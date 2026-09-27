@@ -1,0 +1,152 @@
+{
+  "variant": "V-D",
+  "total": 66,
+  "turned": 29,
+  "rows": [
+    {
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.handleRequest",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.handleRequest",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "AuthController.setAuthCookie",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "AuthController.setAuthCookie",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "AuthService.getCollabToken",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "TokenService.verifyJwt",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "SpaceAbilityFactory.createForUser",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "SpaceAbilityFactory.createForUser",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "WorkspaceAbilityFactory.createForUser",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "hedgedoc",
+      "fn": "AuthController.getPendingUserData",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "hedgedoc",
+      "fn": "AuthController.confirmPendingUserData",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "hedgedoc",
+      "fn": "AuthController.deletePendingUserData",
+      "rule": "Authorization (Ownership Check)"
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AccessTokenController.deletePAT",
+      "rule": "Authorization (Ownership Check)"
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AccessTokenService.createPAT",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AccessTokenService.updateLastUsedForPAT",
+      "rule": "Authorization (Ownership Check)"
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AccessTokenService.updateLastUsedForPAT",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "lujakob-nestjs-realworld-example-app",
+      "fn": "UserService.generateJWT",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "lujakob-nestjs-realworld-example-app",
+      "fn": "UserService.generateJWT",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.allow_access",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.allow_unpublish",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.allow_unpublish",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.allow_stage",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.allow_publish",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.allow_publish",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.setLegacyAuthCacheEntry",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.setLegacyAuthCacheEntry",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "getApiToken",
+      "rule": "Authorization (Unauthenticated Access)"
+    }
+  ]
+}

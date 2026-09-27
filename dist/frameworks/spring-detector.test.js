@@ -1,0 +1,244 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * spring-detector.test.ts — Spring 路由覆盖模型回归（纯函数 + 临时目录）
+ */
+const vitest_1 = require("vitest");
+const fs = __importStar(require("fs"));
+const os = __importStar(require("os"));
+const path = __importStar(require("path"));
+const spring_detector_1 = require("./spring-detector");
+let dir;
+(0, vitest_1.beforeEach)(() => { dir = fs.mkdtempSync(path.join(os.tmpdir(), "spring-det-")); });
+(0, vitest_1.afterEach)(() => { fs.rmSync(dir, { recursive: true, force: true }); });
+function writeJava(rel, content) {
+    const fp = path.join(dir, rel);
+    fs.mkdirSync(path.dirname(fp), { recursive: true });
+    fs.writeFileSync(fp, content);
+}
+const PKG = "package app;\nimport org.springframework.web.bind.annotation.*;\n";
+const SEC = (catchAll) => `${PKG}
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+@Configuration @EnableWebSecurity
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+  @Override protected void configure(HttpSecurity http) throws Exception {
+    http.csrf().disable().authorizeRequests()
+      .antMatchers(HttpMethod.POST, "/users", "/users/login").permitAll()
+      .antMatchers(HttpMethod.GET, "/articles/**", "/tags").permitAll()
+      .antMatchers(HttpMethod.GET, "/articles/feed").authenticated()
+      .anyRequest().${catchAll}();
+    http.addFilterBefore(new JwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+  }
+}`;
+const CTRL = `${PKG}
+@RestController @RequestMapping(path = "articles")
+public class ArticleApi {
+  @PostMapping public Object create() { return null; }
+  @PutMapping("/{slug}") public Object update() { return null; }
+  @GetMapping("/{slug}") public Object one() { return null; }
+  @DeleteMapping("/{slug}") public Object del() { return null; }
+}`;
+(0, vitest_1.describe)("antToRegex", () => {
+    (0, vitest_1.it)("ant 模式转正则", () => {
+        (0, vitest_1.expect)((0, spring_detector_1.antToRegex)("/articles/**").test("/articles/abc")).toBe(true);
+        (0, vitest_1.expect)((0, spring_detector_1.antToRegex)("/articles/**").test("/articles/abc/def")).toBe(true);
+        (0, vitest_1.expect)((0, spring_detector_1.antToRegex)("/articles/*").test("/articles/abc")).toBe(true);
+        (0, vitest_1.expect)((0, spring_detector_1.antToRegex)("/articles/*").test("/articles/abc/def")).toBe(false);
+        (0, vitest_1.expect)((0, spring_detector_1.antToRegex)("/users").test("/users")).toBe(true);
+        (0, vitest_1.expect)((0, spring_detector_1.antToRegex)("/users").test("/users/x")).toBe(false);
+    });
+});
+(0, vitest_1.describe)("analyzeSpringProject", () => {
+    (0, vitest_1.it)("anyRequest().authenticated() 兜底：受保护 mutation 不报", () => {
+        writeJava("sec/WebSecurityConfig.java", SEC("authenticated"));
+        writeJava("api/ArticleApi.java", CTRL);
+        const a = (0, spring_detector_1.analyzeSpringProject)(dir);
+        (0, vitest_1.expect)(a.hasSecurityConfig).toBe(true);
+        (0, vitest_1.expect)(a.catchAll).toBe("authenticated");
+        (0, vitest_1.expect)(a.issues).toHaveLength(0);
+        const art = a.routes.find((r) => r.method === "post" && r.path === "/articles");
+        (0, vitest_1.expect)(art.access).toBe("authenticated");
+    });
+    (0, vitest_1.it)("翻兜底为 permitAll → mutation 重现（敏感性）", () => {
+        writeJava("sec/WebSecurityConfig.java", SEC("permitAll"));
+        writeJava("api/ArticleApi.java", CTRL);
+        const a = (0, spring_detector_1.analyzeSpringProject)(dir);
+        const flags = a.issues.map((i) => i.route);
+        (0, vitest_1.expect)(flags).toContain("POST /articles");
+        (0, vitest_1.expect)(flags).toContain("PUT /articles/{slug}");
+        (0, vitest_1.expect)(flags).toContain("DELETE /articles/{slug}");
+        // GET 读不查
+        (0, vitest_1.expect)(flags).not.toContain("GET /articles/{slug}");
+    });
+    (0, vitest_1.it)("register/login（permitAll + 姊妹佐证）不报", () => {
+        writeJava("sec/WebSecurityConfig.java", SEC("authenticated"));
+        writeJava("api/UsersApi.java", `${PKG}
+@RestController public class UsersApi {
+  @RequestMapping(path = "/users", method = POST) public Object reg() { return null; }
+  @RequestMapping(path = "/users/login", method = POST) public Object login() { return null; }
+}`);
+        const a = (0, spring_detector_1.analyzeSpringProject)(dir);
+        (0, vitest_1.expect)(a.issues).toHaveLength(0);
+    });
+    (0, vitest_1.it)("无安全配置 → mutation 报（无认证裸奔）", () => {
+        writeJava("api/ArticleApi.java", CTRL);
+        const a = (0, spring_detector_1.analyzeSpringProject)(dir);
+        (0, vitest_1.expect)(a.hasSecurityConfig).toBe(false);
+        (0, vitest_1.expect)(a.issues.some((i) => i.route === "POST /articles")).toBe(true);
+    });
+});
+// ── Spring 方言扩展：SecurityFilterChain bean + requestMatchers + @PreAuthorize ──
+const SEC_BEAN = `${PKG}
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+@Configuration @EnableWebSecurity
+public class WebSecurityConfig {
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.csrf().disable().authorizeHttpRequests(auth -> auth
+      .requestMatchers(HttpMethod.POST, "/users", "/users/login").permitAll()
+      .requestMatchers(HttpMethod.GET, "/articles/**", "/tags").permitAll()
+      .requestMatchers(HttpMethod.GET, "/articles/feed").authenticated()
+      .anyRequest().authenticated());
+    return http.build();
+  }
+}`;
+const ADMIN_CTRL = `${PKG}
+@RestController @RequestMapping(path = "admin")
+@PreAuthorize("hasRole('ADMIN')")
+public class AdminApi {
+  @DeleteMapping("/users/{id}") public Object ban() { return null; }
+  @PostMapping("/reset") public Object reset() { return null; }
+}`;
+(0, vitest_1.describe)("spring 方言扩展（2026-09-02）", () => {
+    (0, vitest_1.it)("SecurityFilterChain bean + authorizeHttpRequests + requestMatchers 解析", () => {
+        writeJava("sec/WebSecurityConfig.java", SEC_BEAN);
+        writeJava("api/ArticleApi.java", CTRL);
+        const a = (0, spring_detector_1.analyzeSpringProject)(dir);
+        (0, vitest_1.expect)(a.hasSecurityConfig).toBe(true);
+        (0, vitest_1.expect)(a.catchAll).toBe("authenticated");
+        (0, vitest_1.expect)(a.issues).toHaveLength(0);
+        const post = a.routes.find((r) => r.method === "post" && r.path === "/articles");
+        (0, vitest_1.expect)(post.access).toBe("authenticated");
+    });
+    (0, vitest_1.it)("类级 @PreAuthorize → 该类 mutation 全部受保护（不报）", () => {
+        writeJava("sec/WebSecurityConfig.java", SEC("permitAll")); // 兜底全公开
+        writeJava("api/AdminApi.java", ADMIN_CTRL);
+        const a = (0, spring_detector_1.analyzeSpringProject)(dir);
+        // 兜底 permitAll 下，无注解类会报；@PreAuthorize 类不报
+        (0, vitest_1.expect)(a.issues.some((i) => i.route === "DELETE /admin/users/{id}")).toBe(false);
+        (0, vitest_1.expect)(a.issues.some((i) => i.route === "POST /admin/reset")).toBe(false);
+    });
+    (0, vitest_1.it)("方言反证：requestMatchers permitAll 的 mutation 公开（register 豁免外仍查）", () => {
+        const cfg = SEC_BEAN.replace(".requestMatchers(HttpMethod.GET, \"/articles/**\", \"/tags\").permitAll()", ".requestMatchers(HttpMethod.GET, \"/articles/**\", \"/tags\", \"/payments\").permitAll()").replace(/\.anyRequest\(\)\.authenticated\(\)/, ".anyRequest().permitAll()");
+        writeJava("sec/WebSecurityConfig.java", cfg);
+        writeJava("api/ArticleApi.java", CTRL);
+        const a = (0, spring_detector_1.analyzeSpringProject)(dir);
+        (0, vitest_1.expect)(a.issues.some((i) => i.route === "POST /articles")).toBe(true);
+    });
+    (0, vitest_1.it)("String[] 白名单变量展开：非 auth 词路径 permitAll mutation 被看见（修复前被兜底掩盖）", () => {
+        // 现代 Boot 3 教程标配形态：变量数组白名单（ali-bouali/spring-boot-3-jwt-security）。
+        // 展开后 /public/** 命中 permitAll 规则 → POST /public/files 公开 mutation 被报；
+        // 未展开时该规则被跳过、路由落到兜底 authenticated → 漏报（保守方向错误）。
+        const cfg = `${PKG}
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+@Configuration @EnableWebSecurity
+public class WebSecurityConfig {
+  private static final String[] WHITE_LIST_URL = {"/api/v1/auth/**", "/v3/api-docs", "/public/**"};
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.authorizeHttpRequests(req -> req
+      .requestMatchers(WHITE_LIST_URL).permitAll()
+      .anyRequest().authenticated());
+    return http.build();
+  }
+}`;
+        writeJava("sec/WebSecurityConfig.java", cfg);
+        writeJava("api/PublicApi.java", `${PKG}
+@RestController @RequestMapping("/public")
+public class PublicApi {
+  @PostMapping("/files") public Object up() { return null; }
+}`);
+        const a = (0, spring_detector_1.analyzeSpringProject)(dir);
+        (0, vitest_1.expect)(a.issues.some((i) => i.route === "POST /public/files")).toBe(true);
+    });
+    (0, vitest_1.it)("auth 词段豁免：/auth/authenticate 与 /auth/refresh-token 公开 mutation 不报（词表缺口修复）", () => {
+        const cfg = `${PKG}
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+@Configuration @EnableWebSecurity
+public class WebSecurityConfig {
+  private static final String[] WHITE_LIST_URL = {"/api/v1/auth/**"};
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.authorizeHttpRequests(req -> req
+      .requestMatchers(WHITE_LIST_URL).permitAll()
+      .anyRequest().authenticated());
+    return http.build();
+  }
+}`;
+        writeJava("sec/WebSecurityConfig.java", cfg);
+        writeJava("api/AuthApi.java", `${PKG}
+@RestController @RequestMapping("/api/v1/auth")
+public class AuthApi {
+  @PostMapping("/authenticate") public Object login() { return null; }
+  @PostMapping("/refresh-token") public Object refresh() { return null; }
+}`);
+        const a = (0, spring_detector_1.analyzeSpringProject)(dir);
+        (0, vitest_1.expect)(a.issues).toHaveLength(0);
+    });
+    (0, vitest_1.it)("反证：白名单变量改名（展开失明）→ 路由落到兜底 authenticated，公开 mutation 漏报", () => {
+        const cfg = `${PKG}
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+@Configuration @EnableWebSecurity
+public class WebSecurityConfig {
+  private static final String[] RENAMED = {"/public/**"};
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.authorizeHttpRequests(req -> req
+      .requestMatchers(WHITE_LIST_URL).permitAll()
+      .anyRequest().authenticated());
+    return http.build();
+  }
+}`;
+        writeJava("sec/WebSecurityConfig.java", cfg);
+        writeJava("api/PublicApi.java", `${PKG}
+@RestController @RequestMapping("/public")
+public class PublicApi {
+  @PostMapping("/files") public Object up() { return null; }
+}`);
+        const a = (0, spring_detector_1.analyzeSpringProject)(dir);
+        (0, vitest_1.expect)(a.issues).toHaveLength(0);
+    });
+});

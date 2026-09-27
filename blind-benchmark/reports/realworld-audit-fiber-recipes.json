@@ -1,0 +1,315 @@
+{
+  "tool": "realworld-audit v1",
+  "date": "2026-09-05",
+  "framework": "fiber",
+  "corpus": "fiber-recipes",
+  "repo": "./benchmarks/go-apps/fiber-recipes",
+  "filesScanned": 369,
+  "routesOrProcs": 0,
+  "issuesTotal": 60,
+  "byRule": {
+    "FIBER_ROUTE_NO_AUTH": 60
+  },
+  "issues": [
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /enqueue",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /messages",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /events/results",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /books",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /books",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /books",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /v1/books",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /logout",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST ",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /:userID",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /:userID",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /verify/send/:email",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /verify/check/:email/:code",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /create",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /update/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /delete/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /create",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /update/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /delete/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /ciao",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST message",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /api/v1/book",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /api/v1/book/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /book",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /book/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /book/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /book",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /book/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /book/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /products",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /products/{code}",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /products",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /upload",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /upload",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /employee",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /employee/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /employee/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /employee",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /employee/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /employee/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /employee",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /employee/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /employee/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /posts",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /posts/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /posts/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /posts",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /posts/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /posts/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "PUT /publish",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /books",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "DELETE /books/:id",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /temp",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /api/v1",
+      "file": ""
+    },
+    {
+      "rule": "FIBER_ROUTE_NO_AUTH",
+      "route": "POST /test",
+      "file": ""
+    }
+  ]
+}

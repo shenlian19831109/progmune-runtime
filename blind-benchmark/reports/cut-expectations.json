@@ -1,0 +1,528 @@
+{
+  "generatedAt": "2026-09-23T14:29:51.512Z",
+  "baselineTotal": 49,
+  "baselineViolations": 0,
+  "cuts": [
+    {
+      "id": "CUT-A",
+      "desc": "注入侧恒 false：input_effect 永不产出",
+      "marker": "input_effect",
+      "policy": "never",
+      "redFns": [
+        "uploadAvatar",
+        "uploadBanner",
+        "uploadIcon",
+        "uploadThumb",
+        "uploadCover",
+        "createWidget",
+        "createOrder",
+        "postMetric",
+        "uploadDraft",
+        "addUserRole",
+        "createAuditLog",
+        "createAccountRow",
+        "createTicket",
+        "addEventToQueue",
+        "postNotice",
+        "uploadAsset",
+        "postWelcomeMail",
+        "createMemberRemoval",
+        "createProfileUpdate",
+        "createSession",
+        "postWebhook",
+        "createValidatedRole"
+      ],
+      "red": [
+        {
+          "key": "webshape_E::uploadAvatar",
+          "fn": "uploadAvatar",
+          "project": "webshape_E",
+          "reasons": [
+            "have:input_effect"
+          ],
+          "why": "limits 选项 + 判空抛 4xx ⇒ 有校验证据，不该报"
+        },
+        {
+          "key": "webshape_E::uploadBanner",
+          "fn": "uploadBanner",
+          "project": "webshape_E",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "无校验 ⇒ 该报（抑制机制的反面护栏，防止变成无条件抑制）"
+        },
+        {
+          "key": "webshape_E::uploadIcon",
+          "fn": "uploadIcon",
+          "project": "webshape_E",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "抛 NotFound = 存在性校验，不算输入校验 ⇒ 该报"
+        },
+        {
+          "key": "webshape_E::uploadThumb",
+          "fn": "uploadThumb",
+          "project": "webshape_E",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "抛裸 Error = 环境配置校验，不算输入校验 ⇒ 该报"
+        },
+        {
+          "key": "webshape_E::uploadCover",
+          "fn": "uploadCover",
+          "project": "webshape_E",
+          "reasons": [
+            "have:input_effect"
+          ],
+          "why": "validateContent 旧词表就认 ⇒ 与本轮机制无关，不该报（对照）"
+        },
+        {
+          "key": "webshape_F::createWidget",
+          "fn": "createWidget",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "repo.save = ORM 写入，有副作用证据 ⇒ 仍该报（防止 requireMarker 变成无条件压制）"
+        },
+        {
+          "key": "webshape_F::createOrder",
+          "fn": "createOrder",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "Kysely 链式 insertInto —— S7 通道专项，防止链式判据退化丢真报"
+        },
+        {
+          "key": "webshape_F::postMetric",
+          "fn": "postMetric",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "fetch 出站 —— S3 通道专项"
+        },
+        {
+          "key": "webshape_F::uploadDraft",
+          "fn": "uploadDraft",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect"
+          ],
+          "why": "有副作用但已 validateContent ⇒ 校验位优先，不该报（两个机制不互相覆盖）"
+        },
+        {
+          "key": "webshape_F::addUserRole",
+          "fn": "addUserRole",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "S2 缓存：redis.sadd ⇒ 该报"
+        },
+        {
+          "key": "webshape_F::createAuditLog",
+          "fn": "createAuditLog",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "S4 文件：fs.writeFile ⇒ 该报"
+        },
+        {
+          "key": "webshape_F::createAccountRow",
+          "fn": "createAccountRow",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "S6 prisma：prisma.user.create ⇒ 该报"
+        },
+        {
+          "key": "webshape_F::createTicket",
+          "fn": "createTicket",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "S6 knex：knex('tickets').insert ⇒ 该报"
+        },
+        {
+          "key": "webshape_F::addEventToQueue",
+          "fn": "addEventToQueue",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "S3 投递：queue.publish ⇒ 该报"
+        },
+        {
+          "key": "webshape_F::postNotice",
+          "fn": "postNotice",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "S3 派发：bus.dispatch ⇒ 该报"
+        },
+        {
+          "key": "webshape_F::uploadAsset",
+          "fn": "uploadAsset",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "S5 客户端：s3Client.putObject ⇒ 该报（client 前缀专项）"
+        },
+        {
+          "key": "webshape_F::postWelcomeMail",
+          "fn": "postWelcomeMail",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "S5 委托：mailService.send ⇒ 该报（service 前缀专项）"
+        },
+        {
+          "key": "webshape_F::createMemberRemoval",
+          "fn": "createMemberRemoval",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "S7 链式：trx.deleteFrom ⇒ 该报（删除也是副作用）"
+        },
+        {
+          "key": "webshape_F::createProfileUpdate",
+          "fn": "createProfileUpdate",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "S5 委托：userRepository.update ⇒ 该报（repository 前缀专项）"
+        },
+        {
+          "key": "webshape_F::createSession",
+          "fn": "createSession",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "S2 缓存：redis.setex ⇒ 该报"
+        },
+        {
+          "key": "webshape_F::postWebhook",
+          "fn": "postWebhook",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect",
+            "reportRules:Input Validation"
+          ],
+          "why": "S3 出站：axios.post ⇒ 该报（HTTP 客户端与 fetch 是两条路）"
+        },
+        {
+          "key": "webshape_F::createValidatedRole",
+          "fn": "createValidatedRole",
+          "project": "webshape_F",
+          "reasons": [
+            "have:input_effect"
+          ],
+          "why": "有副作用（redis.sadd）但已 validateContent ⇒ 校验位优先 ⇒ 不该报"
+        }
+      ],
+      "markerDirect": [
+        "webshape_E::uploadAvatar",
+        "webshape_E::uploadBanner",
+        "webshape_E::uploadIcon",
+        "webshape_E::uploadThumb",
+        "webshape_E::uploadCover",
+        "webshape_F::createWidget",
+        "webshape_F::createOrder",
+        "webshape_F::postMetric",
+        "webshape_F::uploadDraft",
+        "webshape_F::addUserRole",
+        "webshape_F::createAuditLog",
+        "webshape_F::createAccountRow",
+        "webshape_F::createTicket",
+        "webshape_F::addEventToQueue",
+        "webshape_F::postNotice",
+        "webshape_F::uploadAsset",
+        "webshape_F::postWelcomeMail",
+        "webshape_F::createMemberRemoval",
+        "webshape_F::createProfileUpdate",
+        "webshape_F::createSession",
+        "webshape_F::postWebhook",
+        "webshape_F::createValidatedRole"
+      ],
+      "ruleMediated": [],
+      "invariantOk": true,
+      "invariantNote": "不变量成立：22 条声明 have:input_effect 的 case 全部转红"
+    },
+    {
+      "id": "CUT-B",
+      "desc": "规则侧移除 requireMarker：等价于人人都有标记",
+      "marker": "input_effect",
+      "policy": "always",
+      "redFns": [
+        "addWidgetToCache",
+        "createStorageClient",
+        "createLocalDriver",
+        "addPackageAccess",
+        "createWidgetPreview",
+        "createCartTotal",
+        "createLogger",
+        "addRoute",
+        "createWidgetSchema"
+      ],
+      "red": [
+        {
+          "key": "webshape_F::addWidgetToCache",
+          "fn": "addWidgetToCache",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "纯内存装配，参数不流向任何 sink ⇒ 不该报（本轮要压的主体）"
+        },
+        {
+          "key": "webshape_F::createStorageClient",
+          "fn": "createStorageClient",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "工厂：只构造对象 ⇒ 不该报（FP 池里 ducktors createS3/createLocal 即此形态）"
+        },
+        {
+          "key": "webshape_F::createLocalDriver",
+          "fn": "createLocalDriver",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "工厂：只返回对象 ⇒ 不该报（FP 池 ducktors createLocal 真形态）"
+        },
+        {
+          "key": "webshape_F::addPackageAccess",
+          "fn": "addPackageAccess",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "配置装配：push 到内存数组 ⇒ 不该报（FP 池 verdaccio addPackageAccess 真形态）"
+        },
+        {
+          "key": "webshape_F::createWidgetPreview",
+          "fn": "createWidgetPreview",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "只读查询：findById 动词不在写入表内 ⇒ 不该报（防 S1/S5 泛化）"
+        },
+        {
+          "key": "webshape_F::createCartTotal",
+          "fn": "createCartTotal",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "纯计算 ⇒ 不该报"
+        },
+        {
+          "key": "webshape_F::createLogger",
+          "fn": "createLogger",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "边界：派生日志子实例不是 sink ⇒ 不该报（logger 不在 S5 前缀表内）"
+        },
+        {
+          "key": "webshape_F::addRoute",
+          "fn": "addRoute",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "边界：路由注册不是 sink ⇒ 不该报（app.get 不落 S3 动词表）"
+        },
+        {
+          "key": "webshape_F::createWidgetSchema",
+          "fn": "createWidgetSchema",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "边界：构造校验 schema 不是 sink ⇒ 不该报"
+        }
+      ],
+      "markerDirect": [
+        "webshape_F::addWidgetToCache",
+        "webshape_F::createStorageClient",
+        "webshape_F::createLocalDriver",
+        "webshape_F::addPackageAccess",
+        "webshape_F::createWidgetPreview",
+        "webshape_F::createCartTotal",
+        "webshape_F::createLogger",
+        "webshape_F::addRoute",
+        "webshape_F::createWidgetSchema"
+      ],
+      "ruleMediated": [],
+      "invariantOk": true,
+      "invariantNote": "不变量成立：9 条声明 none:input_effect 的 case 全部转红"
+    },
+    {
+      "id": "CUT-C",
+      "desc": "注入侧恒 true：无条件注入标记（与 CUT-B 等价）",
+      "marker": "input_effect",
+      "policy": "always",
+      "redFns": [
+        "addWidgetToCache",
+        "createStorageClient",
+        "createLocalDriver",
+        "addPackageAccess",
+        "createWidgetPreview",
+        "createCartTotal",
+        "createLogger",
+        "addRoute",
+        "createWidgetSchema"
+      ],
+      "red": [
+        {
+          "key": "webshape_F::addWidgetToCache",
+          "fn": "addWidgetToCache",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "纯内存装配，参数不流向任何 sink ⇒ 不该报（本轮要压的主体）"
+        },
+        {
+          "key": "webshape_F::createStorageClient",
+          "fn": "createStorageClient",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "工厂：只构造对象 ⇒ 不该报（FP 池里 ducktors createS3/createLocal 即此形态）"
+        },
+        {
+          "key": "webshape_F::createLocalDriver",
+          "fn": "createLocalDriver",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "工厂：只返回对象 ⇒ 不该报（FP 池 ducktors createLocal 真形态）"
+        },
+        {
+          "key": "webshape_F::addPackageAccess",
+          "fn": "addPackageAccess",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "配置装配：push 到内存数组 ⇒ 不该报（FP 池 verdaccio addPackageAccess 真形态）"
+        },
+        {
+          "key": "webshape_F::createWidgetPreview",
+          "fn": "createWidgetPreview",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "只读查询：findById 动词不在写入表内 ⇒ 不该报（防 S1/S5 泛化）"
+        },
+        {
+          "key": "webshape_F::createCartTotal",
+          "fn": "createCartTotal",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "纯计算 ⇒ 不该报"
+        },
+        {
+          "key": "webshape_F::createLogger",
+          "fn": "createLogger",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "边界：派生日志子实例不是 sink ⇒ 不该报（logger 不在 S5 前缀表内）"
+        },
+        {
+          "key": "webshape_F::addRoute",
+          "fn": "addRoute",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "边界：路由注册不是 sink ⇒ 不该报（app.get 不落 S3 动词表）"
+        },
+        {
+          "key": "webshape_F::createWidgetSchema",
+          "fn": "createWidgetSchema",
+          "project": "webshape_F",
+          "reasons": [
+            "none:input_effect",
+            "suppressRules:Input Validation"
+          ],
+          "why": "边界：构造校验 schema 不是 sink ⇒ 不该报"
+        }
+      ],
+      "markerDirect": [
+        "webshape_F::addWidgetToCache",
+        "webshape_F::createStorageClient",
+        "webshape_F::createLocalDriver",
+        "webshape_F::addPackageAccess",
+        "webshape_F::createWidgetPreview",
+        "webshape_F::createCartTotal",
+        "webshape_F::createLogger",
+        "webshape_F::addRoute",
+        "webshape_F::createWidgetSchema"
+      ],
+      "ruleMediated": [],
+      "invariantOk": true,
+      "invariantNote": "不变量成立：9 条声明 none:input_effect 的 case 全部转红"
+    }
+  ]
+}

@@ -1,0 +1,217 @@
+"use strict";
+/**
+ * 跨函数调用序列构建（P4.6：跨函数传播）
+ *
+ * per-function 序列验证的扩展模型：
+ *   - 入口函数（不被任何项目函数调用的函数）的调用序列做传递展开——
+ *     内联被调项目函数体（深度 ≤ MAX_DEPTH、环安全），外部调用（非项目函数）
+ *     原样保留给规则匹配层（别名/词段匹配）。
+ *   - 非入口函数的孤立片段不再单独验证——违规归因到调用它的入口函数，
+ *     消除"helper 单独 close_file / read_file"类的片段误报。
+ *
+ * 边界（与 C 的 L3 同类，如实记录）：展开是语法内联（调用链扁平化），
+ * 不做数据流/指针/分支分析；跨文件依赖 IR 的 calls[] 图。
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MAX_SEQUENCE_CALLS = void 0;
+exports.isProjectFn = isProjectFn;
+exports.collectProjectFunctionNames = collectProjectFunctionNames;
+exports.buildCallSequences = buildCallSequences;
+const MAX_DEPTH = 4;
+/**
+ * 每序列调用预算上限。真实语料实测：Python 盲测语料 350 序列最大 23、
+ * TS 自身 IR 469 序列最大 824——2,000 对现有语料零影响；C 巨型函数
+ * （openssl 单序列可达 1M+ 调用）在预算处截断。
+ */
+exports.MAX_SEQUENCE_CALLS = 2000;
+/** 项目函数判定：有真实文件且非外部导入条目（external 条目无函数体可内联）。 */
+function isProjectFn(f) {
+    return !f.external && !!f.file && f.file !== "(external)";
+}
+/**
+ * 构建项目函数名集合——词段匹配门控用（ssg-bridge 的 projectFunctions 参数）。
+ * 每个项目函数收录三种形态：全名（FlowService.svc_x）、裸名（svc_x）与
+ * 小写变体（调用名大小写差异，如 createActiveSession vs createactivesession）。
+ */
+function collectProjectFunctionNames(ir) {
+    const names = new Set();
+    for (const f of ir) {
+        if (!isProjectFn(f))
+            continue;
+        const name = String(f.name || "");
+        if (!name)
+            continue;
+        const lower = name.toLowerCase();
+        names.add(name);
+        names.add(lower);
+        const dotIdx = name.lastIndexOf(".");
+        if (dotIdx >= 0) {
+            const bare = name.slice(dotIdx + 1);
+            names.add(bare);
+            names.add(bare.toLowerCase());
+        }
+    }
+    return names;
+}
+/**
+ * 从 IR 构建验证序列：入口函数展开 + 非入口抑制。
+ * @param ir - FunctionInfo 列表（TS 或 Python 提取器输出）
+ * @param keepNames - 协议规则名集合：命中这些名字的项目函数是验证单元
+ *   （其调用名保留给规则匹配），不内联其函数体——否则 create_session 等
+ *   规则函数的平凡函数体会把调用名"吞掉"
+ */
+function buildCallSequences(ir, keepNames, maxCalls = exports.MAX_SEQUENCE_CALLS) {
+    // 全局按名回退 + 同文件优先映射：C 中跨文件同名 static 函数极常见
+    // （每个 .c 都有 static cleanup/helper），名字级 Map 会让 last-wins 的
+    // 定义绑定到错误的调用方。同翻译单元（文件）定义优先解析——
+    // 文件内回调（cf->close_one() → 本文件 static close_one）因此接回序列构建；
+    // 跨文件函数指针分发仍不可见（L3 结论不变）。
+    const fnMap = new Map();
+    const fnMapByFile = new Map();
+    const fnMapAll = new Map(); // 裸名 → 全部定义（限定回退候选）
+    for (const f of ir) {
+        if (!isProjectFn(f))
+            continue;
+        fnMap.set(f.name, f);
+        let byFile = fnMapByFile.get(f.file);
+        if (!byFile) {
+            byFile = new Map();
+            fnMapByFile.set(f.file, byFile);
+        }
+        if (!byFile.has(f.name))
+            byFile.set(f.name, f);
+        const all = fnMapAll.get(f.name) || [];
+        all.push(f);
+        fnMapAll.set(f.name, all);
+    }
+    // 保留集小写副本：限定调用名大小写不敏感命中（Java 规则键
+    // User.update vs 变量调用 user.update——大小写差异下的保留判定）
+    const keepNamesLower = keepNames ? new Set([...keepNames].map((k) => k.toLowerCase())) : undefined;
+    /** 限定名末段回退（Java 接收者限定输出）：同文件优先；全局候选
+     *  偏好 className 与接收者变量名大小写不敏感后缀匹配（user→User、
+     *  userRepository→MyBatisUserRepository、jwtService→DefaultJwtService
+     *  ——Java 字段名=类名 camelCase 的惯例）；无偏好时 last-wins 兜底 */
+    const resolveQualified = (fromFile, name) => {
+        const dot = name.lastIndexOf(".");
+        const seg = name.slice(dot + 1);
+        if (!seg)
+            return undefined;
+        const byFile = fnMapByFile.get(fromFile)?.get(seg);
+        if (byFile)
+            return byFile;
+        const all = fnMapAll.get(seg) || [];
+        if (all.length === 0)
+            return undefined;
+        if (all.length === 1)
+            return all[0];
+        const recv = name.slice(0, dot).toLowerCase();
+        // 双向后缀：变量名=类名去前缀（userRepository→MyBatisUserRepository、
+        // jwtService→DefaultJwtService——类名以接收者结尾）或变量名带类名
+        // （类名以接收者结尾的场景罕见，保留）
+        const hit = recv
+            ? all.find((f) => {
+                if (!f.className)
+                    return false;
+                const cn = f.className.toLowerCase();
+                return recv === cn || cn.endsWith(recv) || recv.endsWith(cn);
+            })
+            : undefined;
+        return hit ?? fnMap.get(seg);
+    };
+    /** 调用解析：同文件定义优先，全局按名回退（跨文件同名时每个文件绑自己的）；
+     *  限定名精确不中时末段回退——无注解项目 helper 的 P4.6 内联深度恢复
+     *  （Java 限定化前此类调用按裸名解析，限定化后曾退化为外部 token） */
+    const resolveCall = (fromFile, name) => {
+        const exact = fnMapByFile.get(fromFile)?.get(name) ?? fnMap.get(name);
+        if (exact)
+            return exact;
+        if (!name.includes("."))
+            return undefined;
+        return resolveQualified(fromFile, name);
+    };
+    // 被项目函数调用过的函数不是入口（其片段并入调用方展开序列）——
+    // 按 文件+名字 粒度判定，避免 A 文件的 static x 被 B 文件的调用误判非入口
+    const fnKey = (file, name) => file + "::" + name;
+    const calledBy = new Set();
+    for (const f of ir) {
+        if (!isProjectFn(f))
+            continue;
+        for (const c of f.calls || []) {
+            const resolved = resolveCall(f.file, c);
+            if (resolved)
+                calledBy.add(fnKey(resolved.file, resolved.name));
+        }
+    }
+    /** 调用预算：预算制展开——入口自身调用按序优先，预算耗尽即停（截断），
+     *  不在事后截断百万级序列（内存/时间双浪费） */
+    const budget = { left: maxCalls, truncated: false };
+    /** 展开函数体内的调用（入口序列 = 函数体调用，不含函数自己的名字） */
+    const expandBody = (fn, depth, visiting) => {
+        if (budget.left <= 0) {
+            budget.truncated = true;
+            return [];
+        }
+        const out = [];
+        for (const c of fn.calls || []) {
+            if (typeof c !== "string" || c.startsWith("__progmune_"))
+                continue;
+            if (budget.left <= 0) {
+                budget.truncated = true;
+                return out;
+            }
+            out.push(...expandCall(c, depth, visiting, fn.file));
+        }
+        return out;
+    };
+    const expandCall = (name, depth, visiting, fromFile) => {
+        if (depth > MAX_DEPTH || visiting.has(name))
+            return [];
+        // 规则函数保留优先（先于解析）：限定调用名大小写不敏感命中保留集
+        // → 保留 token 不解析不内联（解析会经末段回退内联掉规则 token，
+        // 且可能绑到同名异类定义）
+        if (keepNames && (keepNames.has(name) || (name.includes(".") && keepNamesLower.has(name.toLowerCase())))) {
+            budget.left--;
+            return [name];
+        }
+        const fn = resolveCall(fromFile, name);
+        // 外部调用：调用名保留给匹配层，不内联（记 1 个调用）
+        if (!fn) {
+            budget.left--;
+            return [name];
+        }
+        // 叶子函数（函数体只调外部原语）是协议原语或叶子 helper：
+        // 保留名字，不内联——否则 S5 改名协议函数的平凡函数体会吞掉调用名
+        const hasProjectCalls = (fn.calls || []).some((c) => resolveCall(fn.file, c));
+        if (!hasProjectCalls) {
+            budget.left--;
+            return [name];
+        }
+        // 内联：函数体自身的调用在递归内各自记账
+        visiting.add(name);
+        const out = expandBody(fn, depth + 1, visiting);
+        visiting.delete(name);
+        return out;
+    };
+    const sequences = [];
+    for (const f of ir) {
+        if (!isProjectFn(f))
+            continue;
+        if (calledBy.has(fnKey(f.file, f.name)))
+            continue; // 非入口：片段并入调用方
+        if (keepNames && keepNames.has(f.name))
+            continue; // 协议原语不是入口：只在调用链内验证
+        budget.left = maxCalls;
+        budget.truncated = false;
+        const calls = expandBody(f, 0, new Set());
+        if (calls.length === 0)
+            continue;
+        sequences.push({
+            calls,
+            file: f.file,
+            function: f.name,
+            truncated: budget.truncated || undefined,
+            directCalls: f.calls || [],
+        });
+    }
+    return sequences;
+}

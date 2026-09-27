@@ -1,0 +1,1168 @@
+{
+ "repo": "docmost",
+ "depth": 2,
+ "files": 118,
+ "callables": 260,
+ "rows": [
+  {
+   "fn": "prosemirrorNodeToYElement",
+   "rule": "No Input Sanitization",
+   "file": "src/collaboration/collaboration.util.ts",
+   "self": [
+    {
+     "file": "src/collaboration/collaboration.util.ts",
+     "name": "prosemirrorNodeToYElement",
+     "kind": "function",
+     "decorators": [],
+     "params": "node: any",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AuthenticationExtension.onAuthenticate",
+   "rule": "Session No Timeout",
+   "file": "src/collaboration/extensions/authentication.extension.ts",
+   "self": [
+    {
+     "file": "src/collaboration/extensions/authentication.extension.ts",
+     "name": "AuthenticationExtension.onAuthenticate",
+     "kind": "method",
+     "decorators": [],
+     "params": "data: onAuthenticatePayload",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "JwtAuthGuard.handleRequest",
+   "rule": "Authorization (Unauthenticated Access)",
+   "file": "src/common/guards/jwt-auth.guard.ts",
+   "self": [
+    {
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "name": "JwtAuthGuard.handleRequest",
+     "kind": "method",
+     "decorators": [],
+     "params": "err: any, user: any, info: any, ctx: ExecutionContext",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "JwtAuthGuard.handleRequest",
+   "rule": "Authorization (Unauthenticated Mutation)",
+   "file": "src/common/guards/jwt-auth.guard.ts",
+   "self": [
+    {
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "name": "JwtAuthGuard.handleRequest",
+     "kind": "method",
+     "decorators": [],
+     "params": "err: any, user: any, info: any, ctx: ExecutionContext",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+   "rule": "Authorization (Unauthenticated Access)",
+   "file": "src/common/guards/jwt-auth.guard.ts",
+   "self": [
+    {
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "name": "JwtAuthGuard.setJoinedWorkspacesCookie",
+     "kind": "method",
+     "decorators": [],
+     "params": "user: any, ctx: ExecutionContext",
+     "authCalls": [],
+     "sanitizeCalls": [
+      "parse("
+     ],
+     "hasReqParam": true
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+   "rule": "Authorization (Unauthenticated Mutation)",
+   "file": "src/common/guards/jwt-auth.guard.ts",
+   "self": [
+    {
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "name": "JwtAuthGuard.setJoinedWorkspacesCookie",
+     "kind": "method",
+     "decorators": [],
+     "params": "user: any, ctx: ExecutionContext",
+     "authCalls": [],
+     "sanitizeCalls": [
+      "parse("
+     ],
+     "hasReqParam": true
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "normalizePostgresUrl",
+   "rule": "No Input Sanitization",
+   "file": "src/common/helpers/utils.ts",
+   "self": [
+    {
+     "file": "src/common/helpers/utils.ts",
+     "name": "normalizePostgresUrl",
+     "kind": "function",
+     "decorators": [],
+     "params": "url: string",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "FileInterceptor.intercept",
+   "rule": "File Upload Without Validation",
+   "file": "src/common/interceptors/file.interceptor.ts",
+   "self": [
+    {
+     "file": "src/common/interceptors/audit-actor.interceptor.ts",
+     "name": "AuditActorInterceptor.intercept",
+     "kind": "method",
+     "decorators": [],
+     "params": "context: ExecutionContext, next: CallHandler",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": true
+    },
+    {
+     "file": "src/common/interceptors/file.interceptor.ts",
+     "name": "FileInterceptor.intercept",
+     "kind": "method",
+     "decorators": [],
+     "params": "context: ExecutionContext, next: CallHandler",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    },
+    {
+     "file": "src/common/interceptors/http-response.interceptor.ts",
+     "name": "TransformHttpResponseInterceptor.intercept",
+     "kind": "method",
+     "decorators": [],
+     "params": "context: ExecutionContext, next: CallHandler<T>",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AttachmentController.uploadFile",
+   "rule": "Authorization (Ownership Check)",
+   "file": "src/core/attachment/attachment.controller.ts",
+   "self": [
+    {
+     "file": "src/core/attachment/attachment.controller.ts",
+     "name": "AttachmentController.uploadFile",
+     "kind": "method",
+     "decorators": [
+      "@UseGuards(JwtAuthGuard)",
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('files/upload')",
+      "@UseInterceptors(FileInterceptor)"
+     ],
+     "params": "@Req() req: any, @Res() res: FastifyReply, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace",
+     "authCalls": [],
+     "sanitizeCalls": [
+      "validateCanEdit("
+     ],
+     "hasReqParam": false
+    },
+    {
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "name": "AttachmentService.uploadFile",
+     "kind": "method",
+     "decorators": [],
+     "params": "opts: {\n    filePromise: Promise<Multipa",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AttachmentController.uploadAvatarOrLogo",
+   "rule": "Authorization (Ownership Check)",
+   "file": "src/core/attachment/attachment.controller.ts",
+   "self": [
+    {
+     "file": "src/core/attachment/attachment.controller.ts",
+     "name": "AttachmentController.uploadAvatarOrLogo",
+     "kind": "method",
+     "decorators": [
+      "@UseGuards(JwtAuthGuard)",
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('attachments/upload-image')",
+      "@UseInterceptors(FileInterceptor)"
+     ],
+     "params": "@Req() req: any, @Res() res: FastifyReply, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace",
+     "authCalls": [
+      "cannot(",
+      "cannot("
+     ],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AttachmentController.removeIcon",
+   "rule": "Authorization (Ownership Check)",
+   "file": "src/core/attachment/attachment.controller.ts",
+   "self": [
+    {
+     "file": "src/core/attachment/attachment.controller.ts",
+     "name": "AttachmentController.removeIcon",
+     "kind": "method",
+     "decorators": [
+      "@UseGuards(JwtAuthGuard)",
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('attachments/remove-icon')"
+     ],
+     "params": "@Body() dto: RemoveIconDto, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace",
+     "authCalls": [
+      "cannot(",
+      "cannot("
+     ],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AttachmentController.removeIcon",
+   "rule": "Authorization (Resource Ownership)",
+   "file": "src/core/attachment/attachment.controller.ts",
+   "self": [
+    {
+     "file": "src/core/attachment/attachment.controller.ts",
+     "name": "AttachmentController.removeIcon",
+     "kind": "method",
+     "decorators": [
+      "@UseGuards(JwtAuthGuard)",
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('attachments/remove-icon')"
+     ],
+     "params": "@Body() dto: RemoveIconDto, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace",
+     "authCalls": [
+      "cannot(",
+      "cannot("
+     ],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AuthController.changePassword",
+   "rule": "No Token Rotation After Privilege Change",
+   "file": "src/core/auth/auth.controller.ts",
+   "self": [
+    {
+     "file": "src/core/auth/auth.controller.ts",
+     "name": "AuthController.changePassword",
+     "kind": "method",
+     "decorators": [
+      "@SkipThrottle({ [AUTH_THROTTLER]: true })",
+      "@UseGuards(JwtAuthGuard)",
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('change-password')"
+     ],
+     "params": "@Body() dto: ChangePasswordDto, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace, @Req() req: FastifyRequest",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    },
+    {
+     "file": "src/core/auth/services/auth.service.ts",
+     "name": "AuthService.changePassword",
+     "kind": "method",
+     "decorators": [],
+     "params": "dto: ChangePasswordDto, userId: string, workspaceId: string, currentSessionId?: string",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AuthController.passwordReset",
+   "rule": "No Token Rotation After Privilege Change",
+   "file": "src/core/auth/auth.controller.ts",
+   "self": [
+    {
+     "file": "src/core/auth/auth.controller.ts",
+     "name": "AuthController.passwordReset",
+     "kind": "method",
+     "decorators": [
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('password-reset')"
+     ],
+     "params": "@Res({ passthrough: true }) res: Fastify, @Body() passwordResetDto: PasswordResetD, @AuthWorkspace() workspace: Workspace",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    },
+    {
+     "file": "src/core/auth/services/auth.service.ts",
+     "name": "AuthService.passwordReset",
+     "kind": "method",
+     "decorators": [],
+     "params": "passwordResetDto: PasswordResetDto, workspace: Workspace",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "CommentController.delete",
+   "rule": "Authorization (Ownership Check)",
+   "file": "src/core/comment/comment.controller.ts",
+   "self": [
+    {
+     "file": "src/core/comment/comment.controller.ts",
+     "name": "CommentController.delete",
+     "kind": "method",
+     "decorators": [
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('delete')"
+     ],
+     "params": "@Body() input: CommentIdDto, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace",
+     "authCalls": [
+      "cannot("
+     ],
+     "sanitizeCalls": [
+      "validateCanComment("
+     ],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "CommentService.create",
+   "rule": "No Input Sanitization",
+   "file": "src/core/comment/comment.service.ts",
+   "self": [
+    {
+     "file": "src/core/comment/comment.controller.ts",
+     "name": "CommentController.create",
+     "kind": "method",
+     "decorators": [
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('create')",
+      "@OAuthScope('write')"
+     ],
+     "params": "@Body() createCommentDto: CreateCommentD, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace",
+     "authCalls": [],
+     "sanitizeCalls": [
+      "validateCanComment("
+     ],
+     "hasReqParam": false
+    },
+    {
+     "file": "src/core/comment/comment.service.ts",
+     "name": "CommentService.create",
+     "kind": "method",
+     "decorators": [],
+     "params": "opts: { page: Page; workspaceId: string;, createCommentDto: CreateCommentDto",
+     "authCalls": [],
+     "sanitizeCalls": [
+      "parse("
+     ],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "GroupController.updateGroup",
+   "rule": "Authorization (Ownership Check)",
+   "file": "src/core/group/group.controller.ts",
+   "self": [
+    {
+     "file": "src/core/group/group.controller.ts",
+     "name": "GroupController.updateGroup",
+     "kind": "method",
+     "decorators": [
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('update')"
+     ],
+     "params": "@Body() updateGroupDto: UpdateGroupDto, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace",
+     "authCalls": [
+      "cannot("
+     ],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    },
+    {
+     "file": "src/core/group/services/group.service.ts",
+     "name": "GroupService.updateGroup",
+     "kind": "method",
+     "decorators": [],
+     "params": "workspaceId: string, updateGroupDto: UpdateGroupDto",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "GroupController.removeGroupMember",
+   "rule": "Authorization (Ownership Check)",
+   "file": "src/core/group/group.controller.ts",
+   "self": [
+    {
+     "file": "src/core/group/group.controller.ts",
+     "name": "GroupController.removeGroupMember",
+     "kind": "method",
+     "decorators": [
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('members/remove')"
+     ],
+     "params": "@Body() removeGroupUserDto: RemoveGroupU, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace",
+     "authCalls": [
+      "cannot("
+     ],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "GroupController.removeGroupMember",
+   "rule": "Authorization (Resource Ownership)",
+   "file": "src/core/group/group.controller.ts",
+   "self": [
+    {
+     "file": "src/core/group/group.controller.ts",
+     "name": "GroupController.removeGroupMember",
+     "kind": "method",
+     "decorators": [
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('members/remove')"
+     ],
+     "params": "@Body() removeGroupUserDto: RemoveGroupU, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace",
+     "authCalls": [
+      "cannot("
+     ],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "GroupController.deleteGroup",
+   "rule": "Authorization (Ownership Check)",
+   "file": "src/core/group/group.controller.ts",
+   "self": [
+    {
+     "file": "src/core/group/group.controller.ts",
+     "name": "GroupController.deleteGroup",
+     "kind": "method",
+     "decorators": [
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('delete')"
+     ],
+     "params": "@Body() groupIdDto: GroupIdDto, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace",
+     "authCalls": [
+      "cannot("
+     ],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    },
+    {
+     "file": "src/core/group/services/group.service.ts",
+     "name": "GroupService.deleteGroup",
+     "kind": "method",
+     "decorators": [],
+     "params": "groupId: string, workspaceId: string",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AttachmentService.saveAttachment",
+   "rule": "No Input Sanitization",
+   "file": "src/core/attachment/services/attachment.service.ts",
+   "self": [
+    {
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "name": "AttachmentService.saveAttachment",
+     "kind": "method",
+     "decorators": [],
+     "params": "opts: {\n    attachmentId?: string;\n    p",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AttachmentService.removeUserAvatar",
+   "rule": "Authorization (Ownership Check)",
+   "file": "src/core/attachment/services/attachment.service.ts",
+   "self": [
+    {
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "name": "AttachmentService.removeUserAvatar",
+     "kind": "method",
+     "decorators": [],
+     "params": "user: User",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [
+    {
+     "depth": 1,
+     "items": [
+      {
+       "file": "src/core/attachment/attachment.controller.ts",
+       "name": "AttachmentController.removeIcon",
+       "decorators": [
+        "@UseGuards(JwtAuthGuard)",
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('attachments/remove-icon')"
+       ],
+       "authCalls": [
+        "cannot(",
+        "cannot("
+       ],
+       "sanitizeCalls": [],
+       "hasReqParam": false
+      }
+     ]
+    }
+   ],
+   "chainHasAuth": true,
+   "chainHasRoute": true,
+   "chainHasReqParam": false,
+   "chainDepthReached": 1
+  },
+  {
+   "fn": "AttachmentService.removeUserAvatar",
+   "rule": "Authorization (Unauthenticated Access)",
+   "file": "src/core/attachment/services/attachment.service.ts",
+   "self": [
+    {
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "name": "AttachmentService.removeUserAvatar",
+     "kind": "method",
+     "decorators": [],
+     "params": "user: User",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [
+    {
+     "depth": 1,
+     "items": [
+      {
+       "file": "src/core/attachment/attachment.controller.ts",
+       "name": "AttachmentController.removeIcon",
+       "decorators": [
+        "@UseGuards(JwtAuthGuard)",
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('attachments/remove-icon')"
+       ],
+       "authCalls": [
+        "cannot(",
+        "cannot("
+       ],
+       "sanitizeCalls": [],
+       "hasReqParam": false
+      }
+     ]
+    }
+   ],
+   "chainHasAuth": true,
+   "chainHasRoute": true,
+   "chainHasReqParam": false,
+   "chainDepthReached": 1
+  },
+  {
+   "fn": "AttachmentService.removeUserAvatar",
+   "rule": "Authorization (Unauthenticated Mutation)",
+   "file": "src/core/attachment/services/attachment.service.ts",
+   "self": [
+    {
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "name": "AttachmentService.removeUserAvatar",
+     "kind": "method",
+     "decorators": [],
+     "params": "user: User",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [
+    {
+     "depth": 1,
+     "items": [
+      {
+       "file": "src/core/attachment/attachment.controller.ts",
+       "name": "AttachmentController.removeIcon",
+       "decorators": [
+        "@UseGuards(JwtAuthGuard)",
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('attachments/remove-icon')"
+       ],
+       "authCalls": [
+        "cannot(",
+        "cannot("
+       ],
+       "sanitizeCalls": [],
+       "hasReqParam": false
+      }
+     ]
+    }
+   ],
+   "chainHasAuth": true,
+   "chainHasRoute": true,
+   "chainHasReqParam": false,
+   "chainDepthReached": 1
+  },
+  {
+   "fn": "AttachmentService.removeUserAvatar",
+   "rule": "Authorization (Resource Ownership)",
+   "file": "src/core/attachment/services/attachment.service.ts",
+   "self": [
+    {
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "name": "AttachmentService.removeUserAvatar",
+     "kind": "method",
+     "decorators": [],
+     "params": "user: User",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [
+    {
+     "depth": 1,
+     "items": [
+      {
+       "file": "src/core/attachment/attachment.controller.ts",
+       "name": "AttachmentController.removeIcon",
+       "decorators": [
+        "@UseGuards(JwtAuthGuard)",
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('attachments/remove-icon')"
+       ],
+       "authCalls": [
+        "cannot(",
+        "cannot("
+       ],
+       "sanitizeCalls": [],
+       "hasReqParam": false
+      }
+     ]
+    }
+   ],
+   "chainHasAuth": true,
+   "chainHasRoute": true,
+   "chainHasReqParam": false,
+   "chainDepthReached": 1
+  },
+  {
+   "fn": "AuthService.login",
+   "rule": "Session No Timeout",
+   "file": "src/core/auth/services/auth.service.ts",
+   "self": [
+    {
+     "file": "src/core/auth/auth.controller.ts",
+     "name": "AuthController.login",
+     "kind": "method",
+     "decorators": [
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('login')"
+     ],
+     "params": "@AuthWorkspace() workspace: Workspace, @Res({ passthrough: true }) res: Fastify, @Body() loginInput: LoginDto",
+     "authCalls": [],
+     "sanitizeCalls": [
+      "validateSsoEnforcement(",
+      "checkMfaRequirements("
+     ],
+     "hasReqParam": false
+    },
+    {
+     "file": "src/core/auth/services/auth.service.ts",
+     "name": "AuthService.login",
+     "kind": "method",
+     "decorators": [],
+     "params": "loginDto: LoginDto, workspaceId: string",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AuthService.register",
+   "rule": "Password Hashing",
+   "file": "src/core/auth/services/auth.service.ts",
+   "self": [
+    {
+     "file": "src/core/auth/services/auth.service.ts",
+     "name": "AuthService.register",
+     "kind": "method",
+     "decorators": [],
+     "params": "createUserDto: CreateUserDto, workspaceId: string",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AuthService.register",
+   "rule": "Password Hashing (Weak)",
+   "file": "src/core/auth/services/auth.service.ts",
+   "self": [
+    {
+     "file": "src/core/auth/services/auth.service.ts",
+     "name": "AuthService.register",
+     "kind": "method",
+     "decorators": [],
+     "params": "createUserDto: CreateUserDto, workspaceId: string",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AuthService.register",
+   "rule": "Registration Without Email Verification",
+   "file": "src/core/auth/services/auth.service.ts",
+   "self": [
+    {
+     "file": "src/core/auth/services/auth.service.ts",
+     "name": "AuthService.register",
+     "kind": "method",
+     "decorators": [],
+     "params": "createUserDto: CreateUserDto, workspaceId: string",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AuthService.changePassword",
+   "rule": "No Token Rotation After Privilege Change",
+   "file": "src/core/auth/services/auth.service.ts",
+   "self": [
+    {
+     "file": "src/core/auth/auth.controller.ts",
+     "name": "AuthController.changePassword",
+     "kind": "method",
+     "decorators": [
+      "@SkipThrottle({ [AUTH_THROTTLER]: true })",
+      "@UseGuards(JwtAuthGuard)",
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('change-password')"
+     ],
+     "params": "@Body() dto: ChangePasswordDto, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace, @Req() req: FastifyRequest",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    },
+    {
+     "file": "src/core/auth/services/auth.service.ts",
+     "name": "AuthService.changePassword",
+     "kind": "method",
+     "decorators": [],
+     "params": "dto: ChangePasswordDto, userId: string, workspaceId: string, currentSessionId?: string",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "AuthService.passwordReset",
+   "rule": "No Token Rotation After Privilege Change",
+   "file": "src/core/auth/services/auth.service.ts",
+   "self": [
+    {
+     "file": "src/core/auth/auth.controller.ts",
+     "name": "AuthController.passwordReset",
+     "kind": "method",
+     "decorators": [
+      "@HttpCode(HttpStatus.OK)",
+      "@Post('password-reset')"
+     ],
+     "params": "@Res({ passthrough: true }) res: Fastify, @Body() passwordResetDto: PasswordResetD, @AuthWorkspace() workspace: Workspace",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    },
+    {
+     "file": "src/core/auth/services/auth.service.ts",
+     "name": "AuthService.passwordReset",
+     "kind": "method",
+     "decorators": [],
+     "params": "passwordResetDto: PasswordResetDto, workspace: Workspace",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "SignupService.signup",
+   "rule": "Password Hashing",
+   "file": "src/core/auth/services/signup.service.ts",
+   "self": [
+    {
+     "file": "src/core/auth/services/signup.service.ts",
+     "name": "SignupService.signup",
+     "kind": "method",
+     "decorators": [],
+     "params": "createUserDto: CreateUserDto, workspaceId: string, trx?: KyselyTransaction",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [
+    {
+     "depth": 1,
+     "items": [
+      {
+       "file": "src/core/auth/services/auth.service.ts",
+       "name": "AuthService.register",
+       "decorators": [],
+       "authCalls": [],
+       "sanitizeCalls": [],
+       "hasReqParam": false
+      }
+     ]
+    }
+   ],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 1
+  },
+  {
+   "fn": "SignupService.signup",
+   "rule": "Password Hashing (Weak)",
+   "file": "src/core/auth/services/signup.service.ts",
+   "self": [
+    {
+     "file": "src/core/auth/services/signup.service.ts",
+     "name": "SignupService.signup",
+     "kind": "method",
+     "decorators": [],
+     "params": "createUserDto: CreateUserDto, workspaceId: string, trx?: KyselyTransaction",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [
+    {
+     "depth": 1,
+     "items": [
+      {
+       "file": "src/core/auth/services/auth.service.ts",
+       "name": "AuthService.register",
+       "decorators": [],
+       "authCalls": [],
+       "sanitizeCalls": [],
+       "hasReqParam": false
+      }
+     ]
+    }
+   ],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 1
+  },
+  {
+   "fn": "SignupService.signup",
+   "rule": "Registration Without Email Verification",
+   "file": "src/core/auth/services/signup.service.ts",
+   "self": [
+    {
+     "file": "src/core/auth/services/signup.service.ts",
+     "name": "SignupService.signup",
+     "kind": "method",
+     "decorators": [],
+     "params": "createUserDto: CreateUserDto, workspaceId: string, trx?: KyselyTransaction",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [
+    {
+     "depth": 1,
+     "items": [
+      {
+       "file": "src/core/auth/services/auth.service.ts",
+       "name": "AuthService.register",
+       "decorators": [],
+       "authCalls": [],
+       "sanitizeCalls": [],
+       "hasReqParam": false
+      }
+     ]
+    }
+   ],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 1
+  },
+  {
+   "fn": "TokenService.generatePdfRenderToken",
+   "rule": "No Input Sanitization",
+   "file": "src/core/auth/services/token.service.ts",
+   "self": [
+    {
+     "file": "src/core/auth/services/token.service.ts",
+     "name": "TokenService.generatePdfRenderToken",
+     "kind": "method",
+     "decorators": [],
+     "params": "pageId: string, workspaceId: string",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "SpaceAbilityFactory.createForUser",
+   "rule": "Authorization (Unauthenticated Access)",
+   "file": "src/core/casl/abilities/space-ability.factory.ts",
+   "self": [
+    {
+     "file": "src/core/casl/abilities/space-ability.factory.ts",
+     "name": "SpaceAbilityFactory.createForUser",
+     "kind": "method",
+     "decorators": [],
+     "params": "user: User, spaceId: string",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    },
+    {
+     "file": "src/core/casl/abilities/workspace-ability.factory.ts",
+     "name": "WorkspaceAbilityFactory.createForUser",
+     "kind": "method",
+     "decorators": [],
+     "params": "user: User, workspace: Workspace",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  },
+  {
+   "fn": "SpaceAbilityFactory.createForUser",
+   "rule": "Authorization (Unauthenticated Mutation)",
+   "file": "src/core/casl/abilities/space-ability.factory.ts",
+   "self": [
+    {
+     "file": "src/core/casl/abilities/space-ability.factory.ts",
+     "name": "SpaceAbilityFactory.createForUser",
+     "kind": "method",
+     "decorators": [],
+     "params": "user: User, spaceId: string",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    },
+    {
+     "file": "src/core/casl/abilities/workspace-ability.factory.ts",
+     "name": "WorkspaceAbilityFactory.createForUser",
+     "kind": "method",
+     "decorators": [],
+     "params": "user: User, workspace: Workspace",
+     "authCalls": [],
+     "sanitizeCalls": [],
+     "hasReqParam": false
+    }
+   ],
+   "callerLayers": [],
+   "chainHasAuth": false,
+   "chainHasRoute": false,
+   "chainHasReqParam": false,
+   "chainDepthReached": 0
+  }
+ ]
+}

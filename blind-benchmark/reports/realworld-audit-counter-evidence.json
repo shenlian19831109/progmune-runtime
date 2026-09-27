@@ -1,0 +1,20 @@
+{
+  "tool": "realworld-audit v1",
+  "date": "2026-09-11",
+  "framework": "fastapi",
+  "corpus": "counter-evidence",
+  "repo": "/tmp/rw-counter",
+  "filesScanned": 70,
+  "routesOrProcs": 19,
+  "issuesTotal": 1,
+  "byRule": {
+    "FASTAPI_ROUTE_NO_AUTH": 1
+  },
+  "issues": [
+    {
+      "rule": "FASTAPI_ROUTE_NO_AUTH",
+      "route": "POST (root)",
+      "file": "/tmp/rw-counter/app/api/routes/articles/articles_resource.py"
+    }
+  ]
+}

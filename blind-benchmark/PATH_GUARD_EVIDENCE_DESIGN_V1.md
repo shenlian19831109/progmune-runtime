@@ -2851,3 +2851,1485 @@ R47 收窄并记下自我修正），而是 **Authorization / Session / Token �
 4. 边际成本：UNKNOWN 的主体是鉴权/会话族（§33.5），补这 17 条不改变那个结论。
 
 ⇒ 记为**待办**而非本轮完成项。
+
+---
+
+## §三十五 跨函数调用链视图原型（2026-09-24）
+
+### 35.1 起因：两条独立线索指向同一个缺口
+
+一篇讲 Jev + Ontology 的文章指出：**判断的前提是世界状态**——本体提供世界状态，Jev 只做判断。
+对照我们：
+
+| 线索 | 发现 |
+|---|---|
+| §二十九 jev 实验 | 喂给 Jev 的 state 只有「函数名 + 调用列表」（`--with-source` 也只是加了函数体） |
+| §三十三 §33.5 | UNKNOWN 的真瓶颈是鉴权/会话族需要**跨函数、跨文件的调用链上下文** |
+
+⇒ 同根：**我们缺「世界状态」这一层**。按 R41 这是「缺信息」⇒ 补信息（确定性、可测、免费），
+不是上概率模型。本轮即造这一层的第一步：**只读原型，不改提取器主干**。
+
+### 35.2 原型
+
+工具：`blind-benchmark/build-call-chain.ts`
+
+对目标函数向上追溯调用者（默认 2 层），每层抽取关键事实：装饰器、鉴权相关调用、
+校验调用、是否吃 `req.*`。目标取自真值集里该仓库的 **UNKNOWN**（正是要救的那批）。
+
+### 35.3 两次收紧：假边比漏边有害得多（R49）
+
+| 版本 | 规则 | 能追溯的条目 | 噪声 |
+|---|---|---|---|
+| v1 | 按**裸名**索引 | 14 | `createForUser` 冒出 25 个调用者、`delete` 冒出 18 个 ⇒ 视图不可用 |
+| v2 | 接收者限定 + 裸名唯一才采信 | 11 | 仍有：`this.storageService.delete()` 被误判给 `CommentController.delete` |
+| v3 | **有接收者时只认强边，绝不裸名兜底** | **7** | **全是干净单边，零噪声** |
+
+边数 14 → 11 → 7，每降一次都换来了可观的精度。取舍原则定为 R49：
+**判据取舍时召回优先（R43，漏报比误报贵），建图时精度优先**——因为假边会污染所有下游
+结论且**不可见**（看起来边更多、覆盖更广），而漏边只是覆盖少一点，覆盖率是可观测的。
+
+### 35.4 实测：docmost 37 条 UNKNOWN
+
+```
+至少追溯 1 层调用者      7 / 37 （19%）
+调用链上见到鉴权/路由痕迹 4 / 37 （11%）
+```
+
+15 条自身是入口（有 `@Post` 等路由装饰器）⇒ 向上追溯对它们**本就无意义**，需要的是向下看。
+10 条非入口但追溯不到 ⇒ 调用者不在切片。
+
+**真正拿到可用上下文并能直接定判的：4 条** —— `AttachmentService.removeUserAvatar` 的
+4 条鉴权类 UNKNOWN，调用者唯一且是 `AttachmentController.removeIcon`，带
+`@UseGuards(JwtAuthGuard)` + 两次 `cannot(`（CASL 权限断言）⇒ 可判 FP。
+
+### 35.5 根因不在实现，在语料（R48）
+
+逐条查证：`AuthService.register` 的调用者**根本不在切片内**——切片里的
+`auth.controller.ts` 只调 `login/setup/changePassword/forgotPassword/passwordReset/
+verifyUserToken/getCollabToken`，没有 `register`。
+
+docmost 后端 `apps/server/src` 共 **444 个 .ts**，切片 **118** ⇒ 采样率约 **27%**。
+一条调用链两端同时被采中的概率大致是采样率的平方 ⇒ 实测连通率 19%，量级吻合。
+
+⇒ **按文件独立采样（随机或按目录轮转）会系统性切断调用链**。这让 R25 那条
+「加切片看饱和」的判据在调用链类机制上失效：加的是**断链**的语料，加再多也不饱和。
+
+### 35.6 结论：暂不进主干，先改采样
+
+| | |
+|---|---|
+| 原型本身 | **可用**，v3 的边零噪声，4 条 UNKNOWN 当场可定判 |
+| 但覆盖率 | 19%（能追溯）/ 11%（能定判） |
+| 判断 | 这个量级撑不起改提取器主干的成本 ⇒ **不进** |
+
+下一步若要继续，应先改采样方式：**按入口取调用闭包**（从一个入口出发把它的调用闭包整个
+切下来），而不是提高随机采样率——闭包采样既保证链完整，文件数也可控（一个入口的闭包通常
+10–30 文件）。改完再评估机制本身。
+
+**对 Jev 的连带结论**：现在 World State 覆盖率只有 19%，喂给 Jev 的仍然会是薄状态
+⇒ **Jev 还是不能上**。R41 第三次存活。§二十九 的结论应表述为
+「在薄 state 上 Jev 不比规则强」，**不能推广成「这类概率判断对我们没用」**。
+
+### 35.7 本轮四门
+
+- tsc **0 错**
+- **未改 src** ⇒ 其余门不受影响（taintpath / webshape / fr / 定向 / 盲测 / FP 池均无需重跑）
+
+规则至 **49 条**：R48（采样方式决定调用链机制的上限）、R49（建图精度优先于召回）。
+
+---
+
+## §三十六 闭包采样：把采样单位从「文件」换成「入口的调用闭包」（2026-09-24）
+
+承接 §35.6 的下一步。产出两个新工具（**均只做只读分析，不改 src、不进扫描路径**）：
+
+- `blind-benchmark/call-graph-lib.ts` —— 调用图基建（callable 抽取 + 边解析），供多个脚本共用
+- `blind-benchmark/closure-sample.ts` —— 闭包采样器 + 同预算对照评测 + 归因诊断
+
+### 36.1 先修了指标，才看清问题（R51）
+
+第一版照抄 §三十五 的口径（"调用者在片内"= 链完整），跑出来即时发现**指标本身错了**：
+37 条 UNKNOWN 里有 **11 条自身就是入口**（控制器方法）。入口的鉴权上下文写在**自己的装饰器**
+上，向上追溯对它本就无意义，拿"有没有调用者在片内"判它，等于把 11 条天生完整的目标判成"追不到"。
+
+修正后的口径（**按目标类型分层取证据**）：
+
+| 目标类型 | 证据来源 |
+|---|---|
+| 自身是入口 | 自身在片内即可（鉴权在自己的装饰器/自身调用里） |
+| 非入口 | 自身在片内 **且** 「谁走到我」在片内（严调用边优先，退一步用文件级 import 边） |
+
+判据的分母错了，结论会整个反过来——这一条比"换个采样器"更值钱。
+
+### 36.2 上界先测，再谈采样（R50）
+
+跑任何采样对照前，先算**全量上界**（把 359 个源文件全放进"切片"时能达到多少）。
+docmost：证据完整 **35/37**、可定判 **20/37**。⇒ 采样再怎么优化也超不过 35/20；
+**可定判的天花板在判据侧（20/37 = 54%），不在语料侧**。
+
+### 36.3 同预算对照：docmost（NestJS，359 候选文件，真值 UNKNOWN 37 条）
+
+每格 = 证据完整/可定判：
+
+| 预算 | 闭包30 | 闭包15 | 旧 topN（按路径序，**池里现存的 docmost 就是它**） | 现轮转（**当前 fetcher 在用的**） |
+|---|---|---|---|---|
+| 30 | 0/0 | 6/6 | 0/0 | 4/4 |
+| 50 | 12/5 | 12/7 | 2/0 | 9/9 |
+| **80** | **27/16** | 18/11 | 16/11 | 15/11 |
+| **120** | **32/20** | 19/11 | **34/20** | 24/14 |
+| 180 | 32/20 | 20/11 | 35/20 | 30/16 |
+| 390 | 32/20 | 20/11 | 35/20 | 35/20 |
+
+**关键读数**：
+
+1. **单点比较会得出相反结论**：只看 120，旧 topN（34/20）略胜闭包（32/20）；
+   但看 80，闭包 27/16 对 topN 16/11 —— 差了一倍。**采样器的优劣随预算变化**，
+   必须在预算轴上扫，不能只比一个数（R50）。
+2. **当前 fetcher 的轮转在两个尺度上都不占优**（120：24/14，是最差的一档）。
+   它是为了治"名额被同一棵子树吃光"才改成轮转的，代价是**主动破坏了目录局部性**。
+3. **旧 topN 之所以不差，是沾了"按路径排序天然按目录聚簇"的光**——字母序 ≈ 廉价局部采样。
+   闭包采样把这个偶然性变成了确定性构造。
+
+同预算（120 文件）下的**实际产出**（提取器实测）：
+
+| 切片 | 文件 | 函数 | 调用 |
+|---|---|---|---|
+| 闭包 hybrid | 120 | **894** | 450 |
+| 现轮转 | 120 | 822 | 419 |
+| 旧 topN（= 池里的 docmost） | 118 | 556 | 368 |
+
+⇒ 同样的文件预算，闭包切片多产出 **+9%**（对轮转）/**+61%**（对旧切片）的可分析函数。
+
+### 36.4 复验：hedgedoc（19 条 UNKNOWN）—— 结论不搬家
+
+| 预算 | 闭包30 | 旧 topN | 现轮转 |
+|---|---|---|---|
+| 80 | 18/12 | 18/12 | 19/12 |
+| 120 | 18/12 | 18/12 | 19/12 |
+
+**持平**。原因诊断得很清楚：hedgedoc 的 19 条 UNKNOWN 里 **15 条自身就是入口**
+（docmost 是 11/37）。目标本身就是入口时，"谁调用我"根本不重要 ⇒ 采样方式影响极小。
+
+⇒ 闭包采样的收益**取决于目标的构成**：链深（服务方法被控制器调用）越多，收益越大；
+入口型目标越多，越无所谓。**不要在单一仓库上给采样器下结论**（R50 第二层）。
+
+### 36.5 归因：37 条（docmost）为什么追不到调用者
+
+| 类别 | 条数 | 含义 |
+|---|---|---|
+| ① 定义都没抽出来 | **0** | 好消息：抽取面没问题，不是"名字/形态不在面内" |
+| ② 自身就是入口 | 11 | 向上追溯无意义（见 R51） |
+| ③ 严边漏、宽边中 | 6 | R49 精度优先的代价（v4 边规则后从 9 降到 6） |
+| ④ 严宽都漏，只有文件级 import 能指出引用者 | 17 | ⇒ World State 的「谁会走到我」应建立在 **import 可达性**上 |
+| ⑤ 三种证据全无 | **0** | 没有真正的"不可见" |
+
+严边可见 14 / 宽边可见 20 / 任一种可见 **37**。
+
+### 36.6 顺手补的两个边规则（v4，精度安全）
+
+`call-graph-lib.ts` 的 `resolve` 从 v3 升到 v4，两处**补漏而非放宽**：
+
+1. **`this.x()` / `super.x()` 限定在同一个类内解析**。v3 会去查 `This.x` 必然落空
+   ⇒ **同类内部调用这条最常见的边整条丢光**（不是精度取舍，是纯缺口）。
+2. **裸调用先按 import 作用域解析**（名字从哪个文件 import 进来，就只认那个文件里的定义），
+   import 里查不到才退回"全局唯一"。旧规则只看全局唯一，于是 `removeUserAvatar` 这类
+   常见名一撞名就整条边丢弃——而 import 作用域是**精确**信息，用它不引入假边。
+
+效果：docmost 严边可见 11 → **14**，③类 9 → **6**。
+
+### 36.7 两级边的分工（R52）
+
+| 用途 | 边 | 假边的后果 |
+|---|---|---|
+| **采样**（决定放哪些文件进切片） | 调用边 ∪ **import 边**（高召回） | 只浪费名额 |
+| **判据**（决定"这条链有没有鉴权"） | 调用边（高精度，R49） | 直接误判 |
+
+所以闭包采样器用 hybrid 边，而 §三十五 的判据视图只认严边。**两种边不能混着用。**
+
+### 36.8 结论与处置
+
+- **不进主干**：本轮全部是语料侧原型，未改 src。
+- **建议换掉当前 fetcher 的轮转**（两个仓库上都不占优）。闭包采样是候选替代，
+  但**先在第二个"链深型"仓库上复验再改默认**——hedgedoc 的复验因目标构成不同而不具备判别力。
+- **新切片暂不入库**：闭包切片只落到 /tmp 试扫（确认可扫：120 文件 / 894 函数）。
+  直接塞进 `fp-pool/` 会被 `fp-pool-scan` 自动扫进 `fp-pool-results.json`，污染现有 9 片基线。
+- **World State 的下一步不在采样侧**：上界只有 20/37 可定判，剩下 17 条缺的是
+  「这条链是否真有鉴权」的语义，不是缺文件。
+
+### 36.9 本轮四门
+
+- tsc **0 错**
+- **未改 src** ⇒ taintpath / webshape / fr-007 / fr-016 / 定向 / 盲测 / FP 池均不受影响
+
+规则至 **52 条**：R50（改采样器须做同预算扫描 + 上界对照 + 两仓库复验）、
+R51（指标分母按目标类型分层）、R52（采样边与判据边两级分工，不可混用）。
+
+---
+
+## §三十七 「谁会走到我」：入口根可达性视图（2026-09-25）
+
+承接 §36.5 的 ④ 类（严/宽调用边都追不到调用者，只有 import 能指出引用者）。
+新增 `blind-benchmark/reach-view.ts`：从目标所在文件沿**反向 import 边**上溯到入口文件，
+输出「入口 → … → 我」的候选路径与路径上的守卫层。**只作候选提示，不作判据**（R52：import ≠ call）。
+
+### 37.0 先订正 §36.5 的一个数字
+
+§36.5 写的「④ 只有 import 能指引用者 **17 条**」**把 11 条自身是入口的目标也算进去了**
+（入口文件当然被别的文件 import）。按是否入口分层后，非入口目标共 26 条，构成是：
+① 严边可见 14、③ 严边漏宽边中 5、④ 只有 import 能指引用者 **7**。
+⇒ 这轮真正要救的是 **12 条**（③+④），不是 26 条。
+
+### 37.1 视图能力（三仓库，UNKNOWN 目标）
+
+| 仓库（框架/引用形态） | 非入口目标 | 可达 | **可人工核（≤3 入口）** | 入口数中位 | 与严边一致 |
+|---|---|---|---|---|---|
+| docmost（NestJS 装饰器 / 相对路径 import） | 26 | **26** | **16** | 2 | 14 / 0 |
+| hedgedoc（NestJS，但目标几乎全是入口） | 1 | 0 | 0 | – | – |
+| verdaccio（Express / monorepo 包名 import） | 27 | 6 | **0** | **19** | 5 / 1 |
+
+**正面对照**：凡严调用边能给出调用者的，import 路径上都包含那个调用者文件
+（docmost 14/14、verdaccio 5/6）⇒ 视图不是噪声，是严边的超集。
+`AttachmentService.removeUserAvatar` 的输出与 §三十五 手工定判用的证据**完全一致**
+（唯一入口 `attachment.controller.ts`、带 JwtAuthGuard、1 跳）。
+
+### 37.2 但它对真正要救的那批几乎无效
+
+按 §36.5 的类别交叉（docmost，全量图）：
+
+| 类别 | 条数 | 可达 | ≤3 入口（可核） | 入口数中位 |
+|---|---|---|---|---|
+| ① 严边可见 | 14 | 14 | **12** | 2 |
+| ③ 严边漏宽边中 | 5 | 5 | **3** | 2 |
+| ④ 只有 import 能指引用者 | 7 | 7 | **1** | **15** |
+
+⇒ 视图的净增量是 ③+④ 共 12 条拿到了路径提示，其中 **只有 4 条**具体到可以人工核。
+**④ 类（本来就是被到处引用的工具/守卫函数）路径中位入口 15 个 —— 提示弥散到等于没说。**
+
+**结论：补 import 可达性这条路部分落空。**它能给出路径，但路径不收窄；
+对「只有 import 能指引用者」的那批，可达 ≠ 可用。
+
+### 37.3 两个必须记住的坑
+
+1. **「路径带守卫」在 NestJS 里近乎重言**：控制器大多带 `@UseGuards`，任何到控制器的路径都"带守卫"。
+   第一版还把目标自身所在文件算进守卫层 ⇒ 得到 26/26 的自证伪满分（已排除自身）。
+   ⇒ 这个信号只能说"入口要求登录"，**说不了"这次操作对这个对象是否授权"**——正是 §33.5 的真瓶颈。
+2. **切片上"提示更具体"是假精确**：docmost 上 26/26 条在切片里的入口数都**少于**全量，
+   因为文件缺失会砍掉路径。已加真假校验并单列计数（不能当收益）。
+
+### 37.4 顺带补的工程缺口（verdaccio 从 0 → 6 靠它）
+
+- **入口识别不能只认装饰器**：加了文件级路由注册 `router.get(` / `app.post(` / `.route(`
+  （Express/Koa/Fastify 形态）。只认装饰器时 verdaccio 的入口文件找不出几个。
+- **import 图必须解析工作区别名**：monorepo 跨包写包名（`import x from '@verdaccio/core'`）、
+  tsconfig 也有 paths 别名。只认相对说明符 ⇒ **monorepo 上整张 import 图近乎空图且静默**。
+  已加 package.json `name` → 目录映射 + tsconfig `paths` 通配别名解析。
+
+### 37.5 处置
+
+- 未改 src；四门：tsc 0 错（含新文件直接类型检查），其余门不受影响。
+- 视图**不进判据链**：只作为人工复核时的"候选入口/守卫层"提示，且必须带入口数一起看。
+- 报告：`reports/reach-view-{docmost,hedgedoc,verdaccio}.json`。
+- 下一步建议回到**判据语义**侧：视图能说明"从哪个路由进来、入口要登录"，
+  但 §33.5 那批要的是"这次操作对这个对象是否授权"（`cannot(...)` 式的对象级校验），
+  这是语义问题，不是图能补的。
+
+规则至 **54 条**：R53（可达性提示必须报入口数并以 ≤3 为可核阈值；切片上的收窄须做真假校验）、
+R54（建 import 图必须解析工作区别名与 paths 别名，否则 monorepo 上静默空图）。
+
+---
+
+## §三十八 对象级授权判据：从「动词白名单」换成「组合式谓语」（2026-09-25，已进主干）
+
+承接 §37.5「回到判据语义侧」。这一次**改了 src**（前两轮都是原型，未落地）。
+
+### 38.1 起点：现有 satisfier 在真实生态上近乎完全失效
+
+`protocol-detector.ts` 的 Ownership Check satisfier 是**动词白名单**：
+`canModify|canDelete|canEdit|hasPermission|checkOwner|isOwner|ownerId\s*[!=]==?` …
+
+实测（全量源码，非切片）：
+
+| 仓库 | trigger 命中（分母） | **现有 satisfier 抑制** |
+|---|---|---|
+| docmost（NestJS + CASL） | 136 | **0 (0.0%)** |
+| verdaccio（Express） | 37 | **0 (0.0%)** |
+| hedgedoc | 115 | 1 (0.9%) |
+
+⇒ 在 CASL 生态上，这条规则等价于「trigger 命中即报违规」。这正是 32 条
+Authorization UNKNOWN 的来源。
+
+**根因不是词表小，是形态不对**：真实谓语是 `can/cannot/may` **+ 任意授权动作**
+的**组合式**（`cannot(Manage, Settings)`、`canRemove`、`canPublish`、`validateCanEdit`），
+而白名单是**枚举**。枚举永远追不上组合——这是 §「污点源词汇表缺口」的同形病根。
+
+### 38.2 形态普查（只读探针 `authz-probe.ts`）
+
+在真值 UNKNOWN 的源码上普查，得到三类：
+
+| 类 | 形态 | 例子（均取自真值） |
+|---|---|---|
+| **A** | CASL 谓语 | `spaceAbility.cannot(Manage, Settings)`、`canRemove`、`canPublish` |
+| **A′** | 带前缀 helper | `validateCanEdit`、`validateCanComment`、`isSharingAllowedFor` |
+| **A″** | 访问/所有权校验 | `validateSpaceAccess`、`checkMediaDeletePermission` |
+| ~~B~~ | ~~"user 作为实参"~~ | `removeFavorite(user.id, …)` —— **判据侧不可判定**（见下） |
+
+⚠ **B 类被砍掉的原因**：引擎判据的接口是 **calls 列表**（`detectSafeguardViolations`
+逐 call 名跑正则），**没有实参**。`AttachmentService.removeUserAvatar`、
+`FavoriteController.removeFavorite` 这类"操作对象就是当前用户"的形态，
+要么改提取器带实参、要么走调用链（§35/§37）——**不是加正则能解决的**。
+
+### 38.3 落地：三条组合规则（只加，不删任何东西）
+
+在 `src/protocol-detector.ts` 给 Ownership Check 与 Resource Ownership 各加三条 safeguard：
+
+1. `AUTHZ_PREDICATE_RE` —— `cannot` 单列 + `(can|may|isAllowed|…)<授权动作词>`
+2. `AUTHZ_CAN_HELPER_RE` —— `\w*(Can|May|Allowed|Permitted|Authorized)[A-Z]\w+`
+3. `AUTHZ_ACCESS_CHECK_RE` —— `(validate|assert|check|…)\w*(Access|Ownership|Permission|…)`
+
+### 38.4 三个实测抓到的假阳性（都写进代码注释了）
+
+| # | 假阳性 | 根因 | 处置 |
+|---|---|---|---|
+| ① | `cannot` 自己不匹配 | 第一版把它塞进 `[A-Z_]\w*` **后缀组**，无后缀 ⇒ 整条不匹配（26 条只命中 2 条就是这个 bug） | 单列 `^cannot$` |
+| ② | `rateLimiter.canSendEmail(userId)` | `can<X>` 的 X 不限定 ⇒ 限流器/配额询问混进来 | X 必须是**授权动作词**（表内刻意不含 Send/Emit/Notify/Render/Parse） |
+| ③ | `E.isRight(x)`（fp-ts Either） | A″ 词尾含 `Rights?` ⇒ 命中 `isRight`；hoppscotch 满仓 fp-ts，一次冒出 2 条假转绿 | 去掉 `Rights`、去掉 `is` 前缀 |
+| ③′ | `deleteByUsersWithoutSpaceAccess` | A″ 只要求名字含 Access ⇒ **数据删除**被当**校验** | 限定前缀必须是校验动词 |
+
+**教训（可复用）**：含 `Access`/`Rights` 的**数据操作**远比含它们的**校验**多；
+`can<X>` 里"能不能做"（能力/配额）和"许不许做"（权限）是两种语义，词形上同形。
+
+### 38.5 鉴别力对照（R50：全量分母 vs 目标批）
+
+判据层（A/A′/A″，不含噪声档 A-soft）：
+
+| 仓库 | 全量命中率 | UNKNOWN 批命中率 | **鉴别力** |
+|---|---|---|---|
+| docmost | 16/136 = 11.8% | 9/26 = 34.6% | **2.9×** |
+| verdaccio | 3/37 = 8.1% | 5/24 = 20.8% | **2.6×** |
+| hedgedoc | 4/115 = 3.5% | 0/6 = 0% | 0×（目标构成不同，同 §36.4） |
+
+鉴别力 2.6–2.9× ⇒ 形态有真实信号，**不是放水**。
+若形态无鉴别力，两个比率会接近 1×。
+
+### 38.6 反向验证（R18：在真实扫描结果上重放）
+
+`authz-probe.ts --simulate`：在 `fp-pool-results.json`（9 片真实扫描）上重放新判据。
+
+Authorization 族违规 **66 条 → 抑制 14 条 (21.2%)**。
+但其中 2 条属 `Unauthenticated Access/Mutation`（那两条规则**未改**，模拟时才带上）
+⇒ **实际落地影响 = Ownership Check 9/17 + Resource Ownership 3/6 = 12 条**。
+
+转绿清单全部人工核对过源码：docmost 9 条全是真 CASL（`cannot(Manage, Settings)` 等），
+verdaccio 3 条是 `canPublish`（内部 `auth.allow_publish({packageName}, user, …)`）
+与 `canRemove`。**没有一条是靠噪声词转绿的**。
+
+### 38.7 四门
+
+- **tsc** `-p tsconfig.json`：**0 错**
+- **taintpath 闸门**：160 条，**失败 0**
+- **真实语料**：fr-007 pre 5 / post 0；fr-016 pre 7 / post 0 —— **均达标**
+- **TS 盲测**：2865 条 → **LOST 0 / ADDED 0，零漂移**
+- **正向对照**（`detectSafeguardViolations` 直调）：
+  5 条真授权（`cannot`/`canRemove`/`validateCanEdit`/`validateSpaceAccess`/
+  `checkMediaDeletePermission`）**全部抑制**；
+  4 条噪声（裸 delete / `canSendEmail` / `isRight` / `deleteByUsersWithoutSpaceAccess`）
+  **全部仍报** ⇒ 改动确实生效，且没有放水
+
+### 38.8 ⚠ 一个必须记住的结论：盲测对本次改动**没有鉴别力**
+
+盲测 2865 条零漂移看似完美，但**它也意味着新判据在盲测语料上一条都没触发**
+——`blind-benchmark/generated/` 是**合成项目**，里面根本没有 `cannot`/`canRemove`
+这类 CASL 形态。
+
+⇒ **零漂移 ≠ 验证通过**。本次改动的效果只能靠 38.5 的鉴别力对照与 38.6 的
+真实语料重放证明。记为 **R56**。
+
+### 38.9 没做的（下一步候选）
+
+引擎里**已经**有 D 类自指排除：`if (isAuthFunction && rule.category === "authorization") continue`。
+但它的 `AUTH_PATTERN` 词表**覆盖不全** —— `JwtAuthGuard.handleRequest`、
+`setAuthCookie`、`verifyJwt`、`getCollabToken`、AbilityFactory 的 `createForUser`
+都不在里面 ⇒ 对**鉴权机制自身**报"未鉴权"的自指谬误仍然存在（docmost 11 条无证据里 8 条属此）。
+
+扩这个词表影响面大（所有 authorization 规则），本轮未动。
+
+规则至 **56 条**：R55（词表升级为组合规则时的三条约束）、R56（零漂移不等于验证通过）。
+
+---
+
+## §三十九 D 类自指排除：把「鉴权机制自身」也识别为 auth function（2026-09-25，已进主干）
+
+承接 §38.9。引擎**已有** `if (isAuthFunction && rule.category === "authorization") continue`
+（protocol-detector.ts 两处），但 AUTH_PATTERN 只列了**用户鉴权入口**
+（login / register / logout / …），**没列鉴权机制自身** ⇒ 对下面这类函数报「未鉴权」，
+属自指谬误：
+
+```
+JwtAuthGuard.handleRequest                 ← 守卫本体
+JwtAuthGuard.setJoinedWorkspacesCookie     ← 守卫里写 cookie
+AuthController.setAuthCookie               ← 登录流程的一部分
+AuthService.getCollabToken                 ← 签发协作 token
+TokenService.verifyJwt                     ← 校验原语
+WorkspaceAbilityFactory.createForUser      ← CASL 授权引擎本体
+```
+
+### 39.1 正例 / 负例集（先立靶子再调判据）
+
+来源：docmost UNKNOWN 里 11 条无授权证据的条目，去重后 7 个目标 ——
+**6 个是机制自身**（正例），第 7 个 `FavoriteController.removeFavorite`
+是「user 作为实参」的 B 类形态，**不该**被自指排除救 ⇒ 它和另外 4 个业务方法一起当负例。
+
+### 39.2 第一版是「容器含 token/session 即算」——越界了，必须废弃
+
+| 变体 | 判据 | 正例 | 负例误吃 | 全量命中率 |
+|---|---|---|---|---|
+| V-A | 仅机制类容器（Guard/Strategy/AbilityFactory 后缀 × 凭据名词） | 3/6 | 0 | 11.9% |
+| V-B | V-A + 机制动词×机制对象（严格动词） | 4/6 | 0 | 13.1% |
+| **V-C** | **V-B + 放宽动词（get/set/create…）** | **6/6** | **0** | **14.6%** |
+| V-D | V-C + 容器含 auth/token/session/…（**宽**） | 6/6 | 0 | **26.2%** |
+
+V-D 正例同样满分，但**反向验证暴露它越界**：比 V-C 多压 15 条，其中包括
+
+- `ApiTokensController.deleteToken` — Authorization (Ownership Check)
+- `AccessTokenController.deletePAT` — Authorization (Ownership Check)
+- `AccessTokenService.updateLastUsedForPAT` — Ownership Check + Unauthenticated Mutation
+- `AuthController.deletePendingUserData` — Authorization (Ownership Check)
+
+**对凭据做增删改恰恰是最需要鉴权的地方**，压掉就是真漏报且不可见（R49 的镜像）。
+⇒ 采纳 V-C；V-D 只作对照保留在探针里。
+
+### 39.3 落地的两条结构化判据（`src/protocol-detector.ts`）
+
+1. **机制类容器** = 机制后缀 `(Guard|Strategy|AbilityFactory)$` **×** 凭据名词
+   （auth/jwt/token/session/cookie/credential/passport/identity/oauth/oidc/ldap/saml/bearer/apikey/ability/permission）
+   - ⚠ 只看后缀不够：`Strategy` 是**通用设计模式后缀**，`CacheStrategy` / `PaymentStrategy`
+     会被误吃；`Guard` 同理（NestJS 的 `ThrottlerGuard` 是**限流**不是鉴权）。
+2. **方法 = 机制动词 × 机制对象**，且**只看点号后的方法部分**
+   （容器词不参与动词匹配，否则 `ApiTokensController` 会漏进来）
+   - 动词：verify/validate/sign/generate/issue/decode/parse/encode/refresh/rotate/get/set/create/build/make/write/read
+   - 对象：jwt/token/cookie/session/credential(s)/signature/bearer
+   - ⚠ 对象**不含** `password`（changePassword/passwordReset 是受保护操作，不是机制）
+   - ⚠ 对象**不含** `pat` —— PAT 是 hoppscotch 的**产品专有缩写**，收它会把
+     `AccessTokenService.createPAT`（创建访问令牌，**需要**鉴权）一起吃掉，
+     属过拟合到单个仓库的缩写（第一版就收了，审清单时发现并去掉）
+
+### 39.4 反向验证一：真值集上「压掉的是不是该压的」
+
+这是**抑制方向**改动最要紧的一问。在 `fp-gold.jsonl` 上重放：
+
+| 会被压掉的 14 条 | 条数 |
+|---|---|
+| **人工已确认 FP** | **8** |
+| 自指 UNKNOWN（本轮要解决的） | 6 |
+| **已确认 TP（真漏洞被沉默）** | **0** ✅ |
+
+⇒ 压掉的 8 条本来就是人工判过的 FP，一条真漏洞都没丢。
+
+### 39.5 反向验证二：实际扫描重放（`selfref-probe.ts --simulate`）
+
+9 片 FP 池实际扫描结果：Authorization 族违规 **66 条 → 新压 14 条 (21.2%)**，
+全部落在 docmost（JwtAuthGuard / AuthService / TokenService / AbilityFactory）、
+`UserService.generateJWT`、verdaccio `getApiToken` —— 逐条核对过源码，全是真机制。
+
+### 39.6 四门
+
+- **tsc** `-p tsconfig.json`：**0 错**
+- **taintpath 闸门**：160 条，**失败 0**
+- **webshape 闸门**：49 条，**失败 0**
+- **真实语料**：fr-007 pre 5 / post 0；fr-016 pre 7 / post 0 —— **均达标**
+- **TS 盲测**：2865 → 2864 条，**LOST 1 / ADDED 0**
+  - 唯一 LOST：`[filestorage] getSession :: Authorization (Unauthenticated Access)`
+  - 核对源码：`generated/filestorage/src/auth.ts` 里 `getSession(token)` 就是
+    **会话机制本体**（按 token 查 session 再取 user）⇒ 压掉正确
+  - ⚠ **与 §38 的对比要记住**：§38 是 LOST 0 / ADDED 0 的**零覆盖**；
+    本轮盲测**真的触发了**（合成语料里有 `auth.ts` 这种模块），
+    所以这 1 条 LOST 是有信息量的，不是噪声
+- **fixture**：新建 `src/protocol-detector-authz-machinery.test.ts`
+  正对照 8 条 + **反对照 10 条**（含凭据 CRUD 三条、ThrottlerGuard、CacheStrategy）
+  ⇒ 与 §38 的 11 条合计 **29 条全部通过**
+
+### 39.7 顺带清掉的一处重复
+
+`AUTH_PATTERN` 那串长正则原本在 **两处逐字重复**（1297 / 1480）。
+提成模块级常量 + 一个 `isAuthFunctionName()` 导出函数，两处共用。
+
+### 39.8 仍未收的（下一步候选）
+
+- **verdaccio 的 `Auth.allow_*` 家族**（`allow_access` / `allow_publish` /
+  `allow_unpublish` / `allow_stage` / `setLegacyAuthCacheEntry`）仍是自指误报 ——
+  容器 `Auth` 不在机制后缀里，方法 `allow_publish` 的宾语 `publish` 不是凭据名词。
+  要收得加一条「容器 == Auth 类 + `allow_` 谓语」规则，属新形态，未在本轮动。
+- **文件路径信号没用上**：`src/core/auth/**`、`*.guard.ts`、`/casl/` 这类路径是
+  比名字更可靠的信号，但 v6 `detectSafeguardViolations` 的签名里**没有 file**
+  （只有 v7 的 `funcFile` 有）。要加得改调用点签名，影响面大。
+
+规则至 **58 条**：R57（抑制方向改动的验收须含「TP 零损失」核对与宽变体对照）、
+R58（通用设计模式后缀不能直接当语义信号）。
+
+---
+
+## 四十、先量「剩余池」再出手：三处判据缺口（2026-09-25）
+
+§38 / §39 各自报了「压掉 14 条」，但**两轮叠加之后还剩什么、剩下的是什么形态**
+从来没有人量过。§40 的第一件事不是继续加规则，而是把叠加后的残差摊开看。
+
+### 40.1 剩余池：66 → 35
+
+新脚本 `blind-benchmark/residual-probe.ts`（只读，在冻结母本上重放两轮判据）：
+
+| | 条数 |
+|---|---|
+| Authorization 族全量 | 66 |
+| §38 组合式谓语压掉 | 17 |
+| §39 自指排除压掉 | 14 |
+| 两者交集 | 0 |
+| **剩余** | **35** |
+
+剩余按 repo：verdaccio 18 / docmost 6 / hoppscotch 6 / hedgedoc 3 / outline 1 / w3tecch 1。
+**verdaccio 一家占一半**，其中 `packages/auth/src/` 独占 10 条。
+
+### 40.2 人工逐条核验：35 条**全是 FP**，没有一条真漏洞
+
+用 `blind-benchmark/peek-fn.py`（只读，按 repo/file/fn 回源码片段）逐个读源码判：
+
+| 形态 | 代表 | 判定依据 |
+|---|---|---|
+| 授权校验藏在"不像校验"的名字里 | `removeFavorite` → `resolveAndValidate(dto,user,workspace.id)` | B 类实参，引擎 calls 无实参 ⇒ 不可见 |
+| Service 层内部（上游已鉴权） | `removeUserAvatar` / `createPAT` / `addUserToTeam`（调用方全类 `@UseGuards(GqlAuthGuard,GqlAdminGuard)`） | 不是入口 |
+| 数据源是自己的会话 | hedgedoc `AuthController.get/confirm/deletePendingUserData`（读 `request.session.pendingUser`） | 不需要对象级授权 |
+| 鉴权机制本体 | `OidcController.callback` / `Auth.allow_*` / `verifyJWTPayload` / `resolveRemoteUser` | 自指 |
+| 路由注册函数（挂了 can 中间件） | verdaccio `publish`：`const can = allow(auth,…)` → `can('publish')` | 有授权 |
+| 非 HTTP 入口 | `UserEventSubscriber.onUserCreate`（事件订阅）/ `ConfigBuilder.addAuth`（配置合并）/ `createContext`（工厂） | 不是入口 |
+| 函数自己就是那个检查 | `canRemove` | 自指 |
+
+⇒ 真值回写 `fp-gold.jsonl`：**verified 79 → 117 条**（新增 38 条，全 FP）。
+⚠ 这 38 条全是 FP 本身就是结论：**Authorization 族的"剩下的"基本都是误报**，
+继续往下切的收益在降。但形态上它们仍成簇，值得收。
+
+### 40.3 三处判据缺口（都不是新机制，是 §38/§39 自己没闭合的地方）
+
+| | 缺口 | 实测 |
+|---|---|---|
+| **C1** | 裸 `can` —— §38 的谓语要求 `can<动作词>`，而 CASL 是 `ability.can(Action.Update, subj)`、verdaccio 是 `can('publish')`，**动作在实参里** | 4 条（verdaccio `publish`） |
+| **C2** | 函数名**自身**就是授权谓语 —— §39 的自指排除只认 AUTH_PATTERN + 机制名，不认 `can<X>`，于是 `canRemove` 报"缺所有权检查" | 1 条 |
+| **C4** | 容器**严格等于** `Auth` —— §39.8 记下的未收项，`Auth.allow_*` / `Auth.setLegacyAuthCacheEntry` | 8 条 |
+| C5 | acronym 拆分缺失（`verifyJWTPayload` 拆成 ["verify","JWTPayload"]，`jwt` 进不了词表） | 2 条，**改主干 identifierParse ⇒ 留 §41** |
+
+### 40.4 落地（`src/protocol-detector.ts`）
+
+- `AUTHZ_BARE_CAN_RE = /^(?:can|cannot)$|\.(?:can|cannot)$/i`，挂 4 条 authorization 规则
+- `isAuthFunctionName()` 增加两条：函数名自身命中 §38 三件套（C2）、`isAuthDecisionName()`（C4）
+- `isAuthDecisionName` = **容器严格等于** `Auth|Authorization|AccessControl|Permissions?`
+  × （方法 `allow_*` 或含机制名词）× **方法不得以受保护动词开头**
+
+落地后重算（`residual-probe.ts` 已改为直接用 src 的 `isAuthFunctionName` +
+四条落地正则，不再自带判据）：**66 → 压掉 44 → 剩余 22**，
+且这 22 条的 gold **全部是人工核验过的 FP** ⇒ 没有一条真漏洞被误压。
+
+**TP 零损失核对（R57）**：本轮新增压掉的 13 条
+（C1 4 + C2 1 + C4 8）在 `fp-gold.jsonl` 上逐条查：**13/13 全是 §40.2 人工核过的 FP，
+已确认 TP 损失 0**。
+
+### 40.5 宽变体对照（R57：每一刀都要报"宽一档会多压什么"）
+
+| 宽变体 | 比窄判据多压 | 判定 |
+|---|---|---|
+| W1 裸 can 放宽到词级 | 3（含 `AttachmentController.uploadFile`、`StorageViewCommand.deleteEntry`×2） | 词级会吃到 cancel/candidate 同形 ⇒ **不得放宽** |
+| W2 自身谓语放宽到含 A-soft | 0 | 边界本来就紧 |
+| W4 容器放宽到 `Auth*` | 6（含 **`AuthController.deletePendingUserData`**、`AuthService.getCollabToken`） | §39 的 V-D 教训复现 ⇒ **不得放宽** |
+
+⇒ 三刀的窄形态都是"再宽一格就会越界"，边界是实测出来的，不是随手收紧的。
+
+### 40.6 四门
+
+- **tsc**：0 错
+- **taintpath**：160 条，失败 0；**webshape**：49 条，失败 0
+- **真实语料**：fr-007 pre 5 / post 0；fr-016 pre 7 / post 0 —— 均达标
+- **TS 盲测**：2864 → 2864，**LOST 0 / ADDED 0**
+  - ⚠ 按 R56 查了是不是"零触发空过"：generated 语料里 C1 触发 **0** 个函数、
+    C4 触发 **0** 个、C2 只 1 个（`JwtAuthGuard.canActivate`，早已被 §39 压）
+    ⇒ **这轮盲测是零覆盖，不能算证据**。真证据是下面那条。
+- **fixture**：新增 `src/protocol-detector-authz-selfpred.test.ts`
+  正向 **10** 条 + 反向 **10** 条，与 §38 的 11、§39 的 18 合计 **49 条全过**
+- 另跑 `extract-ir-taint-structural.test.ts`（唯一还引用 `detectSafeguardViolations` /
+  `identifierParse` 的大文件）：**212 条全过**
+  - ⚠ 末尾有 1 条 vitest **Unhandled Error**：`[vitest-worker]: Timeout calling "onTaskUpdate"`
+    —— worker IPC 超时，本机 load 400+ 时的环境噪音，**不是用例失败**（两次重跑都是 212 passed）
+- ⚠ 全量 `vitest run` 在本机 load 433 下跑了 40 分钟仍未结束，未等它 ——
+  以"引用了改动函数的那几个测试文件"为准（49 + 212 全过）
+
+### 40.7 两处踩坑（都已修，别再踩）
+
+1. **探针与落地判据口径漂移**：探针自己维护了一份 `AUTHZ_ACTION` 词表并用 `^(…)$`
+   **全等**匹配，而落地正则是**前缀**匹配 ⇒ 探针说"这条没救"、代码其实早救了，
+   差点据此去改一个不存在的缺口（C3 就是这么作废的）。
+   ⇒ 已把 src 的三条正则导出，**探针一律 import 同源常量**，不再自带词表。
+2. **裸 can 忘了 `callsOnly`**：默认在 `effectiveCalls` 上匹配，而它含
+   `identifierParse` 拆出的词 ⇒ `canSendEmail` 拆出 "can" ⇒ §38 的负对照直接转绿。
+   ⇒ 4 处全加 `callsOnly: true`，并把 §38 那条"裸 can 太宽 ⇒ 不收"的负对照
+   改写为 cancel/candidate 形态（**§40 推翻 §38 的一个判断，痕迹留在 fixture 注释里**）。
+
+### 40.8 下一步候选（按性价比排）
+
+1. **C5 acronym 拆分**（主干 `identifierParse`，救 `verifyJWTPayload` 类 2 条，
+   但影响所有规则，须单独一轮 + 完整四门）
+2. **路径/模块信号**（`packages/auth/src`、`*.guard.ts`）—— 需给 v6 加可选 `file` 参数
+3. **Service 层 / 非入口判定**（剩余池里 7 条是 Service 层、3 条是非 HTTP 入口）——
+   形态最普遍但**也最危险**：Service 层里同样可能有真漏洞，得先有真值再动
+
+规则至 **60 条**：R59（探针判据必须与落地正则**同源 import**，不得自带一份词表——
+口径漂移会造出"假装存在的缺口"）、R60（抑制类正则挂 `safeguard` 时若语义是
+"某个被调名"，必须显式 `callsOnly`，否则 identifierParse 拆出的词会替你命中）。
+
+---
+
+## 四十一、回头审计「有没有压错」，顺带把 C5 证伪（2026-09-25）
+
+§40.8 留了三个候选，排第一的就是 **C5 acronym 拆分**（`verifyJWTPayload` 拆不出 `jwt`），
+标注为「救 2 条，须动主干 `identifierParse` 单独一轮」。这一轮开工的第一件事是**先把它的账算清楚**，
+结果排第一的候选当场作废，并且顺出了一个过去五轮都没做过的动作：**审计过度抑制**。
+
+### 41.1 C5 证伪：`split-probe.ts`（只读）
+
+在冻结母本上量化三个拆分变体：
+
+| 变体 | 新增词 | 丢失词 | 受益标识符 |
+|---|---|---|---|
+| V-A 保守（仅大写块） | 22 | **12** | 16 |
+| V-A2 保守 + 保留原块 | 22 | 0 | 16 |
+| V-B 激进（连数字一起切） | 38 | 21 | 25 |
+
+规模先看：母本 803 个去重标识符里**只有 31 个（3.9%）**含连续大写。而 V-A2 新增的 22 个词里
+**只有 2 个**（JWT / OIDC）是机制类，其余全是噪声：
+
+| 标识符 | V-A2 多出来的词 |
+|---|---|
+| `validateOAuthToken` | `O`…（幸被 `{2,}` 挡住） |
+| `throwHTTPErr` | `HTTP` `Err` |
+| `createATeam` | `A` `Team` |
+| `prosemirrorNodeToYElement` | `Y` `Element` |
+| `createCLIErrorResponse` | `CLI` `Error` |
+
+而 `identifierParse` 有 **5 个调用点**，其中 `triggerParsedWords` 供给 **trigger 匹配**、
+`effectiveCalls` 供给 **safeguard 匹配** —— 动它等于同时改所有规则的触发面与抑制面。
+
+⇒ **收益 2 条 vs 全局漂移风险 + 20 条噪声词 ⇒ 主干不改。C5 作废。**
+
+### 41.2 E1：折中方案 —— 只在「是不是鉴权机制」这一格补认 acronym
+
+同一个收益，换个地方拿：不动 `identifierParse`，只在 `isAuthMachineryName` 的
+**机制对象侧**额外认 `JWTPayload` → `JWT`（新增 `machineryWords()` / `tokenAcronyms()`）。
+
+局部 ⇒ 不进 `triggerParsedWords` / `effectiveCalls` ⇒ **结构上不可能造成 LOST**。
+
+正则两条约束都是实测出来的（放在 `src/protocol-detector.ts` 的注释里）：
+
+- `^([A-Z]{2,})(?=[A-Z][a-z])` 的 **`{2,}`**：否则 `OAuth` → `O`，单字母噪声；
+- **贪婪回溯**：`OIDCStrategy` 必须拿到 `OIDC` 而不是 `OID`（非贪婪 `[A-Z]+?` 会停在 `OID`，
+  而 `oid` 不在任何机制词表里 ⇒ 这条就白给了）。
+
+→ 剩余池 **22 → 20**，`verifyJWTPayload`（verdaccio ×2 规则）入账。
+
+### 41.3 ⚠ 新动作：审计「有没有压错」（过去五轮从来没做过）
+
+前五轮的验收只有两条：新增压掉的条目 gold 全是 FP + fixture 全绿。
+**但核对用的 gold 是我们自己核的，而且只从「已经被判成违规的那一批」里挑**
+⇒ 存在循环：**只有漏救的才进 gold，gold 里永远不会出现「被误压的真漏洞」**，
+于是每轮都很稳地拿到「TP = 0」。
+
+破这个循环要靠**反事实**：对同一个函数跑两次 detect，只改一处，看差集。
+
+**(a) `suppress-audit.ts` —— 自指排除侧反事实**（改 `enclosingFuncName` → 中性名 `analyzeIntermediate`）
+
+> 扫描 879 个 exported 函数 ⇒ 被「名字被认成鉴权」压掉 **18 条**
+
+逐条读源码核：`JwtAuthGuard.handleRequest` / `setJoinedWorkspacesCookie`（守卫本体与其内部 cookie 写入）、
+`AuthController.setAuthCookie`（登录成功下发 cookie）、`TokenService.verifyJwt`、
+`SpaceAbilityFactory.createForUser`（CASL 引擎本体）、hedgedoc `logout` / `registerGuestUser`
+（`@UseGuards(GuestsEnabledGuard)` + `@OpenApi(201,403,429)`）/ `loginWithLdap` / `registerUser` /
+`loginWithOpenIdConnect`、`Auth.allow_*`、`setLegacyAuthCacheEntry`、`verifyJWTPayload`，
+以及唯一需要细看的 `UserService.generateJWT` —— 调用方是 `user.controller.ts:50` 的 login 流程，
+`user` 来自登录查询 ⇒ **18 条全部抑制正确，零误压**。
+
+**(b) `suppress-why.ts` —— safeguard 侧反事实**（drop-one：逐个剔除一个 call 再跑）
+
+> 592 个 exported 函数 ⇒ 43 条「call → 压掉的规则」
+
+压制理由词频（reason → 能压掉几条不同规则）：
+
+```
+  4 rules  cannot / can
+  2 rules  canRemove
+  1 rules  validateCanEdit / mayUpdateIdentity / getNoteIdAndCheckIfUserCanEditAliases
+  1 rules  enqueuePageHistory / diffAuditTrackedFields / getVersionFromTarball
+  1 rules  validateFileType / validateSsoEnforcement / findByName / findUserById …
+```
+
+**最关键的检查：通用名充当压制理由 = 0 条。**
+若 `includes` / `String` / `debug` 这类通用名能压掉 Authorization 规则，说明某条 safeguard
+正则宽到失去意义 —— 这是抑制侧最严重的失效模式，实测没有发生。
+压制理由全都落在 §38/§40 设计意图内的授权谓语上。
+
+### 41.4 四门
+
+- **tsc** 0 错；**taintpath** 160/0；**webshape** 49/0
+- **真实语料**：fr-007 pre 5 / post 0；fr-016 pre 7 / post 0 —— 均达标
+- **TS 盲测**：2864 → 2864，**LOST 0 / ADDED 0**
+- **fixture**：新增 `src/protocol-detector-acronym.test.ts`（端到端 8 条 + `tokenAcronyms` 表驱动
+  12 条 = 20 条），四个文件合计 **76 条全过**
+- **反向验证**（脚本化，把 `machineryWords` 退回 `identifierParse`）：
+  76 条里 **精确 6 条转红**，其余 70 条（§38/§39/§40）纹丝不动 ⇒ E1 没有横向污染。
+  恢复后 76 条全绿，源码 `REVERSE-VERIFY` 残留 0。
+
+反向验证顺带揪出一个错误假设：`createJWTToken` 我曾标成「BASE 就命中」，
+实测 `identifierParse` 只给 `["create","JWTToken"]`，对象侧拿到的是 `jwttoken`
+（既 ≠ jwt 也 ≠ token）⇒ **BASE 根本不命中，它正是 E1 唯一救回来的一类**。
+已据实测更正 fixture 注释。 ※ 与 R59 同源：**凭印象断言既有行为**。
+
+### 41.5 ⚠ R56 第三次复现：盲测对 Authorization 抑制类改动**系统性失效**
+
+按 R56 惯例查了是不是零触发空过：generated 语料里 token 含 acronym 的函数 **0 个**。
+连同 §38（C1/C2/C4 触发 0）、§40（C1 触发 0、C4 触发 0、C2 仅 1 且早已被 §39 压），
+**这是第三次**：凡是在 Authorization 抑制方向上的改动，盲测必然 LOST 0 / ADDED 0。
+
+| 轮次 | 改动 | 盲测里该形态的触发数 |
+|---|---|---|
+| §38 | 组合式谓语 `can<Action>` | 0 |
+| §40 | 裸 can / 容器=Auth / 自身谓语 | 0 / 0 / 1（早已被压） |
+| §41 | 机制对象侧 acronym | **0** |
+
+⇒ 结论：generated 语料里**没有一类真实世界的授权命名形态**（没有 CASL `ability.can`、
+没有 `Auth.allow_*`、没有 `verifyJWTPayload`）。这道门对这类改动**不提供任何信息**，
+不是"运气不好"，是结构性缺口。
+
+**下一步（§42）应该动手修，而不是继续记 abstention**：给 `generate-projects-webshape.ts`
+加 `webshape_G` 形态族（acronym 机制名 / `allow_*` 决策 / 裸 `can` / `canRemove` 自指），
+让盲测在这条轴上重新有差分能力。三轮的教训都堵在同一个缺口上。
+
+### 41.6 剩余池现状与下一步优先级
+
+剩余 **20 条**（全是已核验 FP）：docmost 6 / hoppscotch 6 / hedgedoc 3 / verdaccio 3 / outline 1 / w3tecch 1。
+其中 **Service 层 9 条**（removeUserAvatar 4 / createPAT 1 / updateLastUsedForPAT 2 / addUserToTeam 2）占 45%。
+
+判「要不要继续压 Service 层」之前，§41 先立了规矩（R61）：**必须先证明前面的压没有压错** ——
+两条审计给出了证明（18 条自指 + 43 条 safeguard，零误压）。有了这个前提，
+「Service 层」这条最大的鱼才值得在下一条（`fp-pool` 真值面上）认真做。
+
+规则至 **62 条**：R61（抑制必须有反向审计——不能只核"新增压掉的"，还要抽样核"早已被压的"）、
+R62（盲测对 Authorization 抑制类改动零覆盖；真证据须来自 fixture + 真实池审计，
+并在下一个可执行时机把形态补进 generated 语料）。
+
+### 41.7 ⚠ 全量单测跑不完的真实原因 + 归因方法（本次实测）
+
+§41 那次全量 `npx vitest run` 跑了 3h+ 后崩溃，日志里没有汇总行。之前只记成"本机 OOM，改用 targeted"。
+这次把日志拆开看，**原因比"内存不够"具体得多**：
+
+1. **崩溃点可定位**：V8 heap 耗尽前最后在跑的是 `src/auto-benchmark-generator.test.ts`，
+   它当场打印 `Total Cases: 890`（synthesized 4 / realworld 26 / **corpus 860**）。
+   890 条基准用例一次性建进内存 —— 这是**单一确定的内存大户**，不是"整体太大"。
+2. **耗时同样集中**：`tests/stress/feedback-storm.stress.ts` 一个文件 **583s**（9.7 分钟），
+   其中单条 431s；CI 里这个文件是被 `--exclude '**/stress/**'` 排除掉的，本地全量没排除。
+3. 134 个测试文件里，日志至少出现过 **121 个**（≈90%）才崩 —— 也就是说**大部分是跑完的**。
+
+⇒ 结论修正：不是"全量不可跑"，而是**全量里有两个已知的巨石**（890 用例的生成器、
+   583s 的压测）。targeted 仍然是对的做法，但理由要说准，否则下次会误判成"机器不行"。
+
+#### 归因方法：用 `git worktree` 建 HEAD 基线（可复用）
+
+要回答"这堆失败是不是我们造成的"，最干净的办法不是 stash（有丢失风险），是**基线 worktree**：
+
+```bash
+git worktree add /tmp/pm-base --detach <HEAD-sha>
+ln -s <主仓库>/node_modules /tmp/pm-base/node_modules   # 不重复装依赖
+cd /tmp/pm-base && npx vitest run <同一批文件>
+```
+
+本次工作树相对 HEAD 只改了 `src/protocol-detector.ts` 一个已跟踪文件（外加 4 个新 fixture），
+所以基线对比是干净的。
+
+#### 实测结果：40 条失败**全部是既有的，与 §35–§41 无关**
+
+| 运行 | 失败数 |
+|---|---|
+| HEAD 基线（d04ea4aa，无 §35–§41） | **16 / 80** |
+| 工作树（§41）第 1 次 | **16 / 80** |
+| 工作树（§41）第 2 次 | **17 / 80** |
+
+同一棵树两次跑出 16 和 17 ⇒ **这组测试本身 flaky**。三次全失败的**稳定红 = 12 条**，
+另有 6 条时红时绿。稳定红全部落在与本次改动无关的子系统：
+
+```
+Default Protocol Definitions > AuthProtocol has auth lifecycle transitions
+P6.1.5-C: Ranking Truth Verification > checks if missing cases are ranking or generation problems
+Full Generalization Report > generates complete generalization validation report
+P6.8 State Name Inference > synthesizer generates semantic state names (integrated pipeline)
+P7.5 Protocol Discovery Quality > clusters 100 labeled trajectories with ARI > 0.5
+P7.5 Protocol Discovery Quality > lock-unlock (len=2) clearly separated from acquire-release (len=3)
+P9.2 Real CVE Validation > detects protocol violations in real-world CVE cases
+Protocol Foundation Model > measures discovery impact of extracted rules
+Protocol Synthesis > generates state machine from prototype sequence
+Expanded Benchmark > runs all 7 protocol suites (50+ cases)
+P4.7 Discovery Analytics > generates full analytics report
+resolveEndpoint > 未设置 PROGMUNE_HUB 时默认指向中央 hub
+```
+
+**⇒ §38/§39/§40/§41 引入的新失败 = 0。** 但这 12 条既有红是项目层面的债，
+其中 `resolveEndpoint` 与 `AuthProtocol` 两条看起来是**真的断言失效**（不是阈值敏感），
+值得单独一轮清理 —— 不在这轮范围内。
+
+规则至 **63 条**：R63（全量单测失败归因必须用 `git worktree` 建 HEAD 基线同批重跑，
+禁止用 stash 或凭印象断言"这是既有的"；且同批要跑两次以区分稳定红与 flaky）。
+
+---
+
+## 四十二、补 webshape_G：让盲测在授权命名轴上重新有差分能力（2026-09-26）
+
+R62 说得很明确：§38 / §40 / §41 三轮在 Authorization **抑制**方向的改动，盲测触发数全是 0；
+「在下一个可执行时机补形态族，而不是继续记 abstention」。这一轮就是那个时机。
+
+**本轮没有改 `src/protocol-detector.ts` 一行** —— 只改语料与期望（+ 文档/规则）。
+
+### 42.1 新增 `webshape_G`（17 条）
+
+`blind-benchmark/generate-projects-webshape.ts` 新增 `PROJECT_G`，把真实项目里出现过的
+授权命名形态搬进合成语料。四条轴，每轴都配反向对照（R19）：
+
+| 轴 | 正向（该压） | 反向（不许压） |
+|---|---|---|
+| **C1** 裸 `can` | `deleteSpace`（`ability.can`）、`deleteTemplate`（裸 `can`） | `deleteWidget`（`canSendEmail` 限流器）、`deleteDraft`（基线无授权） |
+| **§38 A″/A′** | `deleteComment`（`validateSpaceAccess`）、`deleteAlias`（`validateCanEdit`） | `deleteMembers`（`deleteByUsersWithoutSpaceAccess`）、`getUserIdsWithSpaceAccess` |
+| **C2** 自身谓语 | `canRemove` | ——（见 42.3） |
+| **C4** 容器=Auth | `Auth.allow_publish`、`Auth.setLegacyAuthCacheEntry` | `Auth.changePassword`、`AuthController.deletePendingUserData` |
+| **E1** 内嵌 acronym | `createJWTToken`、`setJWTCookie` | `setUserPassword`（password 刻意不在词表）、`deleteExpiredJWTAuditLog`（动词非机制动词） |
+
+⚠ 一个必须知道的口径（写进 PROJECT_G 头部注释）：Authorization 四条规则是 `paramGated`
+且 trigger 打在 **effectiveCalls**（函数名 + 函数体全部调用 + 拆词）上 ⇒ **光有函数名不够**，
+函数体里必须有一条能命中 trigger 的调用，否则规则压根不触发，
+期望写成 `suppress` 就成了「因为没触发所以没报」的**假绿**（与 R56 同源）。
+每个 suppress 用例的函数体里都刻意留了一条 trigger 调用。
+
+另一个实测口径：合成语料里 `repo` 是 `declare const repo: any`（外部符号不可解析），
+extract-ir 记录的调用是**裸方法名**（`findPackage` 而非 `repo.findPackage`）。
+设计用例时按裸名推演，别按 `obj.method` 推演。
+
+### 42.2 反向验证：6 刀里 5 刀承重，**1 刀不承重**
+
+闸门 66/66 全绿之后，逐刀摘掉判据重跑（R64）：
+
+| 摘掉 | 闸门 | 转红 |
+|---|---|---|
+| C1 裸 can | 2/66 | `deleteSpace`、`deleteTemplate` |
+| §41 E1 acronym | 2/66 | `createJWTToken`、`setJWTCookie` |
+| §40 C4 容器=Auth | 2/66 | `Auth.allow_publish`、`Auth.setLegacyAuthCacheEntry` |
+| §38 A″ access_check | 1/66 | `deleteComment` |
+| §38 A′ can_helper | 1/66 | `deleteAlias` |
+| **§40 C2 自身谓语** | **0/66** | **—— 假绿** |
+
+### 42.3 C2 为什么不承重（以及两次「别的机制抢先」）
+
+**① `canRemove` 被两条机制冗余覆盖。** 第一版函数体里写了 `repo.isOwner(...)`，
+结果先被 Ownership Check 自己的 `isOwner` safeguard 压掉 —— C2 完全没参与。
+改成函数体只放 `removeMemberRow`（命中 trigger、不含任何所有权 safeguard）后仍然 0 转红，
+因为 **ownName 会进 effectiveCalls** ⇒ §38 的 `casl_predicate` safeguard 同样能压住它。
+
+⇒ 结构性结论：**在这四条挂了 §38 三条 safeguard 的规则上，C2 是冗余的**
+（函数自身是 `can<Action>` / `validateCan<X>` / `validate<X>Access` 时，§38 那条必然先命中）。
+C2 独力生效的地方只有**没挂 §38 三条**的 marker-gated 规则
+（`Authorization (Cross-User Resource Write)`、`via Client Cookie`、`Payment Refund`）。
+处置：保留 `canRemove` 作端到端行为护栏，`why` 里写明冗余关系（R65）。
+
+**② `Auth.invalidateToken` 不能当 C4 的反向对照。** 它端到端"该报却没报"，
+但红的**原因不是 C4** —— §39 的 `AUTH_PATTERN` 里有 `invalidate`（登出/会话失效入口）
+且按 `identifierParse` **逐词**匹配，`invalidateToken` 会拆出 `invalidate` ⇒ 先被压掉。
+（§40 的 fixture 早已记录这点，当时就改成只断言 `isAuthDecisionName` 这一层。）
+本轮换成 `Auth.changePassword`（`change` 是受保护动词，且不被 AUTH_PATTERN 命中）作反向对照。
+
+### 42.4 R62 闭环的证据：盲测现在真的有差分能力
+
+| | 项目数 | 总条数 | Authorization 族 |
+|---|---|---|---|
+| 补 G 族前 | 117 | 2864 | 938 |
+| 补 G 族后 | **118** | **2887** | **947** |
+
+`webshape_G` 在盲测里报出 **9 条** Authorization（全是 7 条反向对照的形态）。
+**关键不是"多了几条"，是把 C1 + E1 摘掉后盲测会不会变：**
+
+```
+摘掉 C1（裸 can）  ⇒ deleteSpace / deleteTemplate  新增 "Authorization (Ownership Check)"
+摘掉 E1（acronym） ⇒ createJWTToken / setJWTCookie 新增 "Authorization (Unauthenticated Mutation)"
+```
+
+⇒ 之前三轮的 LOST 0 / ADDED 0 是**零触发**；现在同样的改动会在盲测里留下 ADDED。
+**这道门在授权轴上重新有信息了。**（R62 标记 resolved）
+
+### 42.5 四门
+
+- **tsc** 0 错（本轮未改 src）
+- **webshape** 66 条 / 失败 0（49 → 66）
+- **taintpath** 160 条 / 失败 0
+- **真实语料** fr-007 pre 5 / post 0；fr-016 pre 7 / post 0 —— 均达标
+- **TS 盲测** 2864 → 2887，**LOST 0 / ADDED 23**（全部落在新增的 webshape_G，基线零漂移）
+- **fixture** 4 个文件 76 条全过（src 未改，仅回归确认）
+- **反向验证** 6 刀脚本化，恢复后源码 `REVERSE-VERIFY` 残留 **0**
+
+### 42.6 顺手记下的两笔项目债
+
+1. **12 条稳定红**（见 §41.7）：与本次改动无关，其中 `resolveEndpoint > 未设置 PROGMUNE_HUB…`
+   与 `Default Protocol Definitions > AuthProtocol has auth lifecycle transitions`
+   看起来是**真的断言失效**而非阈值敏感，值得单独一轮。
+2. **全量单测的两个巨石**：`src/auto-benchmark-generator.test.ts`（890 条基准用例一次性进内存）
+   与 `tests/stress/feedback-storm.stress.ts`（单文件 583s，CI 已用 `--exclude '**/stress/**'` 排除）。
+   本地全量可在 targeted 之外，单独排除这两个再跑。
+
+### 42.7 下一步
+
+剩余池仍是 20 条（全 verified FP），**Service 层 9 条占 45%** 是最大一族。
+有了 §41 的反向审计（零误压）与 §42 的语料覆盖，这条鱼现在可以做真值了 ——
+但 Service 层同样可能有真漏洞，动之前先在 `fp-pool` 真值面上把「Service 层内部函数」
+这一形态标注出来，别只凭"上游已鉴权"就压。
+
+规则至 **65 条**：R64（语料期望必须过反向验证才算数 —— 不转红就是假绿）、
+R65（写对照前确认唯一压制来源，冗余覆盖要写在 `why` 里而不是声称覆盖了某机制）。
+
+## 四十三、先给「Service 层」标真值：9 条全 FP，但证据是跨函数的（2026-09-26）
+
+### 43.1 动手前的问题（§42.7 立的规矩）
+
+§42.7 说得很清楚：Service 层 9 条是剩余池最大一族（20 条里占 45%），但
+**"别只凭『上游已鉴权』就压"** —— 动机器之前先把这一形态在 `fp-pool` 真值面上标出来。
+本轮就只做这件事：**标真值 + 取硬证据**，一行判别逻辑都没改。
+
+范围：容器名以 `Service` 结尾的类方法且带 Authorization 告警 = **4 函数 / 9 条**
+（另有 3 函数 / 4 条同为 Service 层，但已归 `L6-鉴权机制自身`（`AuthService.getCollabToken` /
+`TokenService.verifyJwt` / `UserService.generateJWT`），不重复归类）。
+
+### 43.2 逐条硬证据（不是"上游大概鉴权了"）
+
+| 函数 | 条数 | 上游入口 | 硬证据 |
+|---|---|---|---|
+| `docmost/AttachmentService.removeUserAvatar` | 4 | `attachment.controller.ts:460-472 removeIcon` | `@UseGuards(JwtAuthGuard)` + `@AuthUser() user:User` 框架注入；写入限定在 `user.id`/`user.workspaceId` ⇒ 客体即主体自身 |
+| `hoppscotch/AccessTokenService.createPAT` | 1 | `access-token.controller.ts:38-47 createPAT` | `@UseGuards(JwtAuthGuard)` + `@GqlUser() user:AuthUser` 框架注入 |
+| `hoppscotch/AccessTokenService.updateLastUsedForPAT` | 2 | `AccessTokenInterceptor`（**不在切片内**） | 拦截器只挂在 `@UseGuards(PATAuthGuard)` 的路由上（controller.ts:81-83 / 97-99）⇒ 到达必然已过 PAT 认证 |
+| `hoppscotch/AdminService.addUserToTeam` | 2 | `admin.resolver.ts:281-289 addUserToTeamByAdmin` | `@UseGuards(GqlAuthGuard, GqlAdminGuard)` + `@GqlAdmin() adminUser:Admin` ⇒ 认证与角色都在上游 |
+
+⇒ **9 条确认为 FP**，形态码 **`L14-Service层内部方法（上游入口已鉴权，主体由框架注入）`**
+已写进 `fp-gold.jsonl` 的 `lead` 字段，`gold_reason` 逐条写明上面的证据行号。
+`fp-pool.json` 新增 `service_layer_2026_09_26` 一节存证据表与裁决。
+
+### 43.3 ⚠ 但判别所需的证据是**跨函数**的
+
+四条里有三条的"已鉴权"证据写在**另一个文件**（controller / resolver 的装饰器上），
+第四条的上游甚至**不在切片内**。而 `detectSafeguardViolations` 的入参只有
+`calls / ownName / params(名) / exposed` —— **单函数视角，看不到调用方**。
+所以"它为什么是 FP"我们知道，"机器怎么知道"还不知道。
+
+### 43.4 三个候选机制的量化与裁决
+
+| | 池内压掉 | 池内 TP | 盲测覆盖 | 反例 | 裁决 |
+|---|---|---|---|---|---|
+| **M1 容器后缀 = Service** | 13（9 verified + 4 heuristic FP） | **0** | **0**（118 项目 / 947 条 Authorization 里 Service 容器命中 0） | **造不出** | **不落地**（R66） |
+| **M2 主体参数类型**（需新增 `paramTypes` 通道） | 3/9 | 0 | 未测 | 可造 | 性价比不足，暂缓 |
+| **M3 调用图上溯上游 guard** | 理论 4/4 函数 | 0 | 待建 | 可造 | **语义正确但代价大**，单列一轮 |
+
+**M1 为什么否掉（两条独立理由）**
+1. **零覆盖**：盲测语料 118 项目 / 947 条 Authorization 里，Service 容器命中 **0**
+   —— 合成语料全是裸函数名与 `XxxController`，R56 第四次以同样方式复现。
+2. **造不出反例（新规则 R66）**：真缺鉴权的 Service 方法与上游已鉴权的 Service 方法，
+   在"容器后缀"这一轴上**完全同形**。判据只能表达"是"，不能表达"否"。
+
+**"池内 TP 0"不能当安全证明。** gold 里 24 条 verified TP **没有一条落在 Authorization 族**
+（12 Input Validation / 7 Data Integrity FK / 3 No Input Sanitization / 2 File Upload）。
+也就是说在 Authorization 上"压掉 0 条 TP"几乎恒真 —— 这是**分母缺失**，不是安全性。
+
+### 43.5 顺带发现的一处既有宽松（不是本轮引入）
+
+这 4 个函数**全部通过了 `paramGated`**（参数名 `user` / `token` / `role` 命中 identity 词表）。
+但 `updateLastUsedForPAT(token)` 的 `token` 是**被操作的 PAT**、`addUserToTeam(…, role)` 的
+`role` 是**要授予的角色** —— 都是被操作对象，不是调用者身份。
+`paramGated` 的 identity 词表目前不区分二者。这是既有宽松，值得单独一轮量。
+
+### 43.6 本轮改动
+
+- **src 未改**（`src/protocol-detector.ts` 零改动）
+- `blind-benchmark/fp-gold.jsonl`：9 条打 `L14` + `gold_reason` 硬证据
+- `blind-benchmark/fp-pool.json`：新增 `service_layer_2026_09_26`
+- `blind-benchmark/fix-regression-corpus.json`：新增 **R66**
+
+### 43.7 下一步
+
+剩余池仍是 20 条（L14 只是把其中 9 条的**真值依据**钉死，数量未变）。
+按"先建证据通道、再上判据"的顺序，§44 候选：
+
+1. **M3（调用图上溯上游 guard）** —— 语义正确、有反例，但要先解决**验证场**：
+   fp-pool 是切片（hoppscotch 缺 `src/interceptors/`），池内回溯不到上游。
+   需要**完整仓库快照**而不是切片，并把 `call-graph-lib` 接进扫描路径（成本/内存要估）。
+2. **paramGated 的 identity 词表区分"主体 vs 被操作对象"** —— 影响面横跨所有 `paramGated`
+   规则与全部语言，四门成本高，但一旦做成是**通用**的降噪。
+3. 继续做别的形态族（Controller 6 条 / 无容器 3 条 / 其他 2 条）—— 但按 R66，
+   每条都要先回答"反例长什么样"。
+
+**建议顺序：2 → 1 → 3**（2 是纯收紧、影响面可量；1 需要先换验证场；3 是打地鼠）。
+
+规则至 **66 条**：R66（判据造不出"同形状、相反真值"的反例就不具备判别力，不得落地）。
+
+### 43.8 补测：切片语料的调用方完整性（决定 M3 能不能在池内验证）
+
+新探针 `blind-benchmark/slice-completeness-probe.ts`（只读）：建调用图后统计
+「切片内找不到调用方（入边 0）」的 callable 比例。
+
+| 切片 | callable 总数 | 入边 0 | 占比 |
+|---|---|---|---|
+| hoppscotch | 203 | 86 | **42.4%** |
+| docmost | 260 | 96 | **36.9%** |
+
+样本里 `AccessTokenService.updateLastUsedForPAT`、`AdminResolver.*` 全部入边 0
+（`AdminResolver` 是 GraphQL resolver —— 调用方是框架，切片内当然没有）。
+
+⇒ **结论：fp-pool 是切片，约四成函数回溯不到上游。M3（调用图上溯）在池内会大量假阴性
+（"没找到上游" ≠ "没有上游"），fp-pool 不能当它的验证场。**
+要做 M3 必须先有**完整仓库快照**（哪怕只完整化 1–2 个仓库），再谈接进扫描路径。
+
+## 四十四、paramGated：标量参数不是「调用者身份」（2026-09-26）
+
+### 44.1 问题（§43.5 记下的既有宽松）
+
+`paramGated` 只看**参数名**是否命中
+`\b(token|session|user|auth|request|scope|cookie|credential|permission|role|identity)\b`。
+于是**被操作对象**被当成**调用者身份**：
+`updateLastUsedForPAT(token: string)` 的 token 是要被更新的 PAT；
+`addUserToTeam(teamID, userEmail, role)` 的 role 是要授予的角色。
+
+### 44.2 落地：给判别器补一条**参数类型通道**
+
+`detectSafeguardViolations(..., params?, exposed?, paramTypes?)` 新增可选第 6 参。
+收紧规则只有一句：**标量类型的参数不再充当身份证据**（主体是领域对象 ——
+`user: AuthUser` / `user: User` / `adminUser: Admin`；被操作对象几乎总是标量）。
+类型通道不可用（调用方没传 / 类型是 `any`、`unknown`、空）时**退回旧行为**（R57，不是一律压）。
+
+```ts
+if (rule.paramGated && params) {
+  const hasIdentity = params.some((p, i) => {
+    if (!IDENTITY_PARAM_RE.test(p)) return false;
+    const t = paramTypes?.[i];
+    if (t === undefined) return true;          // 没传类型 ⇒ 旧行为
+    return classifyParamType(t) !== "scalar";
+  });
+  if (!hasIdentity && !exposed) continue;
+}
+```
+`classifyParamType` 三分类：`string|number|boolean|…` ⇒ `scalar`；
+领域类型 ⇒ `typed`；`any`/`unknown`/空 ⇒ `unknown`（保守放行）。
+联合类型按「含任一领域类型即 typed」处理，`string | null` 仍是 scalar。
+
+传 `paramTypes` 的调用方：`fp-pool-scan` / `batch-scan` / `check-webshape`。
+不传的调用方（`derive-cut-expectations`、python 侧、各类 scripts）行为**完全不变**。
+
+### 44.3 ⚠ 踩坑一：冻结母本**不能**当同刻基线（新规则 R67）
+
+第一版比对直接拿 `reports/fp-pool-results.json` 当基线，得到 **LOST 48**，其中 12 条 UNKNOWN、
+还压着 `AttachmentController.uploadFile` / `CommentController.delete` 这些**真实 Controller**
+（`user: User` 是领域类型，本不该被压）⇒ 差点判成严重召回回归。
+
+真因：**母本冻结于 2026-09-23，早于 §41/§42**。48 条里绝大部分是前几轮的抑制，不是 §44 的。
+正确做法是**摘掉本轮这一刀重跑一次同刻基线**（`/tmp/base-44.py`）再比对：
+
+| 比对方式 | LOST |
+|---|---|
+| 对冻结母本（09-23，早于 §41/§42） | **48**（含 12 UNKNOWN、压到真实 Controller） |
+| 对同刻基线（摘掉 §44 一刀重跑） | **4** |
+
+⇒ **R67：冻结母本只能当 simulate 的 universe，不能当同刻基线。**
+
+### 44.4 ⚠ 踩坑二：探针重写了扫描器的辅助函数，预测全错
+
+`paramgate-probe.ts` 里我**重写**了一份 `computeExposed`，用的是宽口径
+（`handler|controller|route|endpoint|middleware|resolver|listener|on[A-Z]`）。
+而 `fp-pool-scan.ts` 的真实口径只有 `handleRequest|requestHandler` 那一个正则，
+且只把**被它调用的函数**算 exposed ⇒ 真实 exposed 面窄得多。
+结果探针预测"压 8 条"，真实是 4 条（且清单都不一样）。
+
+⇒ **探针要复用扫描器的辅助函数就 `import`，不许重写**（R59 的延伸：同源才同口径）。
+`paramgate-probe.ts` 已就地记下这条，后续若再写同类探针照此办理。
+
+### 44.5 ⚠ 踩坑三：`--out` 参数被 tsx 吞掉
+
+给 `fp-pool-scan.ts` 加 CLI `--out <路径>`（避免覆盖冻结母本）时，实测
+**tsx 会把未知 `--` 参数当成 node 自己的选项**，脚本里 `process.argv.indexOf("--out")`
+时有时无，两次跑出 0 切片。改用**环境变量 `FP_POOL_OUT`** 才稳。
+
+### 44.6 四门
+
+- **tsc** 0 错
+- **webshape** 66 条 / 失败 0
+- **taintpath** 160 条 / 失败 0
+- **真实语料** fr-007 pre 5 / post 0；fr-016 pre 7 / post 0
+- **池内（同刻基线）** 337 → 333：**LOST 4 / ADDED 0**，
+  4 条全部 `FP/verified`（`resolveRemoteUser` ×2、`updateLastUsedForPAT` ×2），**TP 0 / UNKNOWN 0**
+- **TS 盲测** 2887 → 2618：**LOST 269 / ADDED 0**
+- **反向验证** 3 条正对照摘刀后全转红；`REVERSE-VERIFY` 残留 **0**
+
+### 44.7 269 条 LOST 的逐条归因（不是"数字变好"，是纯重复投影）
+
+269 条**全部**落在 `handleRequest`（100 个项目），4 条 Authorization 规则都没有
+`triggerOwnNameOnly` ⇒ dispatcher 会因为**它调用了** `deleteRepo`/`createAccount` 而被投影命中。
+
+决定性证据：**逐项目比对「除 handleRequest 以外」的 Authorization 面 ——
+118 / 118 项目完全一致。** 即没有任何一条真发现丢失，被去掉的只是 dispatcher 上的重复投影。
+这与 §F 轮已验证的教义一致（"175 条 blind-scan 损失逐条分类，无一条真阳性，100% 重复投影"）。
+
+### 44.8 顺带记下的三笔项目债
+
+1. **`IDENTITY_PARAM_RE` 只认裸标识符**：`authUser` / `currentUser` / `userId` 都不命中
+   （`\buser\b` 在 `authUser` 里没有左边界）。最地道的 NestJS 主体参数名反而进不了门。
+   fixture 里已断言这个现状（不是本轮引入的）。
+2. **269 条的"正解"是 `triggerOwnNameOnly`**：§44 是顺带把 dispatcher 投影压掉了，
+   正解应是把 4 条 Authorization 规则改成只对自己函数名触发（§F 对其他规则已这么做）。
+   单列一轮 —— 改完 §44 这条可以退掉。
+3. **`fp-pool-results.json` 冻结于 09-23**，与当前引擎差了 §41/§42 两轮。
+   `residual-probe` 报的"剩余 20 条"是**母本口径**，不是当前引擎口径
+   （当前引擎全池 333 条、Authorization 面更小）。两套数字别混着用。
+
+### 44.9 fixture
+
+新增 `src/protocol-detector-paramgate.test.ts`（14 条）：`classifyParamType` 三分类、
+3 条正对照、5 条反向对照、identity 正则同源性。
+⚠ 其中两条初版是**假绿**：`resolveRemoteUser` 是被 `jwtVerify` 这个 safeguard 压的、
+`rotateSecretValue` 是 trigger 压根没命中（`rotate` 不在动词表）—— 都被反向验证抓出来了。
+
+规则至 **67 条**：R67（冻结母本不能当同刻基线；抑制类改动必须用"摘掉这一刀"重跑的同刻基线比对）。
+
+## 四十五、否决 triggerOwnNameOnly（R66 二次命中），改修 safeguard 词表漂移（2026-09-26）
+
+### 45.1 起点：§44.8 留下的债
+
+§44 说「盲测 269 条 LOST 全落在 dispatcher（`handleRequest`）」，正解应当是把
+4 条 Authorization 规则改成 **`triggerOwnNameOnly`**（trigger 只对 ownName 匹配），
+这样 dispatcher 不会被它调用的函数名投影命中。本轮就去落地它。
+
+### 45.2 ⚠ 先把这一刀量化：即使做成，§45 之后只剩 7 条增量
+
+写探针 `/tmp/predict-45.ts`（**用落地正则黑盒判定**，遵 R59），原理是：
+加 `triggerOwnNameOnly` 后 `triggerCalls` 变为 `[ownName]`，其它条件（paramGated / exposed /
+requireMarker / safeguard / isAuthFunction）全部不变，因此
+
+> LOST(f, R) ⟺ R ∈ 当前违规(f) ∧ trigger 不命中 ownName(f)
+
+结果：**§45 在当前基线上的增量只有 7 条**（269 条已被 §44 吃掉），且其中 2 条是
+自己刚立的对照：
+
+```
+[ecommerce]    placeOrder        :: Authorization (Ownership Check)
+[filestorage]  uploadFile        :: Authorization (Unauthenticated Access)
+[filestorage]  deleteFile        :: Authorization (Unauthenticated Access)
+[filestorage]  createFolder      :: Authorization (Unauthenticated Access)
+[filestorage]  createShareLink   :: Authorization (Unauthenticated Access)
+[webshape_G]   Auth.changePassword :: Authorization (Ownership Check)
+[webshape_G]   Auth.changePassword :: Authorization (Unauthenticated Mutation)
+```
+
+### 45.3 ⚠ 判定：方案被 R66 否决
+
+查 `webshape-expectations.json`，`Auth.changePassword` 的记录写得清清楚楚：
+
+```json
+{ "fn": "Auth.changePassword", "reportRules": ["Authorization (Ownership Check)"],
+  "why": "C4③ 反向：受保护动词 change 开头 ⇒ 凭据 CRUD 真需要鉴权，绝不能压" }
+```
+
+这是 §42 特意立的**反向对照**。于是同一个形状上出现了相反真值：
+
+| 形状（ownName 都不命中 trigger，靠 calls 命中） | 真值 |
+|---|---|
+| `Auth.changePassword` —— 体内真的执行了 `updatePasswordHash` 写操作 | **必须报** |
+| `handleRequest` —— 只是转发，callee 自己有检查 | **不该报** |
+
+⇒ **这条轴无法表达「否」，按 R66 不得落地。** 这是 R66 的第二次实例化
+（第一次是 §43 的「容器后缀 = Service」）。
+
+**收益也是负的**：7 条增量里 2 条是自己的正对照，压掉等于让 webshape 闸门自杀。
+
+### 45.4 ⚠ 顺带踩到的大坑：`dist/` 不是 src 的同步副本
+
+第一轮兼职 vụ denominated `node -e "require('./dist/protocol-detector.js')"` 做判定（R29 离线重放的真身），
+得到一串「`getAllTransfers` calls=[] 却报 Ownership Check」的怪结果 ——
+**根因是 `dist/protocol-detector.js` 落后于 §44 之后的 src**，离线重放喂的是旧行为。
+
+随后我**手抄** src 里的 trigger 正则到 python 复刻，又出错：`getAllTransfers` /
+`listTransfers` 实测 **ownName 自己就命中** trigger，我的复刻判成了不命中。
+（`/i` 标志会让 `[A-Z]` 也匹配小写，`\w*` 的组合远不止手推的那几种。）
+
+⇒ 两条都收进康奈尔 - meanwhile: **离线重放前必须确认 dist 与 src 同步；判定正则一律
+`import` src（R59），手抄必错。**
+
+### 45.5 真正落地：修同族 safeguard 的**词表漂移**
+
+分析 filestorage 那 4 条时报的了干净的病灶 —— 函数体明明写着
+
+```ts
+const user = getSession(token);
+if (!user) return null;      // 显式认证检查
+```
+
+却被判「未认证即可访问」。原因：**`getSession` 同时是 `Unauthenticated Access` 的 trigger 源**
+（`get(?:[A-Z]\w+|_\w+)` 命中 `getSession`），却在它的 safeguard auth_check 词表里缺席。
+
+把两条规则的 auth_check 词表做集合差，**漂移一览无余**：
+
+| 仅 Mutation 有（Access 缺失） | 语义 | 本轮处置 |
+|---|---|---|
+| `getSession\b` | 会话获取 | ✅ 补（filestorage 4 条 FP 的成因） |
+| `validateSession` | 会话校验 | ✅ 补（realestate_B 2 条 FP 的成因） |
+| `verifyToken` | 令牌校验 | ✅ 补（realestate_C 2 条 FP 的成因） |
+| `create_access_token` / `create_jwt_token` / `create_refresh_token` | **签发**令牌 | ❌ **不补** —— 「签发」≠「校验调用者」，语义不同 |
+
+**只做有语义支撑的对称补齐，不做机械对齐。**
+
+```diff
+- { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|...
++ { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|...
+```
+
+### 45.6 结果：盲测压掉 8 条，逐条有源码级 FP 证据
+
+| 来源 | 函数 | 硬证据 |
+|---|---|---|
+| filestorage | `uploadFile` / `deleteFile` / `createFolder` / `createShareLink` | `const user = getSession(token); if (!user) return null;` |
+| realestate_B | `createListing` / `deleteListing` | `const user = validateSession(token); if (!user) return null/false;` |
+| realestate_C | `createListing` / `removeListing` | calls 含 `verifyToken`（同 B 形态） |
+
+**8 条全部 FP，TP 0。**
+
+⚠ **但真实代码池零触发（必须记下来）**：`fp-pool` 9 个真实切片 333 条 safeguard
+**LOST 0 / ADDED 0**。也就是说这一刀的效益**全部落在合成语料形态上**
+（那些 `getSession` / `validateSession` / `verifyToken` 是语料自己造的辅助函数名）。
+诚实结论：**收益小、零风险**；价值在于**消灭一处词表漂移**，防止将来真实项目里
+出现同名形态时被误判。这正是 R56 又一次复现 —— 零漂移 ≠ 通过，必须回答触发点。
+
+### 45.7 四门
+
+- **tsc** 0 错
+- **webshape** 66 条 / 失败 0
+- **taintpath** 160 条 / 失败 0
+- **真实语料** fr-007 pre 5 / post 0；fr-016 pre 7 / post 0（与登记值一致）
+- **TS 盲测** 2618 → 2610：**LOST 8 / ADDED 0**，8 条全 FP
+- **真实切片** 333 → 333：**LOST 0 / ADDED 0**（零覆盖，已按 R56 记录）
+- **fixture** 新增 `src/protocol-detector-authz-drift.test.ts`（11 条）；
+  连同另外 5 个相关 fixture 共 **101 条全过**
+- **反向验证** 摘掉三个词后 fixture **6 条转红**（4 条正对照 + 对称性读侧 + 现状断言），
+  **3 条反向对照不受影响** ⇒ 这一刀只动它该动的；`REVERSE-VERIFY` 残留 **0**
+
+### 45.8 记下的债（本轮不修）
+
+1. **mint 三词**（`create_access_token` / `create_jwt_token` / `create_refresh_token`）
+   只在 Mutation 的词表里，语义是「签发」而非「校验」—— 要不要对称，单列一轮论证。
+2. **`ecommerce/placeOrder :: Ownership Check`**（因调用 `updateStock` 触发）：
+   要区分「更新用户资源 / 更新非属主资源（库存）」需要所有权知识，
+   单函数视角拿不到 ⇒ 暂缓，与 §43 的 M3 同类。
+3. **safeguard 只看「是否调用」不看「是否检查其结果」**：
+   `const u = getSession(t); return data;`（不检查 u）仍被判为已认证。
+   fixture 里已断言这个现状。要修需要数据流而非调用名，**这是顶层债务**。
+4. **`decode_token` 只在 Access 有、Mutation 没有** —— 反向漂移，本轮不动（删词会增报）。
+
+### 45.9 新增规则
+
+- **R68（dist 同步）**：离线重放（R29）依赖 `dist/*.js`，而 dist 不随 src 自动更新 ⇒
+  **重放前必须确认 dist 与 src 同源**，否则喂的是旧行为、结论全错。判定正则一律 import src。
+- **R69（同族词表漂移）**：同一族多条规则共享同类 safeguard 时，每新增一个词就该
+  **对同族规则做一次集合 diff**；漂移会以「同形状的一条报、一条不报」的形式变成 FP。
+  处置只补**有语义支撑**的项，不做机械对齐。
+
+规则至 **69 条**。
+
+## 四十六、三条收尾：mint 对称性 / placeOrder / 顶层债务（2026-09-26）
+
+§45 末尾列了三条候选，本轮全部做完。结论是**两条落地、一条否决**，
+且否决的那条（③）是**用数据否决**的，不是"以后再说"。
+
+### 46.1 ① mint 三词：从 `auth_check` 移出，单独成立 `credential_issuance`
+
+**问题**：`create_access_token|create_refresh_token|create_jwt_token` 只存在于
+`Authorization (Unauthenticated Mutation)` 的 auth_check 词表里，`Access` 没有
+—— §45 做集合 diff 时发现的漂移，当时以「签发 ≠ 校验」为由没补进去。
+
+**溯源**（`git log -S create_access_token`）：来自 **e0e415a9**
+（framework-delegation allowlist）。而这个 commit 的 message 里写着：
+
+> `bare jwt.encode deliberately excluded (hardcoded-secret JWT is itself the vuln:`
+> `PyGoat sec_misconfig_lab3, reverted after an over-broad first version suppressed it)`
+
+**同一笔提交里已经认定「签发类函数不能当安全保障」，却把 `create_*_token` 从
+Token Security 的 satisfier 表整体复制进了 Access/Mutation 的 auth_check。**
+这是复制时的附带物，不是有意为之。
+
+**论证**（探针 `mint-symmetry-probe.ts`，用落地正则）：
+
+| | 写类（Mutation） | 读类（Access） |
+|---|---|---|
+| 调 `create_access_token` | **免** | 报 |
+| 无任何认证调用（对照） | 报 | 报 |
+
+⇒ mint 词在写类上**承重**、读类上**不承重**。若按「词表对齐」补进 Access，
+`getThing` 这类读函数会因此豁免 —— 而调用 `create_access_token` 恰恰说明它**在签发**
+而不是在校验任何人。同形状存在相反真值（`getRefreshToken(userId)` 该免 vs
+`getUserToken(userId)` 不该免）⇒ **按 R66 不补**。
+
+**处置：移出而不是删除。** 它压的是「登录/注册接口被判未认证变更」那批 FP，
+功能是需要的，错的是被归到 `auth_check`（语义上说成"已做认证"）。
+删掉会让 login/register 开始报；**移出**则行为完全不变、语义自洽，
+且下次做词表 diff（R69）不会再把它当成 auth_check 的"缺项"机械对齐过去
+—— **消除诱饵本身就是收益**。
+
+### 46.2 ② `placeOrder` 与 Ownership Check：`owner_self_assigned`
+
+**12 条 FP，成因同一个**：函数**新建**资源并把属主设为当前主体
+（`const item = { ..., ownerId: user.id }`），被操作对象就是自己。
+清单：`banking_A~D/createTransfer` ×4、`payment_A~D/createRefund` ×4、
+`chat/uploadFile`、`filestorage/uploadFile`、`wiki/uploadAttachment`、`ecommerce/placeOrder`。
+
+顺带查清 `createTransfer` 为何命中 trigger：`/i` 让 `[A-Z]` 也吃小写，
+于是 `create` + `Transfer` 被当成 `[A-Z]\w*` + `Transfer`（R68 已记过这个坑）。
+
+**新工具**：`blind-benchmark/body-evidence-probe.py` —— 把**函数体文本**这层证据拉出来
+（判别器只有 `calls/ownName/params`，看不到体）。它给出 5 种形态的覆盖：
+`SUBJECT_ARG` / `SELF_OBJECT` / `SCOPED_QUERY` / `GUARDED_RESULT` / `BARE_AUTH_CALL`。
+
+**机制**：extract-ir 注入 `__progmune_owner_self_assigned__`
+（对象字面量里 `<属主字段>: <主体>.<标识属性>`），Ownership Check 新增 safeguard 消费它。
+
+**⚠ 只认"绑定"形态，不认"实参"形态 —— 这是本轮最值得记的一条。**
+
+| 形态 | 真实池 | 合成语料 | 裁决 |
+|---|---|---|---|
+| `SELF_OBJECT`（`{ userId: user.id }`） | — | 10/10 FP | ✅ 落地 |
+| `SUBJECT_ARG`（`deletePAT(id, user.uid)`） | **3/3 FP** | **1/1 TP** | ❌ 否决 |
+
+`SUBJECT_ARG` 在真实池里 3 条全是 FP（`deletePAT` / `removeFavorite` / `removeUserAvatar`），
+但在合成语料里 `webshape_G/deleteWidget` 是**真 TP**：
+
+```ts
+deleteWidget(widgetId, user) { canSendEmail(user.id); repo.deleteWidget(widgetId); }
+```
+
+`user.id` 属于 `canSendEmail`，与删除操作毫无关系。**合成语料与真实池的真值相反**
+⇒ 只看一边会判错。结果：真实池那 3 条 FP 本轮压不掉，保留告警（诚实记录）。
+
+**净效应（同刻比对）**：摘刀 **2795 条** → 含刀 **2598 条** ⇒
+**这一刀压掉 197 条 Ownership Check，摘刀后 197 条全部回来 ⇒ 承重**。
+抽样复核（`chat/sendMessage`、`hr_A/createPayroll`、`githost_A/createRepo`、
+`banking_A/createTransfer`…）全部是 `{ ownerId|userId: user.id }` 形态 ⇒ **全是 FP**；
+`deleteWidget`（真 TP）**未被压** ✅。真实切片 **LOST 0 / ADDED 0**（R56 又一次，零风险）。
+
+**⚠ 踩坑：第一次报的"LOST 12"是错的 —— 低估了 16 倍。**
+我拿"上一次的 `batch-scan-results.json`"（pre-46）当基线，但两次扫描之间**重跑了语料生成器**，
+语料被重建 ⇒ 不是同刻。改成「摘掉这一刀重跑」的同刻比对后，真实压制数是 **197**。
+（详见 46.6 / R73）
+
+### 46.3 ③ 顶层债务：safeguard 只看"是否调用"，不看"是否检查其结果"
+
+**债务**：这两种写法被同等对待 ——
+
+```ts
+const u = getSession(t); if (!u) return null;   // 真检查了
+getSession(t); return data;                     // 结果被丢弃（真漏洞，当前也豁免）
+```
+
+**量化**（两个新探针，全部只读）：
+
+| | 函数数 | GUARDED（真检查） | BARE（丢弃结果） |
+|---|---|---|---|
+| 合成语料 118 项目 | 1615 | **405** | **154** |
+| 真实切片 9 个 | 245 | **0** | **5** |
+
+真实池 GUARDED = **0** —— 真实代码根本不写 `const u = getSession(); if(!u) return`
+（靠装饰器/中间件/guard），这条债务在真实代码上**目前没有可观测的正例**。
+真实池那 5 条 BARE 全是 verdaccio 的 `authenticate` / `add_user` / `handleAESMiddleware`
+—— **鉴权机制自身**，已被 §39 AUTH_PATTERN 压掉。
+
+**精确增报面**（`auth-result-impact-probe.ts`，用真实判别器做反事实）：
+BARE 且当前确实靠 auth_check 豁免的只有 **26 条，全部是 `handleRequest`**。
+而 `handleRequest` 是 dispatcher —— §44 已用「逐项目比对除 handleRequest 外的
+Authorization 面，118/118 完全一致」证明它在 Authorization 上是**纯重复投影**。
+
+⇒ **收紧后新增的 26 条，没有一条是真发现，全是噪音。**
+
+**裁决：不落地。** 理由：
+1. 收益 = 0（合成语料 26 条全是重复投影，真实池 0 条）
+2. 成本 > 0（26 条新增告警，且方向与本项目"压降 FP"相反）
+3. 按 R66/R56，无收益的收紧不得落地
+
+**⚠ 这不是"以后再说"，是"现在做没有收益"。** 债务仍在，但它的可观测收益为零，
+真正的修法是上数据流（判断 auth 调用的返回值是否进入分支/提前返回），
+那是主干级改动，需要单独一轮。前置条件写进 fp-pool.json：
+**当语料或真实池里出现「非 dispatcher 的 BARE 函数且是真漏洞」时**，才值得收紧。
+
+留下的两个可复用探针（`auth-result-probe.py` 分类 + `auth-result-impact-probe.ts`
+反事实）让下一轮可以直接量化，不用重造。
+
+### 46.4 三个新规则
+
+- **R70（safeguard 的 label 必须与语义一致）**：语义不符的机制要**单独成立条目**，
+  不要并入既有 label。否则下一次集合 diff（R69）会把它当成"缺项"机械对齐过去。
+  §46 ① 的 `create_*_token` 就是这样混进 `auth_check` 的。
+- **R71（判据的真值要**两边**都看）**：合成语料与真实切片可能给出**相反**的真值。
+  §46 ② 的 `SUBJECT_ARG`：真实池 3/3 FP、合成语料 1/1 TP。只看一边必然判错。
+- **R72（增报类改动要逐条证明"新增的每条都是真发现"）**：R66 管抑制类（要造得出反例），
+  R72 管收紧类 —— 收紧天然会增报，必须证明新增的全是真发现。
+  §46 ③ 实测新增 26 条全是 dispatcher 重复投影 ⇒ 收益 0，不得落地。
+
+### 46.5 四门
+
+- **tsc** 0 错
+- **webshape** 66 条 / 失败 0
+- **taintpath** 160 条 / 失败 0
+- **真实语料** fr-007 pre 5 / post 0；fr-016 pre 7 / post 0
+- **TS 盲测** 2610 → 2598：**LOST 12 / ADDED 0**
+- **真实切片** 333 → 333：**LOST 0 / ADDED 0**
+- **fixture** 新增 2 个文件 16 条（`credential-issuance` 9 + `owner-self` 7）全过；
+  连同 5 个相关文件共 117 条全过
+- **反向验证** 见下
+
+### 46.6 ⚠ 踩坑：把"上一次的 results"当基线，压制数被低估 16 倍（R73）
+
+第一次比对用 `pre-46.json`（§45 后、§46 前的上一次扫描结果）作分母，得到 **LOST 12**。
+反向验证摘刀后却新增 **185** 条 —— 两个数字对不上，逼着我查。
+
+真因：两次扫描之间我重跑了 `generate-projects-webshape.ts` /
+`generate-projects-taintpath.ts`，**语料被重建**。跨了语料重建的结果不可比：
+
+| 比对方式 | 压制数 |
+|---|---|
+| 对"上一次 results"（跨了语料重建） | **12** |
+| 对「摘掉这一刀重跑」的同刻结果 | **197** |
+
+R67 说的是「冻结母本不能当同刻基线」，这次踩的是它的近亲：
+**"上一次的 results 文件"同样不是同刻基线。** 正确做法只有一个 ——
+**摘掉这一刀、其余不动、重跑**，跑完自动恢复源码（`/tmp/base-44.py` 模式）。
+判定"这一刀承重"的数字必须来自这个口径。
+
+### 46.7 反向验证
+
+| 刀 | 做法 | 结果 |
+|---|---|---|
+| ② `owner_self_assigned` | 摘掉该 safeguard → 跑盲测 | **197 条全部回来** ⇒ 承重 |
+| ① `credential_issuance` | 摘掉该 safeguard → 跑 fixture | "签发调用只在写类上豁免" 转红 ⇒ 承重 |
+
+`REVERSE-VERIFY` 残留 **0**，src 与 `/tmp/pd.post-46.ts` 逐字节一致。
+
+### 46.8 本轮改动清单
+
+**改了 src 的**
+- `src/protocol-detector.ts`：① 三个 mint 词从 `auth_check` 移出，新建
+  `credential_issuance` 条目；② Ownership Check 新增 `owner_self_assigned` safeguard
+- `src/extract-ir.ts`：新增 `__progmune_owner_self_assigned__` 标记注入
+
+**新增文件**
+- `src/protocol-detector-credential-issuance.test.ts`（9 条）
+- `src/protocol-detector-owner-self.test.ts`（7 条）
+- `blind-benchmark/body-evidence-probe.py`（函数体证据探针，② ③ 共用）
+- `blind-benchmark/auth-result-probe.py`（③ 分类 + `--dump-bare` 导出）
+- `blind-benchmark/auth-result-impact-probe.ts`（③ 反事实，支持 `--bare` 交叉）
+- `blind-benchmark/mint-symmetry-probe.ts`（① 落地正则验证）
+
+**③ 没有改 src** —— 用数据否决，见 46.3。
+
+规则至 **73 条**：R70（label 必须与语义一致）/ R71（真值要两边都看）/ R72（增报类要逐条证明）/ R73（上一次的 results 也不是同刻基线）。

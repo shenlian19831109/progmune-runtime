@@ -1,0 +1,295 @@
+{
+  "repo": "docmost",
+  "universe": 136,
+  "hitExisting": 0,
+  "hitNew": 16,
+  "hitSoft": 2,
+  "newlySuppressed": [
+    {
+      "fn": "AttachmentController.uploadFile",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "hits": [
+        "A′:validateCanEdit"
+      ]
+    },
+    {
+      "fn": "AttachmentController.uploadAvatarOrLogo",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "hits": [
+        "A-core:cannot",
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "AttachmentController.removeIcon",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "hits": [
+        "A-core:cannot",
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "GroupController.updateGroup",
+      "file": "src/core/group/group.controller.ts",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "GroupController.removeGroupMember",
+      "file": "src/core/group/group.controller.ts",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "GroupController.deleteGroup",
+      "file": "src/core/group/group.controller.ts",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "PageAccessService.validateCanEdit",
+      "file": "src/core/page/page-access/page-access.service.ts",
+      "hits": [
+        "A-core:cannot",
+        "A-soft:canUserEditPage"
+      ]
+    },
+    {
+      "fn": "PageController.removePageLabel",
+      "file": "src/core/page/page.controller.ts",
+      "hits": [
+        "A′:validateCanEdit"
+      ]
+    },
+    {
+      "fn": "ShareService.lookupTransclusionForShare",
+      "file": "src/core/share/share.service.ts",
+      "hits": [
+        "A′:isSharingAllowedFor"
+      ]
+    },
+    {
+      "fn": "SpaceController.updateSpace",
+      "file": "src/core/space/space.controller.ts",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "SpaceController.deleteSpace",
+      "file": "src/core/space/space.controller.ts",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "SpaceController.removeSpaceMember",
+      "file": "src/core/space/space.controller.ts",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "SpaceController.updateSpaceMemberRole",
+      "file": "src/core/space/space.controller.ts",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "WorkspaceController.updateWorkspace",
+      "file": "src/core/workspace/controllers/workspace.controller.ts",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "WorkspaceController.deleteWorkspaceMember",
+      "file": "src/core/workspace/controllers/workspace.controller.ts",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "WorkspaceController.updateWorkspaceMemberRole",
+      "file": "src/core/workspace/controllers/workspace.controller.ts",
+      "hits": [
+        "A-core:cannot"
+      ]
+    }
+  ],
+  "softSamples": [
+    {
+      "fn": "PageNotificationService.processPageUpdate",
+      "hits": [
+        "canSendEmail"
+      ]
+    },
+    {
+      "fn": "PageAccessService.validateCanEdit",
+      "hits": [
+        "canUserEditPage"
+      ]
+    }
+  ],
+  "unkHit": 9,
+  "unkLocated": 26,
+  "unk": 26,
+  "unkRows": [
+    {
+      "fn": "JwtAuthGuard.handleRequest",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "JwtAuthGuard.handleRequest",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "AttachmentController.uploadFile",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A′:validateCanEdit"
+      ]
+    },
+    {
+      "fn": "AttachmentController.uploadAvatarOrLogo",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-core:cannot",
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "AttachmentController.removeIcon",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-core:cannot",
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "AttachmentController.removeIcon",
+      "rule": "Authorization (Resource Ownership)",
+      "hits": [
+        "A-core:cannot",
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "AuthController.setAuthCookie",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "AuthController.setAuthCookie",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "CommentController.delete",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A′:validateCanComment",
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "FavoriteController.removeFavorite",
+      "rule": "Authorization (Ownership Check)",
+      "hits": []
+    },
+    {
+      "fn": "FavoriteController.removeFavorite",
+      "rule": "Authorization (Resource Ownership)",
+      "hits": []
+    },
+    {
+      "fn": "GroupController.updateGroup",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "GroupController.removeGroupMember",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "GroupController.removeGroupMember",
+      "rule": "Authorization (Resource Ownership)",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "GroupController.deleteGroup",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "fn": "AttachmentService.removeUserAvatar",
+      "rule": "Authorization (Ownership Check)",
+      "hits": []
+    },
+    {
+      "fn": "AttachmentService.removeUserAvatar",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "AttachmentService.removeUserAvatar",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "AttachmentService.removeUserAvatar",
+      "rule": "Authorization (Resource Ownership)",
+      "hits": []
+    },
+    {
+      "fn": "AuthService.getCollabToken",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "TokenService.verifyJwt",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "SpaceAbilityFactory.createForUser",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "SpaceAbilityFactory.createForUser",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "WorkspaceAbilityFactory.createForUser",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    }
+  ]
+}

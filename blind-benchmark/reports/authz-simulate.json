@@ -1,0 +1,151 @@
+{
+  "total": 66,
+  "turned": 14,
+  "byRule": {
+    "Authorization (Unauthenticated Access)": {
+      "total": 21,
+      "turned": 1
+    },
+    "Authorization (Unauthenticated Mutation)": {
+      "total": 22,
+      "turned": 1
+    },
+    "Authorization (Ownership Check)": {
+      "total": 17,
+      "turned": 9
+    },
+    "Authorization (Resource Ownership)": {
+      "total": 6,
+      "turned": 3
+    }
+  },
+  "rows": [
+    {
+      "repo": "docmost",
+      "fn": "AttachmentController.uploadFile",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A′:validateCanEdit"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentController.uploadAvatarOrLogo",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentController.removeIcon",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentController.removeIcon",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "CommentController.delete",
+      "file": "src/core/comment/comment.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A′:validateCanComment",
+        "A-core:cannot"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "GroupController.updateGroup",
+      "file": "src/core/group/group.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "GroupController.removeGroupMember",
+      "file": "src/core/group/group.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "GroupController.removeGroupMember",
+      "file": "src/core/group/group.controller.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "GroupController.deleteGroup",
+      "file": "src/core/group/group.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-core:cannot"
+      ]
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "stage",
+      "file": "packages/api/src/stage.ts",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-act:canPublish"
+      ]
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "stage",
+      "file": "packages/api/src/stage.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": [
+        "A-act:canPublish"
+      ]
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "stage",
+      "file": "packages/api/src/stage.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": [
+        "A-act:canPublish"
+      ]
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "StorageViewCommand.deleteEntry",
+      "file": "packages/admin-cli/src/commands/storage/view.ts",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-act:canRemove"
+      ]
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "StorageViewCommand.deleteEntry",
+      "file": "packages/admin-cli/src/commands/storage/view.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "hits": [
+        "A-act:canRemove"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,576 @@
+"use strict";
+/**
+ * G1 PATH_GUARD_EVIDENCE —— 路径穿越「校验识别」的定向回归（2026-09-19）。
+ *
+ * 立项背景：路径穿越标记此前是 `taint → file sink ⇒ 标记`，**不看中间有没有
+ * 校验**；SSRF 侧不是这样（无 SSRF_GUARD_EVIDENCE 才标记）。两侧数据流同构、
+ * 判别力差一档——这正是根集合不敢放宽的真正原因（fr-012/fr-015 的 MISS 由此
+ * 从「词表缺口」升级为「机制缺口」）。
+ *
+ * G1 把路径侧改成与 SSRF 对齐：`taint → file sink 且无校验证据 ⇒ 标记`。
+ *
+ * 本文件的每条正例/反例都锚定到**语料里真实存在的一段代码**，不是凭空造的词表：
+ *   - fr-007 openhop  `assertValidFlowId(id)`（fix 才出现，G-C）
+ *   - fr-012 gitlab-mcp  下载侧 localPath 守卫块（pre/post 同一段，G-B）
+ *   - fr-016 Redocly  `assertWithinDir(openapiDir, pathFile, pathName)`（G-C）
+ *   - fr-012 pre 实测反例：`path.basename` 在漏洞态就在（N-A）
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const vitest_1 = require("vitest");
+const fs = __importStar(require("fs"));
+const os = __importStar(require("os"));
+const path = __importStar(require("path"));
+const extract_ir_1 = require("./extract-ir");
+const TSCONFIG = JSON.stringify({
+    compilerOptions: {
+        target: "ES2020",
+        module: "commonjs",
+        moduleResolution: "node",
+        strict: false,
+        skipLibCheck: true,
+        noEmit: true,
+    },
+    include: ["**/*.ts"],
+});
+function makeProject(files) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-taint-guard-"));
+    fs.writeFileSync(path.join(dir, "tsconfig.json"), TSCONFIG);
+    fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify({ name: "fixture", version: "0.0.0", private: true }));
+    for (const [rel, body] of Object.entries(files)) {
+        const abs = path.join(dir, rel);
+        fs.mkdirSync(path.dirname(abs), { recursive: true });
+        fs.writeFileSync(abs, body);
+    }
+    return dir;
+}
+function marksFor(dir, fnName) {
+    const fns = (0, extract_ir_1.extractIR)(dir);
+    const f = fns.find((x) => x.name === fnName);
+    return f ? (f.calls ?? []) : [];
+}
+const PATH_MARK = "__progmune_path_traversal__";
+(0, vitest_1.describe)("G1 基线：无校验证据时必须照旧标记（不得因加判别力而失召回）", () => {
+    (0, vitest_1.it)("taint → 文件 sink，全程无校验 → 标记", () => {
+        const dir = makeProject({
+            "a.ts": `
+import * as fs from "fs";
+export function read(req: any) {
+  const name = req.params.name;
+  return fs.readFileSync("/data/" + name, "utf-8");
+}
+`,
+        });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+});
+(0, vitest_1.describe)("G-B：上跳/绝对路径拒绝（种子=fr-012 gitlab-mcp 下载侧 localPath 守卫块）", () => {
+    // index.ts:7968-7977 —— pre 与 post 完全一致的一段既有守卫。
+    // 它不能当「修复形态种子」，但它是真实世界的「已校验」样本。
+    //
+    // ⚠️ 写法约束（踩过坑）：污点必须**直接出现在 sink 实参窗口里**。
+    // 「污点经 path.normalize(x) / path.join(x) 包装后仍传播」是另一条独立的
+    // 传播缺口（C4，见文末已知边界）—— 若让污点先被包装再进 sink，
+    // 「不得标记」会**假通过**（污点压根没到 sink，与守卫无关）。
+    // 故本组用例让 sink 直接使用污点名，守卫块则照抄真实代码。
+    const GUARD_BLOCK = `
+    const normalizedLocalPath = path.normalize(localPath);
+    if (
+      path.isAbsolute(normalizedLocalPath) ||
+      normalizedLocalPath === ".." ||
+      normalizedLocalPath.startsWith(".." + path.sep) ||
+      normalizedLocalPath.includes(path.sep + ".." + path.sep)
+    ) {
+      throw new Error("Invalid local_path: directory traversal is not allowed.");
+    }
+`;
+    const wrap = (guard) => `
+import * as fs from "fs";
+import * as path from "path";
+export function save(req: any, buffer: any) {
+  const localPath = req.params.local_path;
+${guard}  fs.writeFileSync(localPath, buffer);
+}
+`;
+    (0, vitest_1.it)("去掉守卫块后必须标记（正对照：证明这条用例真的锁住了判别力）", () => {
+        const dir = makeProject({ "a.ts": wrap("") });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "save")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("真实守卫块存在时不得标记", () => {
+        const dir = makeProject({ "a.ts": wrap(GUARD_BLOCK) });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "save")).not.toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+});
+(0, vitest_1.describe)("G-C：独立校验函数（种子=fr-007 openhop / fr-016 Redocly）", () => {
+    // fr-007 的修复形态：把 assertValidFlowId(id) 放进 filePath()，
+    // 真正含 sink 的 get/save 与外层 flowRoutes 里一个校验词汇都没有
+    // —— 只看函数体等于没做，必须向调用方传播。
+    const BASE = `
+import * as fs from "fs";
+import * as path from "path";
+export class FlowStore {
+  private dir = "/data";
+  private filePath(id: string): string {
+    PATHIDGUARD
+    return path.join(this.dir, id + ".yaml");
+  }
+  async get(id: string) {
+    return fs.readFileSync(this.filePath(id), "utf-8");
+  }
+}
+export function flowRoutes(req: any, store: FlowStore) {
+  const id = req.params.id;
+  return store.get(id);
+}
+`;
+    (0, vitest_1.it)("pre（无校验函数）：含 sink 的方法与外层调用点都要标记", () => {
+        const dir = makeProject({ "a.ts": BASE.replace("PATHIDGUARD", "") });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "flowRoutes")).toContain(PATH_MARK);
+            (0, vitest_1.expect)(marksFor(dir, "FlowStore.get")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("post（fr-007 真修复形态 assertValidFlowId）：两侧都不得标记", () => {
+        const dir = makeProject({
+            "flow-id.ts": `
+export function assertValidFlowId(id: string): void {
+  if (!/^[A-Za-z0-9_-]+$/.test(id)) { throw new Error("Invalid flow id: " + id); }
+}
+`,
+            "a.ts": BASE.replace("PATHIDGUARD", "assertValidFlowId(id);"),
+        });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "flowRoutes")).not.toContain(PATH_MARK);
+            (0, vitest_1.expect)(marksFor(dir, "FlowStore.get")).not.toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("fr-016 Redocly 形态 assertWithinDir：不得标记", () => {
+        const dir = makeProject({
+            "a.ts": `
+import * as fs from "fs";
+import * as path from "path";
+// 同上：让污点直接进 sink 实参窗口，避免假通过
+export function iteratePathItems(req: any, openapiDir: string, outDir: string) {
+  const pathName = req.params.name;
+  assertWithinDir(openapiDir, path.join(outDir, pathName) + ".yaml", pathName);
+  fs.writeFileSync(path.join(outDir, pathName) + ".yaml", "x");
+}
+`,
+        });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "iteratePathItems")).not.toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+});
+(0, vitest_1.describe)("G-A：目录包含性校验（canonical 形态）", () => {
+    const wrap = (guard) => `
+import * as fs from "fs";
+import * as path from "path";
+export function read(req: any) {
+  const name = req.params.name;
+  const baseDir = path.resolve("/data");
+  const target = path.resolve(baseDir, name);
+${guard}  return fs.readFileSync(path.join(baseDir, name), "utf-8");
+}
+`;
+    (0, vitest_1.it)("去掉包含性判断后必须标记（正对照）", () => {
+        const dir = makeProject({ "a.ts": wrap("") });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("resolve + startsWith(baseDir) → 不得标记", () => {
+        const dir = makeProject({
+            "a.ts": wrap(`  if (!target.startsWith(baseDir)) { throw new Error("outside"); }\n`),
+        });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).not.toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+});
+(0, vitest_1.describe)("G-D：锚定字符集白名单（种子=fr-007 FLOW_ID_PATTERN）", () => {
+    const wrap = (guard) => `
+import * as fs from "fs";
+export function read(req: any) {
+  const name = req.params.name;
+${guard}  return fs.readFileSync("/data/" + name, "utf-8");
+}
+`;
+    (0, vitest_1.it)("去掉白名单校验后必须标记（正对照）", () => {
+        const dir = makeProject({ "a.ts": wrap("") });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("/^[A-Za-z0-9_-]+$/ 参与校验 → 不得标记", () => {
+        const dir = makeProject({
+            "a.ts": wrap(`  if (!/^[A-Za-z0-9_-]+$/.test(name)) { throw new Error("bad id"); }\n`),
+        });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).not.toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+});
+(0, vitest_1.describe)("反例清单：这些形态**不算**守卫（N-A 是头号陷阱）", () => {
+    (0, vitest_1.it)("N-A path.basename —— fr-012 pre 实测反例：漏洞态就有 basename，必须照旧标记", () => {
+        // 注意：污点直接写进 sink 实参窗口（不经 `const x = path.basename(...)` 赋值），
+        // 因为「污点经表达式包装后仍传播」是另一条独立的传播缺口（见文末已知边界），
+        // 本用例只锁「basename 是否算守卫」这一件事。
+        const dir = makeProject({
+            "a.ts": `
+import * as fs from "fs";
+import * as path from "path";
+export function read(req: any) {
+  const name = req.params.name;
+  return fs.readFileSync("/data/" + path.basename(name), "utf-8");
+}
+`,
+        });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("N-B 单独出现的 join/resolve —— 拼接本身不阻止上跳，必须标记", () => {
+        const dir = makeProject({
+            "a.ts": `
+import * as fs from "fs";
+import * as path from "path";
+export function read(req: any) {
+  const name = req.params.name;
+  return fs.readFileSync(path.resolve("/data", name), "utf-8");
+}
+`,
+        });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("N-C 长度检查 —— 无法阻止上跳，必须标记", () => {
+        const dir = makeProject({
+            "a.ts": `
+import * as fs from "fs";
+export function read(req: any) {
+  const name = req.params.name;
+  if (name.length > 100) { throw new Error("too long"); }
+  return fs.readFileSync("/data/" + name, "utf-8");
+}
+`,
+        });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("N-D 空值检查 —— 空值检查 ≠ 路径包含性检查，必须标记", () => {
+        const dir = makeProject({
+            "a.ts": `
+import * as fs from "fs";
+export function read(req: any) {
+  const name = req.params.name;
+  if (!name) { throw new Error("missing"); }
+  return fs.readFileSync("/data/" + name, "utf-8");
+}
+`,
+        });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+});
+(0, vitest_1.describe)("G2：调用点抑制 —— 按被调用方的实际证据定案（种子=taintpath_B assertTemplateName）", () => {
+    // 缺口形态（2026-09-19 measured，taintpath_B dispatchToolGuarded）：
+    //   `assertTemplateName(args.name); return loadTemplate(args.name);`
+    // `assertTemplateName` 函数体内是锚定字符集白名单（G-D），是真校验，
+    // 但它的名字不含路径语义后缀 —— `Name` 在修 `ensureDir()` 误判时被整体
+    // 移出了 G-C 守卫后缀表，于是调用点侧认不出来，仍被标记。
+    //
+    // G2 的修法不是把 `Name` 加回词表（那是按【名字】猜语义，G-C 已经为这份
+    // 宽松付过一次代价：fr-007 pre 侧召回归零），而是看**被调用方函数体内
+    // 到底有没有校验证据**。
+    //
+    // 精度取舍：净化作用在【表达式】上，不是整函数 —— 同函数体里另一条未被
+    // 校验的流仍会标记。这是 G2 相对 G1（函数级 selfGuarded）的收窄。
+    const body = (guardCall) => `
+import * as fs from "fs";
+export function read(req: any) {
+  const name = req.params.name;
+${guardCall}  return fs.readFileSync("/data/" + name, "utf-8");
+}
+function assertTemplateName(name: string): void {
+  if (!/^[A-Za-z0-9_-]+$/.test(name)) throw new Error("bad template name");
+}
+`;
+    (0, vitest_1.it)("正对照：去掉自定义校验调用后必须标记", () => {
+        const dir = makeProject({ "a.ts": body("") });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("自定义校验函数（名字不含路径语义后缀）被调用 → 不得标记", () => {
+        const dir = makeProject({ "a.ts": body("  assertTemplateName(name);\n") });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).not.toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("负对照：被调用方体内**没有**校验证据时，调用它不得抑制（不能见调用就净化）", () => {
+        const dir = makeProject({
+            "a.ts": `
+import * as fs from "fs";
+export function read(req: any) {
+  const name = req.params.name;
+  logIt(name);
+  return fs.readFileSync("/data/" + name, "utf-8");
+}
+function logIt(x: string): void { console.log(x); }
+`,
+        });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("表达式级净化：同函数体里另一条未被校验的流仍要标记", () => {
+        // G1 的函数级 selfGuarded 会把整个函数体一起静默；G2 只净化真正被传进
+        // 守卫调用的表达式 —— 这条用例锁住这个差别。
+        const dir = makeProject({
+            "a.ts": `
+import * as fs from "fs";
+export function read(req: any) {
+  const name = req.params.name;
+  const other = req.params.other;
+  assertTemplateName(name);
+  fs.readFileSync("/data/" + name, "utf-8");
+  return fs.writeFileSync("/data/" + other, "x");
+}
+function assertTemplateName(name: string): void {
+  if (!/^[A-Za-z0-9_-]+$/.test(name)) throw new Error("bad template name");
+}
+`,
+        });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("跨函数（taintpath_B 形态）：净化只发生在调用点，被调用方定义照旧被反标", () => {
+        // 语料里 `loadTemplate` 自身不含任何不可信根，它被标记是因为调用点命中了
+        // 跨函数一跳（onMethodHit 反标）。故本用例在同一文件里放两个几乎相同的
+        // 调用点 —— 一个净化、一个不净化 —— 才能同时锁住两侧。
+        const dir = makeProject({
+            "store.ts": `
+import * as fs from "fs";
+export function loadTemplate(p: string): string {
+  return fs.readFileSync("/srv/templates/" + p, "utf-8");
+}
+`,
+            "handler.ts": `
+import { loadTemplate } from "./store";
+export function dispatchToolGuarded(params: any) {
+  const args = params.arguments;
+  assertTemplateName(args.name);
+  return loadTemplate(args.name);
+}
+export function dispatchToolBare(params: any) {
+  const args = params.arguments;
+  return loadTemplate(args.name);
+}
+function assertTemplateName(name: string): void {
+  if (!/^[A-Za-z0-9_-]+$/.test(name)) throw new Error("bad template name");
+}
+`,
+        });
+        try {
+            // 净化侧：污点表达式已被校验 ⇒ 调用点不标记
+            (0, vitest_1.expect)(marksFor(dir, "dispatchToolGuarded")).not.toContain(PATH_MARK);
+            // 正对照：同形状去掉校验 ⇒ 照旧标记，且被调用方被反标
+            (0, vitest_1.expect)(marksFor(dir, "dispatchToolBare")).toContain(PATH_MARK);
+            (0, vitest_1.expect)(marksFor(dir, "loadTemplate")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+    (0, vitest_1.it)("已知缺口 G2b：经项目自有 helper 转手的校验证据不生效（保守边界，仍标记）", () => {
+        // 只认 tier-0（函数体自身含校验证据）。经 helper 转手 ⇒ 那是【推断】出来
+        // 的守卫，拿推断结果做抑制会把推断误差直接放大成误报消除。
+        // 代价：这类形态仍会误报，与 C4b（helper 不传播）是同一族缺口。
+        const dir = makeProject({
+            "a.ts": `
+import * as fs from "fs";
+export function read(req: any) {
+  const name = req.params.name;
+  checkName(name);
+  return fs.readFileSync("/data/" + name, "utf-8");
+}
+function checkName(name: string): void {
+  assertTemplateName(name);
+}
+function assertTemplateName(name: string): void {
+  if (!/^[A-Za-z0-9_-]+$/.test(name)) throw new Error("bad template name");
+}
+`,
+        });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "read")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    });
+});
+/**
+ * ── fr-016 post 侧的压制不是同义反复（2026-09-19，3.7.38）──
+ *
+ * 疑虑是合理的：G-C 的后缀表里 `Within` 这一项，当初就是照着 fr-016 的
+ * `assertWithinDir` 加进去的。那么 fr-016 的 post=0 到底算不算证据？
+ *
+ * 区分办法：把守卫函数名换成**不含任何 G-C 后缀**的名字（ enforces 都不带
+ * assert/ensure/check/validate 前缀，这里用 `containCheck` 与 `stamp`），
+ * 只保留它函数体内的真实包含性校验：
+ *   const base = path.resolve(baseDir);
+ *   if (!path.resolve(targetPath).startsWith(base + path.sep)) throw …
+ * 若仍被压制，说明压制的依据是被调用方**自身的证据**（G2 的 tier-0），
+ * 不是名字；那么 fr-016 的 post=0 就不是用测试集反推出来的同义反复。
+ * 正对照：同形状把函数体里的 startWith 删掉，必须重新标记。
+ */
+(0, vitest_1.describe)("fr-016 的压制依据是被调用方的证据，不是它的名字", () => {
+    const body = (guardName, keepGuard) => [
+        'import * as fs from "fs";',
+        'import * as path from "path";',
+        `function ${guardName}(baseDir: string, targetPath: string): void {`,
+        "  const base = path.resolve(baseDir);",
+        "  const target = path.resolve(targetPath);",
+        keepGuard
+            ? '  if (target !== base && !target.startsWith(base + path.sep)) throw new Error("outside");'
+            : "  // 故意不校验：这里是正对照，删掉守卫后必须重新标记",
+        "}",
+        "export function emit(doc: Record<string, any>, outDir: string) {",
+        "  for (const channelName of Object.keys(doc)) {",
+        "    const channelFile = `${outDir}/${channelName}.yaml`;",
+        `    ${guardName}(outDir, channelFile);`,
+        '    fs.writeFileSync(channelFile, "x");',
+        "  }",
+        "}",
+    ].join("\n");
+    (0, vitest_1.it)("负向：守卫函数名不含 G-C 后缀，但其函数体含包含性校验 ⇒ 仍不标记", () => {
+        const dir = makeProject({ "a.ts": body("stamp", true) });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "emit")).not.toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    }, 150000);
+    (0, vitest_1.it)("正对照：同形状删掉函数体里的 startsWith ⇒ 必须重新标记（证明上一条不是空过）", () => {
+        const dir = makeProject({ "a.ts": body("stamp", false) });
+        try {
+            (0, vitest_1.expect)(marksFor(dir, "emit")).toContain(PATH_MARK);
+        }
+        finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    }, 150000);
+});
+/**
+ * ── 已知边界（本次写用例时实测踩到，记录以免后人重复踩）──
+ *
+ * C4：污点经表达式包装后不再传播。
+ *   `const q = path.normalize(x)` / `path.join(x)` / `path.basename(x)` 之后，
+ *   q **不在** tainted 集合里（collectTaintedNames 的单跳只认 `= <name>` 直赋）。
+ *   后果有二：
+ *     ① 召回缺口（这是 C 组的事，本条目不修）；
+ *     ② **测试陷阱**：写「不得标记」类用例时，若污点被包装后再进 sink，
+ *        用例会**假通过**——不是守卫生效，是污点压根没到 sink。
+ *   因此本文件所有 `not.toContain` 用例都配了一条同形状的正对照
+ *   （去掉守卫后必须重新标记），缺了正对照的负向断言一律视为无效。
+ *   本轮就有 3 条用例最初因此假通过（G-A / G-D / fr-016 形态）。
+ */

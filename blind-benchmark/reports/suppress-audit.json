@@ -1,0 +1,373 @@
+[
+ {
+  "repo": "docmost",
+  "fn": "JwtAuthGuard.handleRequest",
+  "file": "src/common/guards/jwt-auth.guard.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)",
+   "Authorization (Unauthenticated Mutation)"
+  ],
+  "params": [
+   "err",
+   "user",
+   "info",
+   "ctx"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "getAllAndOverride",
+   "getHandler",
+   "getClass",
+   "debug",
+   "warn",
+   "includes",
+   "setJoinedWorkspacesCookie"
+  ]
+ },
+ {
+  "repo": "docmost",
+  "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+  "file": "src/common/guards/jwt-auth.guard.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)",
+   "Authorization (Unauthenticated Mutation)"
+  ],
+  "params": [
+   "user",
+   "ctx"
+  ],
+  "exposed": true,
+  "callsSample": [
+   "isCloud",
+   "getRequest",
+   "switchToHttp",
+   "getResponse",
+   "parse",
+   "includes",
+   "push",
+   "setCookie",
+   "stringify",
+   "getSubdomainHost",
+   "addDays",
+   "isHttps"
+  ]
+ },
+ {
+  "repo": "docmost",
+  "fn": "AuthController.setAuthCookie",
+  "file": "src/core/auth/auth.controller.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)",
+   "Authorization (Unauthenticated Mutation)"
+  ],
+  "params": [
+   "res",
+   "token"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "setCookie",
+   "getCookieExpiresIn",
+   "isHttps"
+  ]
+ },
+ {
+  "repo": "docmost",
+  "fn": "TokenService.verifyJwt",
+  "file": "src/core/auth/services/token.service.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)"
+  ],
+  "params": [
+   "token",
+   "tokenType"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "verifyAsync",
+   "getAppSecret"
+  ]
+ },
+ {
+  "repo": "docmost",
+  "fn": "SpaceAbilityFactory.createForUser",
+  "file": "src/core/casl/abilities/space-ability.factory.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)"
+  ],
+  "params": [
+   "user",
+   "spaceId"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "getUserSpaceRoles",
+   "findHighestUserSpaceRole",
+   "buildSpaceAdminAbility",
+   "buildSpaceWriterAbility",
+   "buildSpaceReaderAbility"
+  ]
+ },
+ {
+  "repo": "hedgedoc",
+  "fn": "AuthController.logout",
+  "file": "backend/src/api/private/auth/auth.controller.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)"
+  ],
+  "params": [
+   "request"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "getLogoutUrl",
+   "promisify",
+   "bind",
+   "destroySessionPromise",
+   "create",
+   "error",
+   "String"
+  ]
+ },
+ {
+  "repo": "hedgedoc",
+  "fn": "GuestController.registerGuestUser",
+  "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+  "rules": [
+   "Authorization (Unauthenticated Mutation)"
+  ],
+  "params": [
+   "request"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "createGuestUser",
+   "create"
+  ]
+ },
+ {
+  "repo": "hedgedoc",
+  "fn": "GuestController.loginGuestUser",
+  "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)"
+  ],
+  "params": [
+   "request",
+   "loginDto"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "getUserIdByGuestUuid"
+  ]
+ },
+ {
+  "repo": "hedgedoc",
+  "fn": "LdapController.loginWithLdap",
+  "file": "backend/src/api/private/auth/ldap/ldap.controller.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)",
+   "Authorization (Unauthenticated Mutation)"
+  ],
+  "params": [
+   "request",
+   "ldapIdentifier",
+   "loginDto"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "getLdapConfig",
+   "getUserInfoFromLdap",
+   "getIdentityFromUserIdAndProviderType",
+   "mayUpdateIdentity",
+   "updateUser",
+   "create",
+   "error",
+   "String"
+  ]
+ },
+ {
+  "repo": "hedgedoc",
+  "fn": "LocalController.registerUser",
+  "file": "backend/src/api/private/auth/local/local.controller.ts",
+  "rules": [
+   "Authorization (Unauthenticated Mutation)"
+  ],
+  "params": [
+   "request",
+   "registerDto"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "checkPasswordStrength",
+   "createUserWithLocalIdentity"
+  ]
+ },
+ {
+  "repo": "hedgedoc",
+  "fn": "OidcController.loginWithOpenIdConnect",
+  "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)"
+  ],
+  "params": [
+   "request",
+   "oidcIdentifier"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "assertTopLevelNavigation",
+   "generateCode",
+   "generateState",
+   "getAuthorizationUrl",
+   "save"
+  ]
+ },
+ {
+  "repo": "lujakob-nestjs-realworld-example-app",
+  "fn": "UserService.generateJWT",
+  "file": "src/user/user.service.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)",
+   "Authorization (Unauthenticated Mutation)"
+  ],
+  "params": [
+   "user"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "setDate",
+   "getDate",
+   "sign",
+   "getTime"
+  ]
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "Auth.allow_access",
+  "file": "packages/auth/src/auth.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)"
+  ],
+  "params": [
+   "{ packageName, packageVersion }",
+   "user",
+   "callback"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "slice",
+   "assign",
+   "getMatchedPackagesSpec",
+   "debug",
+   "next"
+  ]
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "Auth.allow_unpublish",
+  "file": "packages/auth/src/auth.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)"
+  ],
+  "params": [
+   "{ packageName, packageVersion }",
+   "user",
+   "callback"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "slice",
+   "assign",
+   "getMatchedPackagesSpec",
+   "debug",
+   "next"
+  ]
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "Auth.allow_stage",
+  "file": "packages/auth/src/auth.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)"
+  ],
+  "params": [
+   "{ packageName, packageVersion }",
+   "user",
+   "callback"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "slice",
+   "assign",
+   "getMatchedPackagesSpec",
+   "debug",
+   "next"
+  ]
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "Auth.allow_publish",
+  "file": "packages/auth/src/auth.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)"
+  ],
+  "params": [
+   "{ packageName, packageVersion }",
+   "user",
+   "callback"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "slice",
+   "assign",
+   "getMatchedPackagesSpec",
+   "debug",
+   "next"
+  ]
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "Auth.setLegacyAuthCacheEntry",
+  "file": "packages/auth/src/auth.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)"
+  ],
+  "params": [
+   "cacheKey",
+   "user"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "set",
+   "now",
+   "getLegacyAuthCacheTtlMs",
+   "cloneRemoteUser",
+   "getLegacyAuthCacheMaxEntries",
+   "next",
+   "keys",
+   "delete"
+  ]
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "verifyJWTPayload",
+  "file": "packages/auth/src/utils.ts",
+  "rules": [
+   "Authorization (Unauthenticated Access)",
+   "Authorization (Unauthenticated Mutation)"
+  ],
+  "params": [
+   "token",
+   "secret",
+   "security"
+  ],
+  "exposed": false,
+  "callsSample": [
+   "verifyPayload",
+   "includes",
+   "createAnonymousRemoteUser",
+   "getCode"
+  ]
+ }
+]

@@ -6,7 +6,12 @@
  * any project's naming conventions (curl, nginx, redis, any C project).
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.IDENTITY_PARAM_RE = exports.AUTHZ_BARE_CAN_RE = exports.AUTHZ_ACCESS_CHECK_RE = exports.AUTHZ_CAN_HELPER_RE = exports.AUTHZ_PREDICATE_RE = exports.AUTHZ_ACTION_WORD = void 0;
 exports.identifierParse = identifierParse;
+exports.tokenAcronyms = tokenAcronyms;
+exports.isAuthDecisionName = isAuthDecisionName;
+exports.isAuthFunctionName = isAuthFunctionName;
+exports.classifyParamType = classifyParamType;
 exports.detectSafeguardViolations = detectSafeguardViolations;
 exports.buildCallerMap = buildCallerMap;
 exports.detectSafeguardViolationsV7 = detectSafeguardViolationsV7;
@@ -267,6 +272,48 @@ const PLSB_PROTOCOLS = [
     },
 ];
 const ALL_PROTOCOLS = [...PROTOCOLS, ...PLSB_PROTOCOLS];
+/**
+ * §38（2026-09-25）组合式授权谓语 —— 三条，逐 call 名匹配（safeguard 口径）。
+ *
+ * 为什么不是继续往白名单里加词：现有 `canModify|canDelete|canEdit` 是**枚举**，
+ * 而真实谓语是「can/cannot/may + 任意授权动作」的**组合**，枚举永远追不上
+ * （实测 docmost 全量 136 条 trigger 命中里，旧白名单抑制 **0** 条）。
+ *
+ * ⚠ 三个踩过的假阳性（都是实测抓到的，改之前先读 §38.4）：
+ *   ① `cannot` 必须单列 —— 塞进 `[A-Z_]\w*` 后缀组会让它自己都不匹配。
+ *   ② `can<X>` 的 X 必须是**授权动作词**：`rateLimiter.canSendEmail(userId)` 是限流器，
+ *      不是权限判定 ⇒ 动作词表刻意不含 Send/Emit/Notify/Render/Parse。
+ *   ③ `...Access` 类词尾必须**限定前缀是校验动词**：`deleteByUsersWithoutSpaceAccess`
+ *      是数据删除不是校验；且词尾不得含 `Rights?`（会命中 fp-ts 的 `E.isRight(x)`）。
+ */
+exports.AUTHZ_ACTION_WORD = "(?:Manage|Read|Write|Create|Update|Delete|Edit|Remove|View|Share|Transfer|Invite|Comment|Move|Rename|Publish|Access|Modify|Upload|Download|Export|Import|Lock|Unlock|Restore|Archive|Pin|Unpin|Assign|Approve|Reject|Execute|Grant|Revoke|All|Any)";
+/** A. CASL 谓语：cannot( / canRemove( / canPublish( / mayCreate( */
+exports.AUTHZ_PREDICATE_RE = new RegExp("^(?:cannot|can_not|isUnable|isDenied|isForbidden)$" +
+    "|^(?:can|able|may|isAble|isAllowed|isPermitted|hasPermission|checkPermission|authorize|isAuthorized|authorised|allowed|permitted)" +
+    exports.AUTHZ_ACTION_WORD, "i");
+/** A′. 带前缀 helper：validateCanEdit / assertCanDelete / isSharingAllowedFor */
+exports.AUTHZ_CAN_HELPER_RE = /^\w*(?:Can|May|Allowed|Permitted|Authorized|Authorised)[A-Z]\w+$/;
+/** A″. 访问/所有权校验：validateSpaceAccess / assertOwnership / checkMediaDeletePermission */
+exports.AUTHZ_ACCESS_CHECK_RE = /^(?:validate|assert|check|ensure|verify|require|confirm|test|has|can|must|needs?)[A-Z_]?\w*(?:Access|Ownership|Permission|Authorization|Grant)\w*$/i;
+/**
+ * §40 C1：裸授权谓语 —— `can('publish')` / `cannot(...)` / `ability.can(...)`。
+ *
+ * 为什么 §38 那条收不到：AUTHZ_PREDICATE_RE 要求 `can` 后面**紧跟动作词**
+ * （canRemove / canPublish），而真实世界的两种主流写法都是**裸** can：
+ *   - CASL：`ability.can(Action.Update, subject)` ← 动作是**实参**，不在名字里
+ *   - verdaccio：`const can = allow(auth, …)`；路由上 `can('publish')`
+ * ⇒ 这两种在 calls 里留下的名字就是 `can` / `ability.can`。
+ *
+ * ⚠⚠ 必须**精确**匹配（`^can$` / `.can$`），绝不能做成 `/\bcan\b/`：
+ *   cancel / candidate / canary / cancan 全都同形但跟授权无关（fixture 已钉死）。
+ */
+exports.AUTHZ_BARE_CAN_RE = /^(?:can|cannot)$|\.(?:can|cannot)$/i;
+/**
+ * ⚠⚠ 挂到规则上时必须带 `callsOnly: true`（2026-09-25 §40 实测踩到）：
+ * 默认会在 `effectiveCalls` 上匹配，而 effectiveCalls 含 **identifierParse 拆出的词**
+ * ⇒ `canSendEmail` 会拆出单词 "can" ⇒ 裸 can 误命中 ⇒ §38 的负对照直接转绿。
+ * callsOnly 把匹配限定在**原始调用名**上（`can` 作为被调名才作数）。
+ */
 const SAFEGUARD_RULES = [
     // ── Password Hashing ──
     {
@@ -322,6 +369,20 @@ const SAFEGUARD_RULES = [
             { pattern: /\b(checkOwner|isOwner|ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy\s*[!=]==?|\.owner\s*[!=]==?|\.user\s*[!=]==?)\b/i, label: "ownership_check" },
             { pattern: /\b(hasPermission|checkPermission|checkAccess|isAuthorized|checkRole|requireRole|adminCheck|isAdmin|canModify|canDelete|canEdit)\b/i, label: "authz_check" },
             { pattern: /\b(__progmune_ownership_checked__)\b/, label: "inline_ownership_check" },
+            // §46 ②：资源属主被**赋值为当前主体**（`{ userId: user.id }` / `where:{userId: user.id}`）。
+            // 这类函数的被操作对象就是（或已被限定在）主体自己，谈不上「改别人的东西」。
+            // 合成语料上覆盖 10/10 FP（createTransfer / createRefund / uploadFile / placeOrder…）。
+            // ⚠ 只认 `<属主字段>: <主体>.id` 的**绑定**形态；**不认** `<调用>(…, user.id, …)` ——
+            //   主体标识作实参这一形状实测存在相反真值（deletePAT 是 FP，deleteWidget 是 TP），按 R66 不落地。
+            { pattern: /\b(__progmune_owner_self_assigned__)\b/, label: "owner_self_assigned" },
+            // §38（2026-09-25）CASL / 组合式授权谓语。上面两条是**动词白名单**，
+            // 而真实世界的谓语是 `can|cannot|may` + 动作 的**组合式**，
+            // 白名单穷举不完（canRemove/canManage/canPublish…）。三条规则见 §38.3。
+            { pattern: exports.AUTHZ_PREDICATE_RE, label: "casl_predicate" },
+            { pattern: exports.AUTHZ_CAN_HELPER_RE, label: "can_helper" },
+            { pattern: exports.AUTHZ_ACCESS_CHECK_RE, label: "access_check" },
+            // §40 C1：裸 can（CASL ability.can / verdaccio can('publish')）—— 精确匹配
+            { pattern: exports.AUTHZ_BARE_CAN_RE, label: "bare_can", callsOnly: true },
         ],
         violationMessage: "Mutation operation does not verify that the acting user owns the resource or holds the required permission before modifying data.",
         conceptMissing: ["OwnershipCheck", "AuthorizationGuard"],
@@ -348,7 +409,9 @@ const SAFEGUARD_RULES = [
         paramGated: true,
         trigger: /\b(list|download|view|fetch)(?:[A-Z]\w*|_\w+)|get(?:[A-Z]\w+|_\w+)/i,
         safeguards: [
-            { pattern: /\b(getUser|validateToken|verifySession|getSessionUser|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|jwt\.decode|decode_token|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__)\b/i, label: "auth_check" },
+            { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|jwt\.decode|decode_token|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__)\b/i, label: "auth_check" },
+            // §40 C1：裸 can —— verdaccio 的 can('publish') 中间件就是这里的授权判定
+            { pattern: exports.AUTHZ_BARE_CAN_RE, label: "bare_can", callsOnly: true },
         ],
         violationMessage: "Data access function does not check authentication. Anyone can access data without credentials.",
         conceptMissing: ["AuthenticationCheck", "AccessControl"],
@@ -380,7 +443,19 @@ const SAFEGUARD_RULES = [
         // (listPosts/getPost/deletePost fire via identifier-parsed words).
         trigger: /\b(add|create|update|set|publish|insert|submit)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Add|Create|Update|Set|Publish|Insert|Submit)\b/i,
         safeguards: [
-            { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|create_access_token|create_refresh_token|create_jwt_token|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__)\b/i, label: "auth_check" },
+            { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__)\b/i, label: "auth_check" },
+            // §40 C1：裸 can —— 同上
+            { pattern: exports.AUTHZ_BARE_CAN_RE, label: "bare_can", callsOnly: true },
+            // §46 ①：凭签发入口豁免 —— 独立 safeguard，**不并入 auth_check**。
+            // create_*_token 是「签发令牌」不是「校验调用者身份」，两者语义相反：
+            // 调用 create_access_token 恰恰说明该函数**没有**校验任何人的身份（它就是发令牌的地方）。
+            // 之所以仍要豁免，是因为 login / register / issueToken 这类入口天然不需要事前认证
+            // （这里压的是「登录接口被判未认证变更」那批 FP），不是因为它做了认证。
+            // ⚠ 因此它**不得对称补进 Unauthenticated Access**（R66：同形状存在相反真值 ——
+            //   getRefreshToken(userId) 是该免的签发入口，getUserToken(userId) 是不该免的越权读取，
+            //   单函数视角区分不了）。分开成两条 label 就是为了让下一次词表 diff（R69）
+            //   不再把这三个词当成 auth_check 的「缺项」而机械对齐过去。
+            { pattern: /\b(create_access_token|create_refresh_token|create_jwt_token)\b/i, label: "credential_issuance" },
         ],
         violationMessage: "Mutation function does not check authentication. Anyone can create or modify data without credentials.",
         conceptMissing: ["AuthenticationCheck", "AccessControl"],
@@ -528,6 +603,12 @@ const SAFEGUARD_RULES = [
         safeguards: [
             { pattern: /\b(ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy|\.owner\s*[!=]==?)/i, label: "ownership_comparison" },
             { pattern: /\b(__progmune_ownership_checked__)\b/, label: "inline_ownership_check" },
+            // §38：同 Ownership Check，组合式谓语一并接上（这条规则更严，更需要）
+            { pattern: exports.AUTHZ_PREDICATE_RE, label: "casl_predicate" },
+            { pattern: exports.AUTHZ_CAN_HELPER_RE, label: "can_helper" },
+            { pattern: exports.AUTHZ_ACCESS_CHECK_RE, label: "access_check" },
+            // §40 C1：同上
+            { pattern: exports.AUTHZ_BARE_CAN_RE, label: "bare_can", callsOnly: true },
         ],
         violationMessage: "Resource mutation checks authentication but does NOT verify the resource belongs to the requesting user. Missing ownerId/authorId comparison.",
         conceptMissing: ["ResourceOwnership", "HorizontalAuthorization"],
@@ -1139,10 +1220,199 @@ function identifierParse(name) {
     return words;
 }
 /**
+ * §39（2026-09-25）D 类自指排除：把「鉴权机制自身」也识别为 auth function。
+ *
+ * 引擎原有 AUTH_PATTERN 只列了**用户鉴权入口**（login / register / logout / …），
+ * 没列**鉴权机制自身**，于是对下面这类函数报「未鉴权」，属自指谬误：
+ *   JwtAuthGuard.handleRequest / TokenService.verifyJwt / AuthService.getCollabToken
+ *   / WorkspaceAbilityFactory.createForUser（CASL 授权引擎本体）
+ *
+ * 判据是**结构化**的两条，不是再往里加词（R55：组合规则必须带约束）：
+ *
+ *   ① 机制类容器 = 机制后缀(Guard|Strategy|AbilityFactory) **×** 凭据名词
+ *      ⚠ 只看后缀不够：`Strategy` 是通用设计模式后缀，CacheStrategy /
+ *        PaymentStrategy 会被误吃；`Guard` 同理（NestJS 的 ThrottlerGuard 是
+ *        限流不是鉴权）。加凭据名词约束后这两类都排除。
+ *   ② 方法 = 机制动词 × 机制对象，**只看点号后的方法部分**
+ *      （容器词不参与动词匹配，否则 ApiTokensController 会漏进来）
+ *
+ * ⚠⚠ 边界（实测踩到的越界，别再放宽）：
+ *   - **不得**改成「容器含 token/session 即算」。实测那样会吃掉
+ *     `ApiTokensController.deleteToken` / `AccessTokenController.deletePAT` /
+ *     `AccessTokenService.updateLastUsedForPAT` 的 Ownership Check ——
+ *     对**凭据做增删改**恰恰是最需要鉴权的地方，压掉就是真漏报且不可见。
+ *   - 机制对象**不含** password（changePassword/passwordReset 是受保护操作）
+ *   - 机制对象**不含** pat（hoppscotch 产品专有缩写，收它会吃掉 createPAT，
+ *     属过拟合到单个仓库的缩写）
+ */
+const AUTH_MACHINERY_CLASS_SUFFIX = /(?:Guard|Strategy|AbilityFactory)$/;
+const AUTH_MACHINERY_NOUN_WORDS = [
+    "auth", "jwt", "token", "session", "cookie", "credential", "passport",
+    "identity", "oauth", "oidc", "ldap", "saml", "bearer", "apikey", "ability", "permission",
+];
+const AUTH_MACHINERY_VERB_WORDS = [
+    "verify", "validate", "sign", "generate", "issue", "decode", "parse",
+    "encode", "refresh", "rotate", "get", "set", "create", "build", "make", "write", "read",
+];
+const AUTH_MACHINERY_OBJECT_WORDS = [
+    "jwt", "token", "cookie", "session", "credential", "credentials", "signature", "bearer",
+];
+/**
+ * §41 E1：token **内嵌**的 acronym 前缀 —— JWT from `JWTPayload`。
+ *
+ * 背景（§40.8 候选 C5）：`identifierParse("verifyJWTPayload")` → ["verify","JWTPayload"]，
+ *   "JWTPayload" 整块 ≠ "jwt" ⇒ 凭据语义对**任何**词表都不可见。
+ *
+ * ⚠⚠ 为什么**不改 identifierParse 主干**（C5 原案的处置结论，2026-09-25）：
+ *   identifierParse 有 **5 个调用点**，其中 `triggerParsedWords` 供给 **trigger 匹配**、
+ *   `effectiveCalls` 供给 **safeguard 匹配** —— 动它等于同时改所有规则的触发面与抑制面。
+ *   `split-probe.ts` 实测：母本 803 个去重标识符里只有 **16 个**受影响，新增 22 个词中
+ *   仅 **2 个**（JWT / OIDC）是机制类，其余全是噪声：
+ *     OAuthToken      → +"Auth"   （从 OAuth 里拆出 Auth，污染面极大）
+ *     throwHTTPErr    → +"HTTP" +"Err"
+ *     createATeam     → +"A" +"Team"
+ *     prosemirrorNodeToYElement → +"Y" +"Element"
+ *   ⇒ 收益 2 条 vs 全局 trigger/effectiveCalls 漂移 ⇒ **主干不改**。
+ *
+ * 折中：**只在「这个函数是否是鉴权机制」这一处**补认 acronym ——
+ *   局部 ⇒ 不影响 triggerParsedWords / effectiveCalls ⇒ **结构上不可能造成 LOST**。
+ */
+const ACRONYM_PREFIX = /^([A-Z]{2,})(?=[A-Z][a-z])/;
+/**
+ * 单个 token 里嵌的 acronym：JWTPayload→JWT / OIDCStrategy→OIDC / HTTPErr→HTTP。
+ * ⚠ `{2,}` 与贪婪回溯两条约束是实测出来的，别随手放宽：
+ *   - `{2,}`：否则 `OAuth` → "O"（satisfies O|Auth 的 lookahead），单字母进词表 = 灾难；
+ *   - 贪婪回溯：`OIDCStrategy` 必须拿到 "OIDC" 而不是 "OID"
+ *     （非贪婪 `[A-Z]+?` 会停在 OID，"oid" 不在任何机制词表里 ⇒ 这条救不了）。
+ *   - lookahead `[A-Z][a-z]`：纯 PascalCase 词（Token/Payload）不匹配，避免把自己再切一遍。
+ */
+function tokenAcronyms(token) {
+    const m = ACRONYM_PREFIX.exec(token);
+    return m ? [m[1]] : [];
+}
+/** identifierParse 的词 + 每个词内嵌的 acronym，统一小写 */
+function machineryWords(method) {
+    const base = identifierParse(method);
+    const out = base.map((w) => w.toLowerCase());
+    for (const t of base)
+        for (const a of tokenAcronyms(t))
+            out.push(a.toLowerCase());
+    return out;
+}
+function isAuthMachineryName(enclosingFuncName) {
+    const dot = enclosingFuncName.lastIndexOf(".");
+    const container = dot > 0 ? enclosingFuncName.slice(0, dot) : "";
+    // ① 机制类容器
+    if (container && AUTH_MACHINERY_CLASS_SUFFIX.test(container)) {
+        const cl = container.toLowerCase();
+        if (AUTH_MACHINERY_NOUN_WORDS.some((w) => cl.includes(w)))
+            return true;
+    }
+    // ② 方法 = 机制动词 × 机制对象（§41 E1：对象侧支持内嵌 acronym，见 ACRONYM_PREFIX 注释）
+    const method = dot >= 0 ? enclosingFuncName.slice(dot + 1) : enclosingFuncName;
+    const mw = machineryWords(method);
+    if (mw.some((w) => AUTH_MACHINERY_VERB_WORDS.includes(w)) &&
+        mw.some((w) => AUTH_MACHINERY_OBJECT_WORDS.includes(w)))
+        return true;
+    return false;
+}
+/**
+ * §40 C4：**容器严格等于裸鉴权类名** × **方法是授权决策或机制内部**。
+ *
+ * §39.8 记下的未收项：verdaccio `Auth.allow_publish` / `Auth.allow_access` /
+ * `Auth.setLegacyAuthCacheEntry`。容器 `Auth` 不带 Guard/Strategy/AbilityFactory 后缀，
+ * 方法也不是「机制动词 × 机制对象」 ⇒ §39 的结构化判据够不着。
+ *
+ * ⚠⚠ 两层约束**缺一不可**（宽变体实测，见 §40.5）：
+ *   ① 容器必须**严格等于** Auth / Authorization / AccessControl / Permissions。
+ *      放宽成 `Auth*` 会吃掉 `AuthController.deletePendingUserData` —— §39 的 V-D
+ *      反向验证早就证明这类**不能**压（对凭据/待处理用户做增删改最需要鉴权）。
+ *   ② 方法必须是 `allow_*`（授权决策）或含机制名词（Cache/Token/JWT/AES/Session/
+ *      Middleware/Encrypt…），且**不得以受保护动词开头** —— 否则
+ *      `Auth.changePassword` / `Auth.invalidateToken` / `Auth.add_user` 会被压掉。
+ */
+const AUTH_CLASS_EXACT = /^(?:Auth|Authorization|AccessControl|Permissions?)$/;
+const AUTH_MECHANISM_METHOD = /(?:Cache|Token|JWT|AES|Bearer|Session|Middleware|Encrypt|Decrypt|Payload|Signature)/i;
+const PROTECTED_VERB_PREFIX = /^(?:change|add|remove|delete|update|create|reset|invalidate|revoke|grant|deny|rotate)/i;
+function isAuthDecisionName(enclosingFuncName) {
+    const dot = enclosingFuncName.lastIndexOf(".");
+    if (dot <= 0)
+        return false;
+    if (!AUTH_CLASS_EXACT.test(enclosingFuncName.slice(0, dot)))
+        return false;
+    const method = enclosingFuncName.slice(dot + 1);
+    if (PROTECTED_VERB_PREFIX.test(method))
+        return false;
+    return /^allow_/i.test(method) || AUTH_MECHANISM_METHOD.test(method);
+}
+/** 用户鉴权入口词表（login/register/logout/…）—— 原在两处重复定义，提成一份 */
+const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout|create_account|register_new_user|register_user|sign_up|create_user|do_login|sign_in|log_in|verify_token|validate_session|get_user|get_session_user|get_current_user|do_logout|sign_out|log_out|end_session|invalidate_session|clear_session)\b/i;
+/**
+ * 该函数是否是「鉴权相关」函数 —— 是则跳过 authorization 类目规则
+ * （对鉴权机制自己报「未鉴权」是自指谬误）。
+ */
+function isAuthFunctionName(enclosingFuncName) {
+    if (!enclosingFuncName)
+        return false;
+    const rawLower = enclosingFuncName.toLowerCase();
+    if (AUTH_PATTERN.test(rawLower))
+        return true;
+    if (identifierParse(enclosingFuncName).some((w) => AUTH_PATTERN.test(w)))
+        return true;
+    if (isAuthMachineryName(enclosingFuncName))
+        return true;
+    if (isAuthDecisionName(enclosingFuncName))
+        return true; // §40 C4
+    // §40 C2：**函数自身**就是那个授权检查 ⇒ 对它报"缺检查"同样自指。
+    // 例：verdaccio `canRemove` 报 "Authorization (Ownership Check)"。
+    // 判据复用 §38 的三条（同源，不另起一份），只作用在**点号后的方法部分**。
+    const dot = enclosingFuncName.lastIndexOf(".");
+    const method = dot >= 0 ? enclosingFuncName.slice(dot + 1) : enclosingFuncName;
+    if (exports.AUTHZ_PREDICATE_RE.test(method) ||
+        exports.AUTHZ_CAN_HELPER_RE.test(method) ||
+        exports.AUTHZ_ACCESS_CHECK_RE.test(method))
+        return true;
+    return false;
+}
+/**
  * Detect missing safeguards in function call sequences.
  * Uses identifier parsing to match compound names (registerNewUser → register).
  */
-function detectSafeguardViolations(calls, enclosingFuncName, language, params, exposed) {
+/**
+ * §44（2026-09-26）`paramGated` 的身份词表 —— 与旧的内联正则同源，抽出来是为了让
+ * fixture 能 import 落地正则（R59），也让「主体 vs 被操作对象」这一刀有单一定义。
+ *
+ * ⚠ 这个词表**只能表达"参数名像身份"**，不能单独区分主体与被操作对象
+ * （`token` 既可能是调用者凭证，也可能是被操作的 PAT）。
+ * 区分靠**参数类型**（见 `classifyParamType`）：主体是领域对象，被操作对象是标量。
+ */
+exports.IDENTITY_PARAM_RE = /\b(token|session|user|auth|request|scope|cookie|credential|permission|role|identity)\b/i;
+/** 标量类型 —— 被操作对象几乎总是这些（id / email / token 都是 string）。 */
+const SCALAR_PARAM_TYPE_RE = /^(?:string|number|boolean|bigint|symbol|void|never|date)(?:\[\])?$/i;
+/** 类型解析不出来 —— 保守，不收紧（ts-morph 对 `any` / 解不出类型的参数会给出这些）。 */
+const UNKNOWN_PARAM_TYPE_RE = /^(?:any|unknown|object)(?:\[\])?$/i;
+const NULLISH_PARAM_TYPE_RE = /^(?:null|undefined)$/i;
+/**
+ * 参数类型三分类。**"unknown" 一律按旧行为放行** —— 类型通道不可用不是压制的理由。
+ * 联合类型（`User | null` / `AuthenticationType | null`）按"含任一领域类型即 typed"处理。
+ */
+function classifyParamType(t) {
+    const parts = (t || "")
+        .split("|")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .filter((s) => !NULLISH_PARAM_TYPE_RE.test(s));
+    if (parts.length === 0)
+        return "unknown";
+    if (parts.every((s) => UNKNOWN_PARAM_TYPE_RE.test(s)))
+        return "unknown";
+    if (parts.some((s) => UNKNOWN_PARAM_TYPE_RE.test(s)))
+        return "typed"; // 含 any 的联合 ⇒ 不敢判标量
+    if (parts.every((s) => SCALAR_PARAM_TYPE_RE.test(s)))
+        return "scalar";
+    return "typed";
+}
+function detectSafeguardViolations(calls, enclosingFuncName, language, params, exposed, paramTypes) {
     const violations = [];
     // Build effective calls: raw names + identifier-parsed words.
     // Class-qualified names (Class.method) contribute only their METHOD name —
@@ -1156,10 +1426,8 @@ function detectSafeguardViolations(calls, enclosingFuncName, language, params, e
     }
     const effectiveCalls = [...new Set([...rawCalls, ...parsedWords])];
     // Skip authorization rules for auth functions — check both raw lowercased name and parsed words
-    const rawLower = enclosingFuncName?.toLowerCase() || "";
-    const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout|create_account|register_new_user|register_user|sign_up|create_user|do_login|sign_in|log_in|verify_token|validate_session|get_user|get_session_user|get_current_user|do_logout|sign_out|log_out|end_session|invalidate_session|clear_session)\b/i;
-    const isAuthFunction = enclosingFuncName != null && (AUTH_PATTERN.test(rawLower) ||
-        identifierParse(enclosingFuncName).some(w => AUTH_PATTERN.test(w)));
+    // §39：入口词表 ∪ 鉴权机制自身（自指排除），详见 isAuthFunctionName
+    const isAuthFunction = isAuthFunctionName(enclosingFuncName);
     // Filter rules by language
     const activeRules = language
         ? SAFEGUARD_RULES.filter(r => !r.languages || r.languages.includes(language))
@@ -1197,8 +1465,23 @@ function detectSafeguardViolations(calls, enclosingFuncName, language, params, e
         // Surface gate (paramGated): only apply to functions that can plausibly
         // authenticate — routed by a web handler (exposed) or taking an
         // identity-ish parameter. Requires the caller to pass param names.
+        //
+        // §44（2026-09-26）：光看参数名会把**被操作对象**当成**调用者身份** ——
+        //   `updateLastUsedForPAT(token: string)` 的 token 是要被更新的 PAT；
+        //   `addUserToTeam(teamID, userEmail, role)` 的 role 是要授予的角色。
+        // 主体是**领域对象**（`user: AuthUser` / `user: User` / `adminUser: Admin`），
+        // 被操作对象几乎总是**标量**（id / email / token 都是 string）⇒ 标量类型的参数
+        // 不再充当身份证据。类型通道不可用时不收紧（退回旧行为，见 R57）。
         if (rule.paramGated && params) {
-            const hasIdentity = params.some(p => /\b(token|session|user|auth|request|scope|cookie|credential|permission|role|identity)\b/i.test(p));
+            const hasIdentity = params.some((p, i) => {
+                if (!exports.IDENTITY_PARAM_RE.test(p))
+                    return false;
+                const t = paramTypes?.[i];
+                // 调用方没传类型 / 该参数类型解析不出来（any、unknown、空）⇒ 保守放行
+                if (t === undefined)
+                    return true;
+                return classifyParamType(t) !== "scalar";
+            });
             if (!hasIdentity && !exposed)
                 continue;
         }
@@ -1311,10 +1594,8 @@ function detectSafeguardViolationsV7(calls, enclosingFuncName, callerMap, funcCa
     for (const c of triggerEffectiveCalls)
         safeContext.add(c);
     // Skip authorization rules for auth functions
-    const rawLower = enclosingFuncName?.toLowerCase() || "";
-    const AUTH_PATTERN = /\b(register|signup|signin|login|authenticate|createuser|createaccount|registeruser|registernewuser|dologin|verifytoken|validatesession|getuser|getsessionuser|getcurrentuser|endsession|logout|signout|dologout|destroysession|invalidatesession|invalidate|signout|create_account|register_new_user|register_user|sign_up|create_user|do_login|sign_in|log_in|verify_token|validate_session|get_user|get_session_user|get_current_user|do_logout|sign_out|log_out|end_session|invalidate_session|clear_session)\b/i;
-    const isAuthFunction = enclosingFuncName != null && (AUTH_PATTERN.test(rawLower) ||
-        identifierParse(enclosingFuncName).some(w => AUTH_PATTERN.test(w)));
+    // §39：入口词表 ∪ 鉴权机制自身（自指排除），详见 isAuthFunctionName
+    const isAuthFunction = isAuthFunctionName(enclosingFuncName);
     // Filter rules by language
     const activeRulesV7 = language
         ? SAFEGUARD_RULES.filter(r => !r.languages || r.languages.includes(language))

@@ -81,7 +81,8 @@ export function scanProject(projectId: string): ProjectScanResult {
     .map(f => ({
       name: f.name, file: f.file, calls: f.calls || [],
       protocolViolations: detectProtocolViolations(f.calls || []),
-      safeguardViolations: detectSafeguardViolations(f.calls || [], f.name, "typescript", (f.params || []).map(p => p.name), isExposed(f.name, exposed)),
+      // §44：参数类型通道 —— 没有它 paramGated 只能靠参数名，会把被操作对象当身份
+      safeguardViolations: detectSafeguardViolations(f.calls || [], f.name, "typescript", (f.params || []).map(p => p.name), isExposed(f.name, exposed), (f.params || []).map(p => p.type || "")),
     }));
 
   return { project: projectId, files: [...new Set(funcs.map(f => f.file))].length,

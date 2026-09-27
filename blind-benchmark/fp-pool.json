@@ -1344,5 +1344,401 @@
       "再拉 1 个切片（单机拉，不要并行）以满足「连续 2 片」的饱和条件",
       "饱和达标后才可做规则侧校准（本轮未动任何规则）"
     ]
+  },
+  "call_chain_prototype_2026_09_24": {
+    "trigger": "一篇讲 Jev + Ontology 的文章指出「判断的前提是世界状态」。对照发现两条独立线索同根：§二十九 jev 实验喂的 state 只有函数名+调用列表；§33.5 UNKNOWN 真瓶颈是鉴权/会话族需要跨函数调用链上下文 ⇒ 我们缺「世界状态」这一层。按 R41 属缺信息 ⇒ 补信息，不上概率模型。",
+    "tool": {
+      "path": "blind-benchmark/build-call-chain.ts",
+      "scope": "只读原型，不改提取器主干",
+      "what": "对目标函数向上追溯调用者（depth 默认 2），每层抽取装饰器 / 鉴权调用 / 校验调用 / 是否吃 req.*",
+      "targets": "真值集里该仓库的 UNKNOWN"
+    },
+    "edge_tightening": [
+      {
+        "ver": "v1",
+        "rule": "按裸名索引",
+        "traced": 14,
+        "noise": "createForUser 冒出 25 个调用者、delete 冒出 18 个 ⇒ 视图不可用"
+      },
+      {
+        "ver": "v2",
+        "rule": "接收者限定 + 裸名唯一才采信",
+        "traced": 11,
+        "noise": "仍有：this.storageService.delete() 被误判给 CommentController.delete"
+      },
+      {
+        "ver": "v3",
+        "rule": "有接收者时只认强边，绝不裸名兜底",
+        "traced": 7,
+        "noise": "零噪声，全是干净单边"
+      }
+    ],
+    "r49": "假边比漏边有害得多：假边污染所有下游结论且不可见（看起来边更多覆盖更广），漏边只是覆盖少且可观测。⇒ 建图精度优先；注意与 R43 方向相反（判据取舍召回优先），因为下游不同。",
+    "measured_docmost": {
+      "targets": 37,
+      "traced_at_least_1_caller": 7,
+      "with_auth_or_route_on_chain": 4,
+      "entry_points_where_upward_is_meaningless": 15,
+      "non_entry_untraceable": 10,
+      "directly_decidable": 4,
+      "direct_decidable_detail": "AttachmentService.removeUserAvatar 的 4 条鉴权类 UNKNOWN ⇒ 唯一调用者 AttachmentController.removeIcon，带 @UseGuards(JwtAuthGuard) + 两次 cannot(（CASL）⇒ 可判 FP"
+    },
+    "r48": {
+      "root_cause": "不在实现，在语料采样",
+      "evidence": "AuthService.register 的调用者根本不在切片内——切片里的 auth.controller.ts 只调 login/setup/changePassword/forgotPassword/passwordReset/verifyUserToken/getCollabToken，没有 register",
+      "sampling_rate": "切片 118 个 .ts / 后端 apps/server/src 共 444 个 ⇒ 约 27%",
+      "why_low_coverage": "调用链两端同时被采中的概率 ≈ 采样率的平方 ⇒ 实测连通率 19%，量级吻合",
+      "implication": "按文件独立采样（随机或按目录轮转）系统性切断调用链。这让 R25「加切片看饱和」在调用链类机制上失效：加的是断链语料，加再多也不饱和",
+      "fix": "改为按入口取调用闭包采样（一个入口 10–30 文件，既保证链完整又可控），而不是提高随机采样率"
+    },
+    "verdict": {
+      "prototype": "可用（v3 零噪声，4 条 UNKNOWN 当场可定判）",
+      "coverage": "19% 能追溯 / 11% 能定判",
+      "decision": "不进主干——这个量级撑不起改提取器主干的成本。先改采样，再评估机制",
+      "jev": "World State 覆盖率仅 19% ⇒ 喂给 Jev 仍是薄状态 ⇒ Jev 还是不能上，R41 第三次存活。§二十九 结论应表述为「在薄 state 上 Jev 不比规则强」，不能推广成「概率判断对我们没用」"
+    },
+    "two_bugs_hit": [
+      "args.indexOf('--fn') 返回 -1 时 args[-1+1]=args[0]='--repo' 被当成函数名 ⇒ 目标数恒为 1（已加 flag() 辅助）",
+      "类方法在索引里是 Class.method，gold 只存裸名 ⇒ 最初 self 匹配不到，整条链从起点就断（已允许后缀匹配）"
+    ],
+    "gates": {
+      "tsc": "0 错",
+      "src_changed": false,
+      "note": "未改 src ⇒ 其余门不受影响"
+    }
+  },
+  "service_layer_2026_09_26": {
+    "$what": "§43：把「Service 层内部函数」这一形态在真值面上标注出来（§42.7 要求的动手机器前置动作）。只标真值、上证据，**没有改判别逻辑**。",
+    "$scope": "容器名以 Service 结尾的类方法，且带 Authorization 族告警。共 4 函数 / 9 条（另有 3 函数 / 4 条同为 Service 层但已归 L6-鉴权机制自身，不重复归类）。",
+    "verdict": "9 条**全部确认为 FP**，且每一条都拿到**跨函数硬证据**（上游入口的 guard 装饰器 + 主体注入方式），不是靠「上游大概鉴权了」猜的。",
+    "hard_evidence": [
+      {
+        "fn": "docmost/AttachmentService.removeUserAvatar",
+        "rules": 4,
+        "upstream": "src/core/attachment/attachment.controller.ts:460-472 AttachmentController.removeIcon",
+        "evidence": "@UseGuards(JwtAuthGuard) + @AuthUser() user:User 框架注入；写入限定在 user.id / user.workspaceId ⇒ 客体即主体自身"
+      },
+      {
+        "fn": "hoppscotch/AccessTokenService.createPAT",
+        "rules": 1,
+        "upstream": "packages/hoppscotch-backend/src/access-token/access-token.controller.ts:38-47 AccessTokenController.createPAT",
+        "evidence": "@UseGuards(JwtAuthGuard) + @GqlUser() user:AuthUser 框架注入 ⇒ 认证已完成"
+      },
+      {
+        "fn": "hoppscotch/AccessTokenService.updateLastUsedForPAT",
+        "rules": 2,
+        "upstream": "AccessTokenInterceptor（**调用方文件不在切片内**，切片缺 src/interceptors/）",
+        "evidence": "拦截器只在 @UseGuards(PATAuthGuard) 的路由上挂载（controller.ts:81-83 / 97-99）⇒ 到达该函数必然已通过 PAT 认证"
+      },
+      {
+        "fn": "hoppscotch/AdminService.addUserToTeam",
+        "rules": 2,
+        "upstream": "packages/hoppscotch-backend/src/admin/admin.resolver.ts:281-289 AdminResolver.addUserToTeamByAdmin",
+        "evidence": "@UseGuards(GqlAuthGuard, GqlAdminGuard) + @GqlAdmin() adminUser:Admin ⇒ 认证与角色判定都在上游"
+      }
+    ],
+    "$why_no_mechanism_yet": [
+      "M1 容器后缀 Service：池内压 13 条（9 verified FP + 4 heuristic FP），**池内 TP 0**；但 ① 盲测语料里 Service 容器命中 **0**（118 项目 / 947 条 Authorization 全在裸函数名与 Controller 上）⇒ 零覆盖；② 该判据只看名字，**构造不出「同形状、相反真值」的反例** ⇒ 按 R66 不具备判别力，不落地。",
+      "M2 主体参数类型（需新增 paramTypes 通道，改 detectSafeguardViolations 签名）：只覆盖 3/9（removeUserAvatar 的 Unauthenticated 两条 + createPAT 一条），且 `user: User` 当「已认证主体」是弱推断，Ownership 两条仍然漏 ⇒ 性价比不足，暂缓。",
+      "M3 调用图上溯上游 guard：**语义上正确**，但 fp-pool 是**切片**（hoppscotch 缺 src/interceptors/），池内根本回溯不到上游 ⇒ 切片语料不能当跨函数机制的验证场；要落地须换完整仓库快照 + 把 call-graph-lib 接进扫描路径，成本高，单列一轮。"
+    ],
+    "false_gate_check": "⚠ 顺带确认：这 4 个函数都**通过**了 paramGated（参数名命中 user / token / role）。也就是说 paramGated 的 identity 词表把「被操作对象」（updateLastUsedForPAT 的 token、addUserToTeam 的 role）也算成了「调用者身份」。这是 paramGated 的既有宽松，不是本轮新引入的问题，但它是 M2/M3 之外值得单独一轮看的轴。",
+    "rows": [
+      {
+        "fn": "AttachmentService.removeUserAvatar",
+        "repo": "docmost",
+        "file": "src/core/attachment/services/attachment.service.ts",
+        "rule": "Authorization (Ownership Check)",
+        "gold": "FP",
+        "confidence": "verified",
+        "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+      },
+      {
+        "fn": "AttachmentService.removeUserAvatar",
+        "repo": "docmost",
+        "file": "src/core/attachment/services/attachment.service.ts",
+        "rule": "Authorization (Unauthenticated Access)",
+        "gold": "FP",
+        "confidence": "verified",
+        "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+      },
+      {
+        "fn": "AttachmentService.removeUserAvatar",
+        "repo": "docmost",
+        "file": "src/core/attachment/services/attachment.service.ts",
+        "rule": "Authorization (Unauthenticated Mutation)",
+        "gold": "FP",
+        "confidence": "verified",
+        "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+      },
+      {
+        "fn": "AttachmentService.removeUserAvatar",
+        "repo": "docmost",
+        "file": "src/core/attachment/services/attachment.service.ts",
+        "rule": "Authorization (Resource Ownership)",
+        "gold": "FP",
+        "confidence": "verified",
+        "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+      },
+      {
+        "fn": "AuthService.getCollabToken",
+        "repo": "docmost",
+        "file": "src/core/auth/services/auth.service.ts",
+        "rule": "Authorization (Unauthenticated Access)",
+        "gold": "FP",
+        "confidence": "heuristic",
+        "lead": "L6-内部私有工具方法"
+      },
+      {
+        "fn": "TokenService.verifyJwt",
+        "repo": "docmost",
+        "file": "src/core/auth/services/token.service.ts",
+        "rule": "Authorization (Unauthenticated Access)",
+        "gold": "FP",
+        "confidence": "heuristic",
+        "lead": "L6-内部私有工具方法"
+      },
+      {
+        "fn": "AccessTokenService.createPAT",
+        "repo": "hoppscotch",
+        "file": "packages/hoppscotch-backend/src/access-token/access-token.service.ts",
+        "rule": "Authorization (Unauthenticated Mutation)",
+        "gold": "FP",
+        "confidence": "verified",
+        "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+      },
+      {
+        "fn": "AccessTokenService.updateLastUsedForPAT",
+        "repo": "hoppscotch",
+        "file": "packages/hoppscotch-backend/src/access-token/access-token.service.ts",
+        "rule": "Authorization (Ownership Check)",
+        "gold": "FP",
+        "confidence": "verified",
+        "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+      },
+      {
+        "fn": "AccessTokenService.updateLastUsedForPAT",
+        "repo": "hoppscotch",
+        "file": "packages/hoppscotch-backend/src/access-token/access-token.service.ts",
+        "rule": "Authorization (Unauthenticated Mutation)",
+        "gold": "FP",
+        "confidence": "verified",
+        "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+      },
+      {
+        "fn": "AdminService.addUserToTeam",
+        "repo": "hoppscotch",
+        "file": "packages/hoppscotch-backend/src/admin/admin.service.ts",
+        "rule": "Authorization (Unauthenticated Access)",
+        "gold": "FP",
+        "confidence": "verified",
+        "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+      },
+      {
+        "fn": "AdminService.addUserToTeam",
+        "repo": "hoppscotch",
+        "file": "packages/hoppscotch-backend/src/admin/admin.service.ts",
+        "rule": "Authorization (Unauthenticated Mutation)",
+        "gold": "FP",
+        "confidence": "verified",
+        "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+      },
+      {
+        "fn": "UserService.generateJWT",
+        "repo": "lujakob-nestjs-realworld-example-app",
+        "file": "src/user/user.service.ts",
+        "rule": "Authorization (Unauthenticated Access)",
+        "gold": "FP",
+        "confidence": "heuristic",
+        "lead": "L6-内部私有工具方法"
+      },
+      {
+        "fn": "UserService.generateJWT",
+        "repo": "lujakob-nestjs-realworld-example-app",
+        "file": "src/user/user.service.ts",
+        "rule": "Authorization (Unauthenticated Mutation)",
+        "gold": "FP",
+        "confidence": "heuristic",
+        "lead": "L6-内部私有工具方法"
+      }
+    ],
+    "slice_completeness_2026_09_26": {
+      "probe": "blind-benchmark/slice-completeness-probe.ts（只读）",
+      "question": "切片内能否回溯到调用方？入边 0 表示找不到。",
+      "result": {
+        "hoppscotch": {
+          "callables": 203,
+          "no_incoming": 86,
+          "pct": 42.4
+        },
+        "docmost": {
+          "callables": 260,
+          "no_incoming": 96,
+          "pct": 36.9
+        }
+      },
+      "conclusion": "约四成 callable 在切片内没有调用方 ⇒ fp-pool 不能当跨函数机制（调用图上溯）的验证场，会大量假阴性。要做必须先备完整仓库快照。"
+    }
+  },
+  "paramgate_2026_09_26": {
+    "$what": "§44：paramGated 区分「调用者主体」与「被操作对象」—— 标量类型的参数不再充当身份证据。",
+    "change": "detectSafeguardViolations 新增可选第 6 参 paramTypes；classifyParamType 三分类（scalar/typed/unknown）；unknown 一律退回旧行为。",
+    "net_effect_pool": {
+      "baseline": "同刻基线（摘掉这一刀重跑，reports/fp-pool-results.pre-44-real.json）",
+      "before": 337,
+      "after": 333,
+      "lost": 4,
+      "added": 0,
+      "verdicts": {
+        "FP/verified": 4,
+        "TP": 0,
+        "UNKNOWN": 0
+      },
+      "lost_list": [
+        "verdaccio/resolveRemoteUser :: Authorization (Unauthenticated Access)",
+        "verdaccio/resolveRemoteUser :: Authorization (Unauthenticated Mutation)",
+        "hoppscotch/AccessTokenService.updateLastUsedForPAT :: Authorization (Unauthenticated Mutation)",
+        "hoppscotch/AccessTokenService.updateLastUsedForPAT :: Authorization (Ownership Check)"
+      ]
+    },
+    "net_effect_blind": {
+      "before": 2887,
+      "after": 2618,
+      "lost": 269,
+      "added": 0,
+      "attribution": "269 条 100% 落在 handleRequest（dispatcher 投影）；逐项目比对「除 handleRequest 外」的 Authorization 面，118/118 项目完全一致 ⇒ 零召回损失"
+    },
+    "$warning_baseline_trap": "⚠ 若拿冻结母本 fp-pool-results.json（09-23，早于 §41/§42）当基线会得到 LOST 48，其中 12 条 UNKNOWN、还压着真实 Controller —— 那是前几轮的效应。见 R67。",
+    "$warning_probe_caliber": "⚠ reports/paramgate-probe.json 是在**宽口径 computeExposed** 下算的，只能看参数↔真值对应关系，不能用来报压制数（§44.4）。",
+    "debt": [
+      "IDENTITY_PARAM_RE 只认裸标识符：authUser / currentUser / userId 都不命中（\\buser\\b 无左边界）",
+      "269 条的正解是给 4 条 Authorization 规则加 triggerOwnNameOnly（§F 对其他规则已这么做），单列一轮",
+      "冻结母本与当前引擎差了 §41/§42 两轮：residual-probe 的「剩余 20」是母本口径，不是当前口径"
+    ]
+  },
+  "authz_vocab_drift_2026_09_26": {
+    "$what": "§45：修 Authorization 两条 Unauthenticated 规则之间的 safeguard 词表漂移。",
+    "change": "Access 规则 auth_check 补入 getSession\\b / validateSession / verifyToken（Mutation 里本来就有）。",
+    "rejected_alternative": {
+      "proposal": "给 4 条 Authorization 规则加 triggerOwnNameOnly（§44.8 立的债）",
+      "verdict": "否决 —— R66 二次命中",
+      "why": "ownName 不命中 trigger 这一形状上存在相反真值：Auth.changePassword（体内真执行 updatePasswordHash ⇒ 必须报，且是 §42 立的 C4③ 反向对照）vs handleRequest（只转发 ⇒ 不该报）。且量化后增量只有 7 条，其中 2 条就是自己的正对照 ⇒ 收益为负。"
+    },
+    "blind_benchmark": {
+      "before": 2618,
+      "after": 2610,
+      "lost": 8,
+      "added": 0,
+      "lost_list": [
+        "filestorage/uploadFile|deleteFile|createFolder|createShareLink :: Unauthenticated Access  ← getSession(token)+if(!user)return",
+        "realestate_B/createListing|deleteListing :: Unauthenticated Access  ← validateSession(token)+if(!user)return",
+        "realestate_C/createListing|removeListing :: Unauthenticated Access  ← verifyToken 同形态"
+      ],
+      "verdict": "8 条全部 FP（源码级硬证据：显式认证检查 + 提前返回），TP 0"
+    },
+    "real_slice": {
+      "before": 333,
+      "after": 333,
+      "lost": 0,
+      "added": 0,
+      "note": "⚠ 零覆盖（R56 又一次）：9 个真实切片无一命中这三个词。收益全部落在合成语料形态上，价值是消灭漂移而非当期降噪。"
+    },
+    "not_done_on_purpose": [
+      "mint 三词 create_access_token / create_jwt_token / create_refresh_token：语义是「签发」≠「校验调用者」，不机械对齐",
+      "decode_token 只在 Access 有：反向漂移，删词会增报，不动"
+    ],
+    "debt": [
+      "ecommerce/placeOrder :: Ownership Check（因调用 updateStock 触发）—— 区分「用户资源/非属主资源」需所有权知识，单函数视角拿不到",
+      "safeguard 只看「是否调用」不看「是否检查其结果」：const u=getSession(t); return data; 仍判已认证 —— 顶层债务，需数据流"
+    ],
+    "gates": {
+      "tsc": 0,
+      "webshape": "66/0",
+      "taintpath": "160/0",
+      "fr-007": "pre 5 / post 0",
+      "fr-016": "pre 7 / post 0",
+      "fixtures": "101 条全过（新增 src/protocol-detector-authz-drift.test.ts 11 条）",
+      "reverse": "摘词后 6 条转红 / 3 条反向对照不受影响 / REVERSE-VERIFY 残留 0"
+    }
+  },
+  "s46_owner_self_and_credential_issuance_2026_09_26": {
+    "$what": "§46：两条独立的语义修正。① mint 三词从 auth_check 移出单独成立 credential_issuance；② 新增 owner_self_assigned 标记压「新建资源属主=自己」那批 Ownership Check FP。",
+    "part1_credential_issuance": {
+      "problem": "`create_access_token|create_refresh_token|create_jwt_token` 只在 Unauthenticated Mutation 的 auth_check 词表里，Access 没有 —— §45 集合 diff 发现的漂移。",
+      "provenance": "git log -S 定位到 e0e415a9（framework-delegation allowlist）。该 commit 的 message 明确写着 `bare jwt.encode deliberately excluded (hardcoded-secret JWT is itself the vuln: PyGoat sec_misconfig_lab3)` —— 同一笔提交里已经认定「签发类函数不能当安全保障」，却把 create_*_token 从 Token Security 的 satisfier 表整体复制进了 Access/Mutation 的 auth_check。",
+      "decision": "**不补进 Access**（R66：getRefreshToken(userId) 该免 vs getUserToken(userId) 不该免，同形状相反真值）；**从 Mutation 的 auth_check 移出**，单独成立一条 label=credential_issuance 的 safeguard。",
+      "why_move_not_delete": "它压的是「登录/注册接口被判未认证变更」那批 FP —— 功能是需要的，错的是它被归到 auth_check（语义上说成「已做认证」）。删掉会让 login/register 开始报；移出则行为不变、语义自洽，且下次词表 diff 不会再把它当成 auth_check 的缺项（消除 R69 诱饵）。",
+      "verified": "探针 mint-symmetry-probe.ts：写类+create_access_token 免 / 读类+create_access_token 报 —— 移动前后行为完全一致。"
+    },
+    "part2_owner_self_assigned": {
+      "problem": "Ownership Check 在合成语料上有 12 条 FP，成因一致：函数新建资源并把属主设为当前主体（`{ ownerId: user.id }` / `{ userId: user.id }`），被操作对象就是自己。",
+      "mechanism": "extract-ir 注入 `__progmune_owner_self_assigned__`（对象字面量里 `<属主字段>: <主体>.<标识属性>`）；Ownership Check 新增一条 safeguard 消费它。",
+      "rejected_subject_arg": {
+        "proposal": "顺带认「主体标识作调用实参」（`deletePAT(id, user.uid)` / `updateUser({...}, user.id, ...)`）",
+        "why_rejected": "**R66 + 真实样本反例**：真实池 3 条该形态全是 FP（deletePAT / removeFavorite / removeUserAvatar），但合成语料 `webshape_G/deleteWidget` 同形态却是 **TP**（体里 `canSendEmail(user.id); repo.deleteWidget(widgetId);` —— user.id 与删除操作无关）。合成语料与真实池真值相反 ⇒ 只看一边会判错。",
+        "consequence": "真实池那 3 条 FP 本轮**压不掉**，保留告警。"
+      },
+      "blind_benchmark": {
+        "same_moment_baseline": "摘掉 owner_self_assigned 重跑（reports/batch-scan-results.no-knifeA.json）",
+        "with_knife": 2598,
+        "without_knife": 2795,
+        "suppressed": 197,
+        "note": "⚠ 第一次报的 12 是错的：拿「上一次 results」当基线，跨了语料重建 ⇒ 低估 16 倍（R73）",
+        "sampled_and_confirmed_fp": [
+          "chat/sendMessage",
+          "hr_A/createPayroll",
+          "githost_A/createRepo",
+          "banking_A/createTransfer",
+          "ecommerce/placeOrder"
+        ],
+        "not_suppressed": "webshape_G/deleteWidget（真 TP）未被压 ✅"
+      },
+      "real_slice": {
+        "before": 333,
+        "after": 333,
+        "lost": 0,
+        "added": 0,
+        "note": "⚠ R56 又一次：9 个真实切片零覆盖。收益全在合成语料形态上，零风险。"
+      }
+    },
+    "gates": {
+      "tsc": 0,
+      "webshape": "66/0",
+      "taintpath": "160/0",
+      "fr-007": "pre 5 / post 0",
+      "fr-016": "pre 7 / post 0",
+      "fixtures": "新增 2 文件 16 条全过",
+      "reverse": "② 摘刀 197 条全部回来 / ① 摘刀 fixture 转红 / REVERSE-VERIFY 残留 0"
+    },
+    "part3_auth_result_checked_REJECTED": {
+      "$what": "§46 ③ 顶层债务：safeguard 只看「是否调用」auth 函数、不看「是否检查其结果」。",
+      "verdict": "**不落地**（用数据否决，不是延期）",
+      "quantified": {
+        "synthetic": {
+          "functions": 1615,
+          "GUARDED": 405,
+          "BARE": 154,
+          "NO_AUTH": 1024
+        },
+        "real_slice": {
+          "functions": 245,
+          "GUARDED": 0,
+          "BARE": 5,
+          "NO_AUTH": 205,
+          "note": "真实池 GUARDED=0 —— 真实代码不写 `const u=getSession(); if(!u) return`，靠装饰器/中间件；那 5 条 BARE 全是 verdaccio 鉴权机制自身，已被 §39 AUTH_PATTERN 压 ⇒ 净效应 0"
+        },
+        "counterfactual_added": {
+          "count": 26,
+          "all_are": "handleRequest（dispatcher）",
+          "why_noise": "§44 已证明 dispatcher 在 Authorization 上 100% 是重复投影（逐项目比对除 handleRequest 外的 Authorization 面，118/118 一致）"
+        }
+      },
+      "decision_reason": "收益 0（26 条全是重复投影、真实池 0）、成本 >0（26 条新噪音且方向与降噪相反）⇒ R72 不落地",
+      "prerequisite_to_revisit": "当语料或真实池里出现「**非 dispatcher** 的 BARE 函数且是真漏洞」时才值得收紧；真正的修法要上数据流（判断 auth 返回值是否进入分支/提前返回），属主干级改动。",
+      "tools_left": [
+        "blind-benchmark/auth-result-probe.py（分类 + --dump-bare）",
+        "blind-benchmark/auth-result-impact-probe.ts（反事实 + --bare 交叉）"
+      ]
+    }
   }
 }

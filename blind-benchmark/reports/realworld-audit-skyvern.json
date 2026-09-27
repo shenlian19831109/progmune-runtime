@@ -1,0 +1,25 @@
+{
+  "tool": "realworld-audit v1",
+  "date": "2026-09-11",
+  "framework": "fastapi",
+  "corpus": "skyvern",
+  "repo": "/tmp/skyvern",
+  "filesScanned": 1371,
+  "routesOrProcs": 412,
+  "issuesTotal": 2,
+  "byRule": {
+    "FASTAPI_ROUTE_NO_AUTH": 2
+  },
+  "issues": [
+    {
+      "rule": "FASTAPI_ROUTE_NO_AUTH",
+      "route": "POST /webhook",
+      "file": "/tmp/skyvern/skyvern/forge/sdk/routes/agent_protocol.py"
+    },
+    {
+      "rule": "FASTAPI_ROUTE_NO_AUTH",
+      "route": "POST /webhook/",
+      "file": "/tmp/skyvern/skyvern/forge/sdk/routes/agent_protocol.py"
+    }
+  ]
+}

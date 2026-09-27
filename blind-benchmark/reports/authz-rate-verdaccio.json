@@ -1,0 +1,166 @@
+{
+  "repo": "verdaccio",
+  "universe": 37,
+  "hitExisting": 0,
+  "hitNew": 3,
+  "hitSoft": 0,
+  "newlySuppressed": [
+    {
+      "fn": "StorageViewCommand.deleteEntry",
+      "file": "packages/admin-cli/src/commands/storage/view.ts",
+      "hits": [
+        "A-act:canRemove"
+      ]
+    },
+    {
+      "fn": "Storage.removeTarball",
+      "file": "packages/store/src/storage.ts",
+      "hits": [
+        "A′:checkAllowedToChangePackage"
+      ]
+    },
+    {
+      "fn": "Storage.removePackageByRevision",
+      "file": "packages/store/src/storage.ts",
+      "hits": [
+        "A′:checkAllowedToChangePackage"
+      ]
+    }
+  ],
+  "softSamples": [],
+  "unkHit": 5,
+  "unkLocated": 24,
+  "unk": 24,
+  "unkRows": [
+    {
+      "fn": "publish",
+      "rule": "Authorization (Ownership Check)",
+      "hits": []
+    },
+    {
+      "fn": "publish",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "publish",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "publish",
+      "rule": "Authorization (Resource Ownership)",
+      "hits": []
+    },
+    {
+      "fn": "stage",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-act:canPublish"
+      ]
+    },
+    {
+      "fn": "stage",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": [
+        "A-act:canPublish"
+      ]
+    },
+    {
+      "fn": "stage",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": [
+        "A-act:canPublish"
+      ]
+    },
+    {
+      "fn": "Auth.allow_access",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "Auth.allow_unpublish",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "Auth.allow_unpublish",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "Auth.allow_stage",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "Auth.allow_publish",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "Auth.allow_publish",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "Auth.setLegacyAuthCacheEntry",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "Auth.setLegacyAuthCacheEntry",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "getApiToken",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "verifyJWTPayload",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "verifyJWTPayload",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "ConfigBuilder.addAuth",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "resolveRemoteUser",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "resolveRemoteUser",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "canRemove",
+      "rule": "Authorization (Ownership Check)",
+      "hits": []
+    },
+    {
+      "fn": "StorageViewCommand.deleteEntry",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-act:canRemove"
+      ]
+    },
+    {
+      "fn": "StorageViewCommand.deleteEntry",
+      "rule": "Authorization (Resource Ownership)",
+      "hits": [
+        "A-act:canRemove"
+      ]
+    }
+  ]
+}

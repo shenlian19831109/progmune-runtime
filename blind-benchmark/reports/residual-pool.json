@@ -1,0 +1,294 @@
+{
+  "generatedAt": "2026-09-26T02:52:16.475Z",
+  "total": 66,
+  "suppressedBy38": 21,
+  "suppressedBy39": 25,
+  "residual": 20,
+  "rows": [
+    {
+      "repo": "docmost",
+      "fn": "FavoriteController.removeFavorite",
+      "file": "src/core/favorite/favorite.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "gold": "FP",
+      "calls": [
+        "resolveAndValidate",
+        "removeFavorite",
+        "__progmune_auth_machinery__",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "FavoriteController.removeFavorite",
+      "file": "src/core/favorite/favorite.controller.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "gold": "FP",
+      "calls": [
+        "resolveAndValidate",
+        "removeFavorite",
+        "__progmune_auth_machinery__",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentService.removeUserAvatar",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "rule": "Authorization (Ownership Check)",
+      "gold": "FP",
+      "calls": [
+        "startsWith",
+        "toLowerCase",
+        "getAttachmentFolderPath",
+        "deleteRedundantFile",
+        "updateUser",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentService.removeUserAvatar",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "gold": "FP",
+      "calls": [
+        "startsWith",
+        "toLowerCase",
+        "getAttachmentFolderPath",
+        "deleteRedundantFile",
+        "updateUser",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentService.removeUserAvatar",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "gold": "FP",
+      "calls": [
+        "startsWith",
+        "toLowerCase",
+        "getAttachmentFolderPath",
+        "deleteRedundantFile",
+        "updateUser",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentService.removeUserAvatar",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "gold": "FP",
+      "calls": [
+        "startsWith",
+        "toLowerCase",
+        "getAttachmentFolderPath",
+        "deleteRedundantFile",
+        "updateUser",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "hedgedoc",
+      "fn": "AuthController.getPendingUserData",
+      "file": "backend/src/api/private/auth/auth.controller.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "gold": "FP",
+      "calls": [
+        "create",
+        "__progmune_input_guard__",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "hedgedoc",
+      "fn": "AuthController.confirmPendingUserData",
+      "file": "backend/src/api/private/auth/auth.controller.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "gold": "FP",
+      "calls": [
+        "createUserWithIdentityFromPendingUserConfirmation",
+        "save",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "hedgedoc",
+      "fn": "AuthController.deletePendingUserData",
+      "file": "backend/src/api/private/auth/auth.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "gold": "FP",
+      "calls": [
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AccessTokenController.deletePAT",
+      "file": "packages/hoppscotch-backend/src/access-token/access-token.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "gold": "FP",
+      "calls": [
+        "createCLIErrorResponse",
+        "deletePAT",
+        "isLeft",
+        "throwHTTPErr",
+        "__progmune_auth_machinery__",
+        "__progmune_input_guard__",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AccessTokenService.createPAT",
+      "file": "packages/hoppscotch-backend/src/access-token/access-token.service.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "gold": "FP",
+      "calls": [
+        "isValidLength",
+        "left",
+        "validateExpirationDate",
+        "create",
+        "calculateExpirationDate",
+        "cast",
+        "right",
+        "__progmune_token_issued__",
+        "__progmune_input_schema__",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AccessTokenService.updateLastUsedForPAT",
+      "file": "packages/hoppscotch-backend/src/access-token/access-token.service.ts",
+      "rule": "Authorization (Ownership Check)",
+      "gold": "FP",
+      "calls": [
+        "extractUUID",
+        "left",
+        "update",
+        "right",
+        "cast",
+        "__progmune_token_issued__",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AccessTokenService.updateLastUsedForPAT",
+      "file": "packages/hoppscotch-backend/src/access-token/access-token.service.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "gold": "FP",
+      "calls": [
+        "extractUUID",
+        "left",
+        "update",
+        "right",
+        "cast",
+        "__progmune_token_issued__",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AdminService.addUserToTeam",
+      "file": "packages/hoppscotch-backend/src/admin/admin.service.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "gold": "FP",
+      "calls": [
+        "validateEmail",
+        "left",
+        "findUserByEmail",
+        "isNone",
+        "getTeamMemberTE",
+        "isLeft",
+        "addMemberToTeamWithEmail",
+        "getTeamInviteByEmailAndTeamID",
+        "isRight",
+        "revokeInvitation",
+        "right",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AdminService.addUserToTeam",
+      "file": "packages/hoppscotch-backend/src/admin/admin.service.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "gold": "FP",
+      "calls": [
+        "validateEmail",
+        "left",
+        "findUserByEmail",
+        "isNone",
+        "getTeamMemberTE",
+        "isLeft",
+        "addMemberToTeamWithEmail",
+        "getTeamInviteByEmailAndTeamID",
+        "isRight",
+        "revokeInvitation",
+        "right",
+        "__progmune_input_effect__"
+      ]
+    },
+    {
+      "repo": "outline",
+      "fn": "createContext",
+      "file": "server/context.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "gold": "FP",
+      "calls": []
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "ConfigBuilder.addAuth",
+      "file": "packages/config/src/builder.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "gold": "FP",
+      "calls": [
+        "merge"
+      ]
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "resolveRemoteUser",
+      "file": "packages/admin-cli/src/commands/storage/access.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "gold": "FP",
+      "calls": [
+        "createAnonymousRemoteUser",
+        "getMiddlewareCredentials",
+        "isArray",
+        "__progmune_token_issued__"
+      ]
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "resolveRemoteUser",
+      "file": "packages/admin-cli/src/commands/storage/access.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "gold": "FP",
+      "calls": [
+        "createAnonymousRemoteUser",
+        "getMiddlewareCredentials",
+        "isArray",
+        "__progmune_token_issued__"
+      ]
+    },
+    {
+      "repo": "w3tecch-express-typescript-boilerplate",
+      "fn": "UserEventSubscriber.onUserCreate",
+      "file": "src/api/subscribers/UserEventSubscriber.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "gold": "FP",
+      "calls": [
+        "info",
+        "toString",
+        "__progmune_input_schema__"
+      ]
+    }
+  ]
+}

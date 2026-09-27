@@ -39,7 +39,7 @@ interface Case {
   why: string;
 }
 
-type FuncRow = { name: string; file: string; calls: string[]; params: string[] };
+type FuncRow = { name: string; file: string; calls: string[]; params: string[]; paramTypes: string[] };
 
 function extractLive(project: string): FuncRow[] | null {
   const dir = path.join(GENERATED, project);
@@ -48,13 +48,14 @@ function extractLive(project: string): FuncRow[] | null {
     name: string;
     file?: string;
     calls?: string[];
-    params?: Array<{ name: string }>;
+    params?: Array<{ name: string; type?: string }>;
   }>;
   return fns.map((f) => ({
     name: f.name,
     file: f.file || "",
     calls: f.calls || [],
     params: (f.params || []).map((p) => p.name),
+    paramTypes: (f.params || []).map((p) => p.type || ""),
   }));
 }
 
@@ -103,7 +104,7 @@ function main(): number {
       if (c.reportRules || c.suppressRules) {
         // 与 batch-scan 同口径：language 必须显式给，否则 python-only 规则会套上来
         const rules = new Set(
-          detectSafeguardViolations(f.calls, f.name, "typescript", f.params, false).map(
+          detectSafeguardViolations(f.calls, f.name, "typescript", f.params, false, f.paramTypes).map(
             (v: any) => v.rule as string
           )
         );

@@ -1,0 +1,5138 @@
+{
+ "src": "/tmp/full-hedgedoc",
+ "outName": "hedgedoc-closure",
+ "maxFiles": 120,
+ "perEntry": 30,
+ "depth": 3,
+ "totalSourceFiles": 1132,
+ "callables": 3510,
+ "entries": 164,
+ "mode": "hybrid",
+ "picks": [
+  {
+   "mode": "callee",
+   "files": 110,
+   "entriesUsed": 164,
+   "entriesSkipped": 0,
+   "used": [
+    {
+     "fn": "AliasController.addAlias",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 15,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "AliasController.getAllAliases",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "AliasController.getNoteIdAndCheckIfUserCanEditAliases",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "AliasController.makeAliasPrimary",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "AliasController.removeAlias",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ApiTokensController.deleteToken",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "added": 3,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "ApiTokensController.getUserTokens",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "ApiTokensController.postTokenRequest",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "AuthController.confirmPendingUserData",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "added": 7,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "AuthController.deletePendingUserData",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "AuthController.getPendingUserData",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "AuthController.logout",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "GuestController.loginGuestUser",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "added": 1,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "GuestController.registerGuestUser",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "LdapController.loginWithLdap",
+     "file": "backend/src/api/private/auth/ldap/ldap.controller.ts",
+     "added": 2,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "LocalController.login",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "added": 1,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "LocalController.registerUser",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "LocalController.updatePassword",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "OidcController.assertTopLevelNavigation",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "OidcController.backchannelLogout",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "OidcController.callback",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "OidcController.loginWithOpenIdConnect",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ConfigController.getFrontendConfig",
+     "file": "backend/src/api/private/config/config.controller.ts",
+     "added": 3,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "CsrfController.getToken",
+     "file": "backend/src/api/private/csrf/csrf.controller.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "CsrfGuard.canActivate",
+     "file": "backend/src/api/private/csrf/csrf.guard.ts",
+     "added": 2,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "ExploreController.checkQueryParams",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 2,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ExploreController.ensurePageNumberIsValid",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ExploreController.ensureSortQueryParamIsValid",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ExploreController.ensureTypeQueryParamIsValid",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ExploreController.getMyNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ExploreController.getMyPinnedNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ExploreController.getPublicNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ExploreController.getRecentlyVisitedNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ExploreController.getSharedNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ExploreController.setPinStatus",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "GroupsController.getGroup",
+     "file": "backend/src/api/private/groups/groups.controller.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "MeController.deleteUser",
+     "file": "backend/src/api/private/me/me.controller.ts",
+     "added": 3,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "MeController.getMe",
+     "file": "backend/src/api/private/me/me.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "MeController.getMyMedia",
+     "file": "backend/src/api/private/me/me.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "MeController.updateProfile",
+     "file": "backend/src/api/private/me/me.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "MediaController.deleteMedia",
+     "file": "backend/src/api/private/media/media.controller.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "MediaController.getMedia",
+     "file": "backend/src/api/private/media/media.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "MediaController.linkMediaToNote",
+     "file": "backend/src/api/private/media/media.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "MediaController.uploadMedia",
+     "file": "backend/src/api/private/media/media.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.changeOwner",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 5,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.changeVisibility",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.createNamedNote",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.createNote",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.deleteNote",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.getNote",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.getNoteMetadata",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.getNotePermissions",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.getNoteRevision",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.getNoteRevisions",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.getNotesMedia",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.purgeNoteRevisions",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.removeGroupPermission",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.removeUserPermission",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.setGroupPermission",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NotesController.setUserPermission",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "UsersController.checkUsername",
+     "file": "backend/src/api/private/users/users.controller.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "UsersController.getUser",
+     "file": "backend/src/api/private/users/users.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "CsrfExempt",
+     "file": "backend/src/api/utils/decorators/csrf-exempt.decorator.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "OpenApi",
+     "file": "backend/src/api/utils/decorators/openapi.decorator.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "extractNoteAlias",
+     "file": "backend/src/api/utils/extract-note-id-from-request.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "extractNoteIdFromRequest",
+     "file": "backend/src/api/utils/extract-note-id-from-request.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ApiTokenGuard.canActivate",
+     "file": "backend/src/api/utils/guards/api-token.guard.ts",
+     "added": 1,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "GuestsEnabledGuard.canActivate",
+     "file": "backend/src/api/utils/guards/guests-enabled.guard.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "LoginEnabledGuard.canActivate",
+     "file": "backend/src/api/utils/guards/login-enabled.guard.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "MockApiTokenGuard.canActivate",
+     "file": "backend/src/api/utils/guards/mock-api-token.guard.ts",
+     "added": 1,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "RegistrationEnabledGuard.canActivate",
+     "file": "backend/src/api/utils/guards/registration-enabled.guard.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "GetNoteIdInterceptor.intercept",
+     "file": "backend/src/api/utils/interceptors/get-note-id.interceptor.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "NoteHeaderInterceptor.intercept",
+     "file": "backend/src/api/utils/interceptors/note-header.interceptor.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "MediaRedirectController.getMedia",
+     "file": "backend/src/media-redirect/media-redirect.controller.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "addAlias",
+     "file": "frontend/src/api/alias/index.ts",
+     "added": 2,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "deleteAlias",
+     "file": "frontend/src/api/alias/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "getAllAliases",
+     "file": "frontend/src/api/alias/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "markAliasAsPrimary",
+     "file": "frontend/src/api/alias/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "deleteAccessToken",
+     "file": "frontend/src/api/api-tokens/index.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "getAccessTokenList",
+     "file": "frontend/src/api/api-tokens/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "postNewAccessToken",
+     "file": "frontend/src/api/api-tokens/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "logInGuest",
+     "file": "frontend/src/api/auth/guest.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "registerGuest",
+     "file": "frontend/src/api/auth/guest.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "checkUsernameAvailability",
+     "file": "frontend/src/api/auth/index.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "doLogout",
+     "file": "frontend/src/api/auth/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "doLdapLogin",
+     "file": "frontend/src/api/auth/ldap.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "doLocalLogin",
+     "file": "frontend/src/api/auth/local.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "doLocalPasswordChange",
+     "file": "frontend/src/api/auth/local.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "doLocalRegister",
+     "file": "frontend/src/api/auth/local.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "cancelPendingUser",
+     "file": "frontend/src/api/auth/pending-user.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "confirmPendingUser",
+     "file": "frontend/src/api/auth/pending-user.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "getPendingUserInfo",
+     "file": "frontend/src/api/auth/pending-user.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "RateLimitError.getResetIn",
+     "file": "frontend/src/api/common/api-error.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "ApiRequestBuilderWithBody.withBody",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder-with-body.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "ApiRequestBuilderWithBody.withJsonBody",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder-with-body.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "ApiRequestBuilder.determineBaseUrl",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "added": 4,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "ApiRequestBuilder.isSSR",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "ApiRequestBuilder.readApiErrorResponseFromBody",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "ApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "ApiRequestBuilder.sendRequestAndVerifyResponse",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "ApiRequestBuilder.withCustomOptions",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "ApiRequestBuilder.withHeader",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "DeleteApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/delete-api-request-builder.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "GetApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/get-api-request-builder.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "PostApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/post-api-request-builder.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "PutApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/put-api-request-builder.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "expectFetch",
+     "file": "frontend/src/api/common/api-request-builder/test-utils/expect-fetch.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "mapCodeToText",
+     "file": "frontend/src/api/common/api-request-builder/test-utils/expect-fetch.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "ApiResponse.asParsedJsonObject",
+     "file": "frontend/src/api/common/api-response.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "ApiResponse.getResponse",
+     "file": "frontend/src/api/common/api-response.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "ErrorToI18nKeyMapper.orFallbackI18nKey",
+     "file": "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "ErrorToI18nKeyMapper.withBackendErrorName",
+     "file": "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "ErrorToI18nKeyMapper.withErrorMessage",
+     "file": "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "ErrorToI18nKeyMapper.withHttpCode",
+     "file": "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "getConfig",
+     "file": "frontend/src/api/config/index.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "getExplorePageEntries",
+     "file": "frontend/src/api/explore/index.ts",
+     "added": 2,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "getPinnedNotes",
+     "file": "frontend/src/api/explore/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "setPinnedState",
+     "file": "frontend/src/api/explore/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "createURLSearchParams",
+     "file": "frontend/src/api/explore/utils.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "getGroup",
+     "file": "frontend/src/api/group/index.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "deleteUser",
+     "file": "frontend/src/api/me/index.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "getMe",
+     "file": "frontend/src/api/me/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "getMyMedia",
+     "file": "frontend/src/api/me/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "updateUser",
+     "file": "frontend/src/api/me/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "deleteUploadedMedia",
+     "file": "frontend/src/api/media/index.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "getProxiedUrl",
+     "file": "frontend/src/api/media/index.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "uploadFile",
+     "file": "frontend/src/api/media/index.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "createNote",
+     "file": "frontend/src/api/notes/index.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "createNoteWithPrimaryAlias",
+     "file": "frontend/src/api/notes/index.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "deleteNote",
+     "file": "frontend/src/api/notes/index.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "getMediaForNote",
+     "file": "frontend/src/api/notes/index.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "getNote",
+     "file": "frontend/src/api/notes/index.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "getNoteMetadata",
+     "file": "frontend/src/api/notes/index.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "getNotePermissions",
+     "file": "frontend/src/api/notes/index.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "removeGroupPermission",
+     "file": "frontend/src/api/permissions/index.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "removeUserPermission",
+     "file": "frontend/src/api/permissions/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "setGroupPermission",
+     "file": "frontend/src/api/permissions/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "setNoteOwner",
+     "file": "frontend/src/api/permissions/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "setNotePublic",
+     "file": "frontend/src/api/permissions/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "setUserPermission",
+     "file": "frontend/src/api/permissions/index.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "deleteRevisionsForNote",
+     "file": "frontend/src/api/revisions/index.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "getAllRevisions",
+     "file": "frontend/src/api/revisions/index.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "getRevision",
+     "file": "frontend/src/api/revisions/index.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "getUserInfo",
+     "file": "frontend/src/api/users/index.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/auth/local/login.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/auth/logout.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/config.ts",
+     "added": 2,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/groups/_EVERYONE.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/groups/_LOGGED_IN.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/groups/hedgedoc-devs.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/me/index.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/me/media.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/media.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/features/index.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/features/revisions/019a5647-fc18-7e2d-9d8d-867be8a5ef28.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/features/revisions/019a5648-4986-7213-9067-a4a6859171c5.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/features/revisions/index.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/index.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/slide-example/index.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/tokens.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/users/profile/erik.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/users/profile/mock.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/users/profile/molly.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/users/profile/tilman.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    }
+   ],
+   "skipped": [],
+   "sliceFiles": [
+    "backend/src/alias/alias.service.ts",
+    "backend/src/api-token/api-token.service.ts",
+    "backend/src/api/private/alias/alias.controller.ts",
+    "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+    "backend/src/api/private/auth/auth.controller.ts",
+    "backend/src/api/private/auth/guest/guest.controller.ts",
+    "backend/src/api/private/auth/ldap/ldap.controller.ts",
+    "backend/src/api/private/auth/local/local.controller.ts",
+    "backend/src/api/private/auth/oidc/oidc.controller.ts",
+    "backend/src/api/private/config/config.controller.ts",
+    "backend/src/api/private/csrf/csrf.controller.ts",
+    "backend/src/api/private/csrf/csrf.guard.ts",
+    "backend/src/api/private/explore/explore.controller.ts",
+    "backend/src/api/private/groups/groups.controller.ts",
+    "backend/src/api/private/me/me.controller.ts",
+    "backend/src/api/private/media/media.controller.ts",
+    "backend/src/api/private/notes/notes.controller.ts",
+    "backend/src/api/private/users/users.controller.ts",
+    "backend/src/api/utils/decorators/csrf-exempt.decorator.ts",
+    "backend/src/api/utils/decorators/openapi.decorator.ts",
+    "backend/src/api/utils/extract-note-id-from-request.ts",
+    "backend/src/api/utils/guards/api-token.guard.ts",
+    "backend/src/api/utils/guards/guests-enabled.guard.ts",
+    "backend/src/api/utils/guards/login-enabled.guard.ts",
+    "backend/src/api/utils/guards/mock-api-token.guard.ts",
+    "backend/src/api/utils/guards/registration-enabled.guard.ts",
+    "backend/src/api/utils/interceptors/get-note-id.interceptor.ts",
+    "backend/src/api/utils/interceptors/note-header.interceptor.ts",
+    "backend/src/auth/identity.service.ts",
+    "backend/src/auth/ldap/ldap.service.ts",
+    "backend/src/auth/oidc/oidc.service.ts",
+    "backend/src/errors/error-mapping.ts",
+    "backend/src/errors/http-exception-object.ts",
+    "backend/src/explore/explore.service.ts",
+    "backend/src/frontend-config/frontend-config.service.ts",
+    "backend/src/groups/groups.service.ts",
+    "backend/src/media-redirect/media-redirect.controller.ts",
+    "backend/src/media/media.service.ts",
+    "backend/src/notes/note.service.ts",
+    "backend/src/permissions/permission.service.ts",
+    "backend/src/permissions/utils/convert-editability-to-permission-level.ts",
+    "backend/src/realtime/realtime-note/realtime-note-store.ts",
+    "backend/src/realtime/realtime-note/realtime-note.ts",
+    "backend/src/revisions/revisions.service.ts",
+    "backend/src/revisions/utils/extract-revision-metadata-from-content.ts",
+    "backend/src/sessions/session.service.ts",
+    "backend/src/users/random-word-lists/name-randomizer.ts",
+    "backend/src/users/users.service.ts",
+    "backend/src/utils/datetime.ts",
+    "backend/src/utils/password.ts",
+    "backend/src/utils/server-version.ts",
+    "commons/src/file-type/extract-file-type.ts",
+    "commons/src/frontmatter-extractor/extractor.ts",
+    "commons/src/message-transporters/message-transporter.ts",
+    "commons/src/note-frontmatter/parse-note-frontmatter.ts",
+    "commons/src/parse-url/parse-url.ts",
+    "commons/src/title-extraction/extract-first-heading.ts",
+    "commons/src/title-extraction/generate-note-title.ts",
+    "commons/src/y-doc-sync/realtime-doc.ts",
+    "frontend/src/api/alias/index.ts",
+    "frontend/src/api/api-tokens/index.ts",
+    "frontend/src/api/auth/guest.ts",
+    "frontend/src/api/auth/index.ts",
+    "frontend/src/api/auth/ldap.ts",
+    "frontend/src/api/auth/local.ts",
+    "frontend/src/api/auth/pending-user.ts",
+    "frontend/src/api/common/api-error.ts",
+    "frontend/src/api/common/api-request-builder/api-request-builder-with-body.ts",
+    "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+    "frontend/src/api/common/api-request-builder/delete-api-request-builder.ts",
+    "frontend/src/api/common/api-request-builder/get-api-request-builder.ts",
+    "frontend/src/api/common/api-request-builder/post-api-request-builder.ts",
+    "frontend/src/api/common/api-request-builder/put-api-request-builder.ts",
+    "frontend/src/api/common/api-request-builder/test-utils/expect-fetch.ts",
+    "frontend/src/api/common/api-response.ts",
+    "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+    "frontend/src/api/config/index.ts",
+    "frontend/src/api/explore/index.ts",
+    "frontend/src/api/explore/utils.ts",
+    "frontend/src/api/group/index.ts",
+    "frontend/src/api/me/index.ts",
+    "frontend/src/api/media/index.ts",
+    "frontend/src/api/notes/index.ts",
+    "frontend/src/api/permissions/index.ts",
+    "frontend/src/api/revisions/index.ts",
+    "frontend/src/api/users/index.ts",
+    "frontend/src/handler-utils/respond-to-matching-request.ts",
+    "frontend/src/pages/api/private/auth/local/login.ts",
+    "frontend/src/pages/api/private/auth/logout.ts",
+    "frontend/src/pages/api/private/config.ts",
+    "frontend/src/pages/api/private/groups/_EVERYONE.ts",
+    "frontend/src/pages/api/private/groups/_LOGGED_IN.ts",
+    "frontend/src/pages/api/private/groups/hedgedoc-devs.ts",
+    "frontend/src/pages/api/private/me/index.ts",
+    "frontend/src/pages/api/private/me/media.ts",
+    "frontend/src/pages/api/private/media.ts",
+    "frontend/src/pages/api/private/notes/features/index.ts",
+    "frontend/src/pages/api/private/notes/features/revisions/019a5647-fc18-7e2d-9d8d-867be8a5ef28.ts",
+    "frontend/src/pages/api/private/notes/features/revisions/019a5648-4986-7213-9067-a4a6859171c5.ts",
+    "frontend/src/pages/api/private/notes/features/revisions/index.ts",
+    "frontend/src/pages/api/private/notes/index.ts",
+    "frontend/src/pages/api/private/notes/slide-example/index.ts",
+    "frontend/src/pages/api/private/tokens.ts",
+    "frontend/src/pages/api/private/users/profile/erik.ts",
+    "frontend/src/pages/api/private/users/profile/mock.ts",
+    "frontend/src/pages/api/private/users/profile/molly.ts",
+    "frontend/src/pages/api/private/users/profile/tilman.ts",
+    "frontend/src/redux/csrf-token/methods.ts",
+    "frontend/src/utils/base-url-from-env-extractor.ts",
+    "frontend/src/utils/logger.ts"
+   ]
+  },
+  {
+   "mode": "import",
+   "files": 120,
+   "entriesUsed": 80,
+   "entriesSkipped": 84,
+   "used": [
+    {
+     "fn": "AliasController.addAlias",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 11,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "AliasController.getAllAliases",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "AliasController.getNoteIdAndCheckIfUserCanEditAliases",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "AliasController.makeAliasPrimary",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "AliasController.removeAlias",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "ApiTokensController.deleteToken",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "added": 16,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ApiTokensController.getUserTokens",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ApiTokensController.postTokenRequest",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "AuthController.confirmPendingUserData",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "added": 9,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "AuthController.deletePendingUserData",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "AuthController.getPendingUserData",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "AuthController.logout",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "GuestController.loginGuestUser",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "added": 9,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "GuestController.registerGuestUser",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "LdapController.loginWithLdap",
+     "file": "backend/src/api/private/auth/ldap/ldap.controller.ts",
+     "added": 6,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "LocalController.login",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "added": 7,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "LocalController.registerUser",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "LocalController.updatePassword",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "OidcController.assertTopLevelNavigation",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "added": 3,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "OidcController.backchannelLogout",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "OidcController.callback",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "OidcController.loginWithOpenIdConnect",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ConfigController.getFrontendConfig",
+     "file": "backend/src/api/private/config/config.controller.ts",
+     "added": 9,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "CsrfController.getToken",
+     "file": "backend/src/api/private/csrf/csrf.controller.ts",
+     "added": 2,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "CsrfGuard.canActivate",
+     "file": "backend/src/api/private/csrf/csrf.guard.ts",
+     "added": 1,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "ExploreController.checkQueryParams",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 10,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.ensurePageNumberIsValid",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.ensureSortQueryParamIsValid",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.ensureTypeQueryParamIsValid",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.getMyNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.getMyPinnedNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.getPublicNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.getRecentlyVisitedNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.getSharedNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.setPinStatus",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "GroupsController.getGroup",
+     "file": "backend/src/api/private/groups/groups.controller.ts",
+     "added": 2,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "MeController.deleteUser",
+     "file": "backend/src/api/private/me/me.controller.ts",
+     "added": 4,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MeController.getMe",
+     "file": "backend/src/api/private/me/me.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MeController.getMyMedia",
+     "file": "backend/src/api/private/me/me.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MeController.updateProfile",
+     "file": "backend/src/api/private/me/me.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MediaController.deleteMedia",
+     "file": "backend/src/api/private/media/media.controller.ts",
+     "added": 7,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MediaController.getMedia",
+     "file": "backend/src/api/private/media/media.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MediaController.linkMediaToNote",
+     "file": "backend/src/api/private/media/media.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MediaController.uploadMedia",
+     "file": "backend/src/api/private/media/media.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.changeOwner",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.changeVisibility",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.createNamedNote",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.createNote",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.deleteNote",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.getNote",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.getNoteMetadata",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.getNotePermissions",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.getNoteRevision",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.getNoteRevisions",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.getNotesMedia",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.purgeNoteRevisions",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.removeGroupPermission",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.removeUserPermission",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.setGroupPermission",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.setUserPermission",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "UsersController.checkUsername",
+     "file": "backend/src/api/private/users/users.controller.ts",
+     "added": 3,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "UsersController.getUser",
+     "file": "backend/src/api/private/users/users.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "CsrfExempt",
+     "file": "backend/src/api/utils/decorators/csrf-exempt.decorator.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "OpenApi",
+     "file": "backend/src/api/utils/decorators/openapi.decorator.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "extractNoteAlias",
+     "file": "backend/src/api/utils/extract-note-id-from-request.ts",
+     "added": 1,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "extractNoteIdFromRequest",
+     "file": "backend/src/api/utils/extract-note-id-from-request.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ApiTokenGuard.canActivate",
+     "file": "backend/src/api/utils/guards/api-token.guard.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "GuestsEnabledGuard.canActivate",
+     "file": "backend/src/api/utils/guards/guests-enabled.guard.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "LoginEnabledGuard.canActivate",
+     "file": "backend/src/api/utils/guards/login-enabled.guard.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "MockApiTokenGuard.canActivate",
+     "file": "backend/src/api/utils/guards/mock-api-token.guard.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "RegistrationEnabledGuard.canActivate",
+     "file": "backend/src/api/utils/guards/registration-enabled.guard.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "GetNoteIdInterceptor.intercept",
+     "file": "backend/src/api/utils/interceptors/get-note-id.interceptor.ts",
+     "added": 1,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "NoteHeaderInterceptor.intercept",
+     "file": "backend/src/api/utils/interceptors/note-header.interceptor.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "MediaRedirectController.getMedia",
+     "file": "backend/src/media-redirect/media-redirect.controller.ts",
+     "added": 9,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "logInGuest",
+     "file": "frontend/src/api/auth/guest.ts",
+     "added": 5,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "registerGuest",
+     "file": "frontend/src/api/auth/guest.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "checkUsernameAvailability",
+     "file": "frontend/src/api/auth/index.ts",
+     "added": 2,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "doLogout",
+     "file": "frontend/src/api/auth/index.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ApiResponse.asParsedJsonObject",
+     "file": "frontend/src/api/common/api-response.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "ApiResponse.getResponse",
+     "file": "frontend/src/api/common/api-response.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    }
+   ],
+   "skipped": [
+    {
+     "fn": "addAlias",
+     "file": "frontend/src/api/alias/index.ts",
+     "need": 13
+    },
+    {
+     "fn": "deleteAlias",
+     "file": "frontend/src/api/alias/index.ts",
+     "need": 13
+    },
+    {
+     "fn": "getAllAliases",
+     "file": "frontend/src/api/alias/index.ts",
+     "need": 13
+    },
+    {
+     "fn": "markAliasAsPrimary",
+     "file": "frontend/src/api/alias/index.ts",
+     "need": 13
+    },
+    {
+     "fn": "deleteAccessToken",
+     "file": "frontend/src/api/api-tokens/index.ts",
+     "need": 12
+    },
+    {
+     "fn": "getAccessTokenList",
+     "file": "frontend/src/api/api-tokens/index.ts",
+     "need": 12
+    },
+    {
+     "fn": "postNewAccessToken",
+     "file": "frontend/src/api/api-tokens/index.ts",
+     "need": 12
+    },
+    {
+     "fn": "doLdapLogin",
+     "file": "frontend/src/api/auth/ldap.ts",
+     "need": 1
+    },
+    {
+     "fn": "doLocalLogin",
+     "file": "frontend/src/api/auth/local.ts",
+     "need": 2
+    },
+    {
+     "fn": "doLocalPasswordChange",
+     "file": "frontend/src/api/auth/local.ts",
+     "need": 2
+    },
+    {
+     "fn": "doLocalRegister",
+     "file": "frontend/src/api/auth/local.ts",
+     "need": 2
+    },
+    {
+     "fn": "cancelPendingUser",
+     "file": "frontend/src/api/auth/pending-user.ts",
+     "need": 8
+    },
+    {
+     "fn": "confirmPendingUser",
+     "file": "frontend/src/api/auth/pending-user.ts",
+     "need": 8
+    },
+    {
+     "fn": "getPendingUserInfo",
+     "file": "frontend/src/api/auth/pending-user.ts",
+     "need": 8
+    },
+    {
+     "fn": "RateLimitError.getResetIn",
+     "file": "frontend/src/api/common/api-error.ts",
+     "need": 1
+    },
+    {
+     "fn": "ApiRequestBuilderWithBody.withBody",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder-with-body.ts",
+     "need": 9
+    },
+    {
+     "fn": "ApiRequestBuilderWithBody.withJsonBody",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder-with-body.ts",
+     "need": 9
+    },
+    {
+     "fn": "ApiRequestBuilder.determineBaseUrl",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 18
+    },
+    {
+     "fn": "ApiRequestBuilder.isSSR",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 18
+    },
+    {
+     "fn": "ApiRequestBuilder.readApiErrorResponseFromBody",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 18
+    },
+    {
+     "fn": "ApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 18
+    },
+    {
+     "fn": "ApiRequestBuilder.sendRequestAndVerifyResponse",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 18
+    },
+    {
+     "fn": "ApiRequestBuilder.withCustomOptions",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 18
+    },
+    {
+     "fn": "ApiRequestBuilder.withHeader",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 18
+    },
+    {
+     "fn": "DeleteApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/delete-api-request-builder.ts",
+     "need": 5
+    },
+    {
+     "fn": "GetApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/get-api-request-builder.ts",
+     "need": 10
+    },
+    {
+     "fn": "PostApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/post-api-request-builder.ts",
+     "need": 5
+    },
+    {
+     "fn": "PutApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/put-api-request-builder.ts",
+     "need": 6
+    },
+    {
+     "fn": "expectFetch",
+     "file": "frontend/src/api/common/api-request-builder/test-utils/expect-fetch.ts",
+     "need": 14
+    },
+    {
+     "fn": "mapCodeToText",
+     "file": "frontend/src/api/common/api-request-builder/test-utils/expect-fetch.ts",
+     "need": 14
+    },
+    {
+     "fn": "ErrorToI18nKeyMapper.orFallbackI18nKey",
+     "file": "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+     "need": 2
+    },
+    {
+     "fn": "ErrorToI18nKeyMapper.withBackendErrorName",
+     "file": "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+     "need": 2
+    },
+    {
+     "fn": "ErrorToI18nKeyMapper.withErrorMessage",
+     "file": "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+     "need": 2
+    },
+    {
+     "fn": "ErrorToI18nKeyMapper.withHttpCode",
+     "file": "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+     "need": 2
+    },
+    {
+     "fn": "getConfig",
+     "file": "frontend/src/api/config/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "getExplorePageEntries",
+     "file": "frontend/src/api/explore/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "getPinnedNotes",
+     "file": "frontend/src/api/explore/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "setPinnedState",
+     "file": "frontend/src/api/explore/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "createURLSearchParams",
+     "file": "frontend/src/api/explore/utils.ts",
+     "need": 1
+    },
+    {
+     "fn": "getGroup",
+     "file": "frontend/src/api/group/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "deleteUser",
+     "file": "frontend/src/api/me/index.ts",
+     "need": 8
+    },
+    {
+     "fn": "getMe",
+     "file": "frontend/src/api/me/index.ts",
+     "need": 8
+    },
+    {
+     "fn": "getMyMedia",
+     "file": "frontend/src/api/me/index.ts",
+     "need": 8
+    },
+    {
+     "fn": "updateUser",
+     "file": "frontend/src/api/me/index.ts",
+     "need": 8
+    },
+    {
+     "fn": "deleteUploadedMedia",
+     "file": "frontend/src/api/media/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "getProxiedUrl",
+     "file": "frontend/src/api/media/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "uploadFile",
+     "file": "frontend/src/api/media/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "createNote",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "createNoteWithPrimaryAlias",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "deleteNote",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "getMediaForNote",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "getNote",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "getNoteMetadata",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "getNotePermissions",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "removeGroupPermission",
+     "file": "frontend/src/api/permissions/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "removeUserPermission",
+     "file": "frontend/src/api/permissions/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "setGroupPermission",
+     "file": "frontend/src/api/permissions/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "setNoteOwner",
+     "file": "frontend/src/api/permissions/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "setNotePublic",
+     "file": "frontend/src/api/permissions/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "setUserPermission",
+     "file": "frontend/src/api/permissions/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "deleteRevisionsForNote",
+     "file": "frontend/src/api/revisions/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "getAllRevisions",
+     "file": "frontend/src/api/revisions/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "getRevision",
+     "file": "frontend/src/api/revisions/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "getUserInfo",
+     "file": "frontend/src/api/users/index.ts",
+     "need": 7
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/auth/local/login.ts",
+     "need": 1
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/auth/logout.ts",
+     "need": 1
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/config.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/groups/_EVERYONE.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/groups/_LOGGED_IN.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/groups/hedgedoc-devs.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/me/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/me/media.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/media.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/features/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/features/revisions/019a5647-fc18-7e2d-9d8d-867be8a5ef28.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/features/revisions/019a5648-4986-7213-9067-a4a6859171c5.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/features/revisions/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/slide-example/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/tokens.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/users/profile/erik.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/users/profile/mock.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/users/profile/molly.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/users/profile/tilman.ts",
+     "need": 2
+    }
+   ],
+   "sliceFiles": [
+    "backend/src/alias/alias.service.ts",
+    "backend/src/api-token/api-token.service.ts",
+    "backend/src/api/private/alias/alias.controller.ts",
+    "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+    "backend/src/api/private/auth/auth.controller.ts",
+    "backend/src/api/private/auth/guest/guest.controller.ts",
+    "backend/src/api/private/auth/ldap/ldap.controller.ts",
+    "backend/src/api/private/auth/local/local.controller.ts",
+    "backend/src/api/private/auth/oidc/oidc.controller.ts",
+    "backend/src/api/private/config/config.controller.ts",
+    "backend/src/api/private/csrf/csrf.controller.ts",
+    "backend/src/api/private/csrf/csrf.guard.ts",
+    "backend/src/api/private/explore/explore.controller.ts",
+    "backend/src/api/private/groups/groups.controller.ts",
+    "backend/src/api/private/me/me.controller.ts",
+    "backend/src/api/private/media/media.controller.ts",
+    "backend/src/api/private/notes/notes.controller.ts",
+    "backend/src/api/private/users/users.controller.ts",
+    "backend/src/api/utils/decorators/csrf-exempt.decorator.ts",
+    "backend/src/api/utils/decorators/fastify-file.decorator.ts",
+    "backend/src/api/utils/decorators/openapi.decorator.ts",
+    "backend/src/api/utils/decorators/request-note-id.decorator.ts",
+    "backend/src/api/utils/decorators/request-user-id.decorator.ts",
+    "backend/src/api/utils/decorators/session-authprovider.decorator.ts",
+    "backend/src/api/utils/descriptions.ts",
+    "backend/src/api/utils/extract-note-id-from-request.ts",
+    "backend/src/api/utils/guards/api-token.guard.ts",
+    "backend/src/api/utils/guards/guests-enabled.guard.ts",
+    "backend/src/api/utils/guards/login-enabled.guard.ts",
+    "backend/src/api/utils/guards/mock-api-token.guard.ts",
+    "backend/src/api/utils/guards/registration-enabled.guard.ts",
+    "backend/src/api/utils/interceptors/get-note-id.interceptor.ts",
+    "backend/src/api/utils/interceptors/note-header.interceptor.ts",
+    "backend/src/api/utils/request.type.ts",
+    "backend/src/auth/identity.service.ts",
+    "backend/src/auth/ldap/ldap.service.ts",
+    "backend/src/auth/local/local.service.ts",
+    "backend/src/auth/oidc/oidc.service.ts",
+    "backend/src/auth/session.guard.ts",
+    "backend/src/config/app.config.ts",
+    "backend/src/config/auth.config.ts",
+    "backend/src/config/customization.config.ts",
+    "backend/src/config/external-services.config.ts",
+    "backend/src/config/loglevel.enum.ts",
+    "backend/src/config/media.config.ts",
+    "backend/src/config/note.config.ts",
+    "backend/src/config/theme.enum.ts",
+    "backend/src/config/utils.ts",
+    "backend/src/config/zod-error-message.ts",
+    "backend/src/dtos/alias-create.dto.ts",
+    "backend/src/dtos/alias-update.dto.ts",
+    "backend/src/dtos/api-token-create.dto.ts",
+    "backend/src/dtos/api-token-with-secret.dto.ts",
+    "backend/src/dtos/api-token.dto.ts",
+    "backend/src/dtos/backchannel-logout.dto.ts",
+    "backend/src/dtos/branding.dto.ts",
+    "backend/src/dtos/csrf-token.dto.ts",
+    "backend/src/dtos/frontend-config.dto.ts",
+    "backend/src/dtos/group-info.dto.ts",
+    "backend/src/dtos/guest-login.dto.ts",
+    "backend/src/dtos/guest-registration-response.dto.ts",
+    "backend/src/dtos/ldap-login-response.dto.ts",
+    "backend/src/dtos/ldap-login.dto.ts",
+    "backend/src/dtos/login-user-info.dto.ts",
+    "backend/src/dtos/login.dto.ts",
+    "backend/src/dtos/logout-response.dto.ts",
+    "backend/src/dtos/media-upload.dto.ts",
+    "backend/src/dtos/note-aliases.dto.ts",
+    "backend/src/dtos/note-explore-entry.dto.ts",
+    "backend/src/dtos/note-metadata.dto.ts",
+    "backend/src/dtos/note-pin-status.dto.ts",
+    "backend/src/dtos/note.dto.ts",
+    "backend/src/dtos/pending-ldap-user-info.dto.ts",
+    "backend/src/dtos/pending-user-confirmation.dto.ts",
+    "backend/src/dtos/pending-user-info.dto.ts",
+    "backend/src/dtos/register.dto.ts",
+    "backend/src/dtos/server-version.dto.ts",
+    "backend/src/dtos/special-urls.dto.ts",
+    "backend/src/dtos/update-password.dto.ts",
+    "backend/src/dtos/user-info.dto.ts",
+    "backend/src/dtos/username-check-response.dto.ts",
+    "backend/src/dtos/username-check.dto.ts",
+    "backend/src/errors/errors.ts",
+    "backend/src/events.ts",
+    "backend/src/explore/explore.service.ts",
+    "backend/src/frontend-config/frontend-config.service.ts",
+    "backend/src/groups/groups.service.ts",
+    "backend/src/logger/console-logger.service.ts",
+    "backend/src/media-redirect/media-redirect.controller.ts",
+    "backend/src/media/backends/azure-backend.ts",
+    "backend/src/media/backends/filesystem-backend.ts",
+    "backend/src/media/backends/imgur-backend.ts",
+    "backend/src/media/backends/s3-backend.ts",
+    "backend/src/media/backends/webdav-backend.ts",
+    "backend/src/media/media-backend.interface.ts",
+    "backend/src/media/media-response.interface.ts",
+    "backend/src/media/media.service.ts",
+    "backend/src/media/multer-file.interface.ts",
+    "backend/src/notes/note.service.ts",
+    "backend/src/permissions/permission.service.ts",
+    "backend/src/permissions/permissions.guard.ts",
+    "backend/src/permissions/require-permission.decorator.ts",
+    "backend/src/realtime/realtime-note/realtime-note-store.ts",
+    "backend/src/revisions/revisions.service.ts",
+    "backend/src/sessions/session-state.ts",
+    "backend/src/sessions/session.service.ts",
+    "backend/src/users/random-word-lists/name-randomizer.ts",
+    "backend/src/users/random-word-lists/random-words.ts",
+    "backend/src/users/users.service.ts",
+    "backend/src/utils/datetime.ts",
+    "backend/src/utils/dev-mode.ts",
+    "backend/src/utils/password.ts",
+    "backend/src/utils/server-version.ts",
+    "frontend/src/api/auth/guest.ts",
+    "frontend/src/api/auth/index.ts",
+    "frontend/src/api/common/api-request-builder/api-request-builder-with-body.ts",
+    "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+    "frontend/src/api/common/api-request-builder/delete-api-request-builder.ts",
+    "frontend/src/api/common/api-request-builder/post-api-request-builder.ts",
+    "frontend/src/api/common/api-response.ts"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "files": 120,
+   "entriesUsed": 76,
+   "entriesSkipped": 88,
+   "used": [
+    {
+     "fn": "AliasController.addAlias",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 11,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "AliasController.getAllAliases",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "AliasController.getNoteIdAndCheckIfUserCanEditAliases",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "AliasController.makeAliasPrimary",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "AliasController.removeAlias",
+     "file": "backend/src/api/private/alias/alias.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "ApiTokensController.deleteToken",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "added": 18,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ApiTokensController.getUserTokens",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "ApiTokensController.postTokenRequest",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "AuthController.confirmPendingUserData",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "added": 10,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "AuthController.deletePendingUserData",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "AuthController.getPendingUserData",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "AuthController.logout",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "GuestController.loginGuestUser",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "added": 9,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "GuestController.registerGuestUser",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "LdapController.loginWithLdap",
+     "file": "backend/src/api/private/auth/ldap/ldap.controller.ts",
+     "added": 5,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "LocalController.login",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "added": 7,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "LocalController.registerUser",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "LocalController.updatePassword",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "OidcController.assertTopLevelNavigation",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "added": 3,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "OidcController.backchannelLogout",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "OidcController.callback",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "OidcController.loginWithOpenIdConnect",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "ConfigController.getFrontendConfig",
+     "file": "backend/src/api/private/config/config.controller.ts",
+     "added": 10,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "CsrfController.getToken",
+     "file": "backend/src/api/private/csrf/csrf.controller.ts",
+     "added": 2,
+     "rings": 3,
+     "truncated": false
+    },
+    {
+     "fn": "CsrfGuard.canActivate",
+     "file": "backend/src/api/private/csrf/csrf.guard.ts",
+     "added": 2,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "ExploreController.checkQueryParams",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 4,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.ensurePageNumberIsValid",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.ensureSortQueryParamIsValid",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.ensureTypeQueryParamIsValid",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.getMyNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.getMyPinnedNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.getPublicNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.getRecentlyVisitedNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.getSharedNotes",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "ExploreController.setPinStatus",
+     "file": "backend/src/api/private/explore/explore.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "GroupsController.getGroup",
+     "file": "backend/src/api/private/groups/groups.controller.ts",
+     "added": 3,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "MeController.deleteUser",
+     "file": "backend/src/api/private/me/me.controller.ts",
+     "added": 4,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MeController.getMe",
+     "file": "backend/src/api/private/me/me.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MeController.getMyMedia",
+     "file": "backend/src/api/private/me/me.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MeController.updateProfile",
+     "file": "backend/src/api/private/me/me.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MediaController.deleteMedia",
+     "file": "backend/src/api/private/media/media.controller.ts",
+     "added": 7,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MediaController.getMedia",
+     "file": "backend/src/api/private/media/media.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MediaController.linkMediaToNote",
+     "file": "backend/src/api/private/media/media.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "MediaController.uploadMedia",
+     "file": "backend/src/api/private/media/media.controller.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.changeOwner",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 1,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.changeVisibility",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.createNamedNote",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.createNote",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.deleteNote",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.getNote",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.getNoteMetadata",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.getNotePermissions",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.getNoteRevision",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.getNoteRevisions",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.getNotesMedia",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.purgeNoteRevisions",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.removeGroupPermission",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.removeUserPermission",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.setGroupPermission",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "NotesController.setUserPermission",
+     "file": "backend/src/api/private/notes/notes.controller.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": true
+    },
+    {
+     "fn": "UsersController.checkUsername",
+     "file": "backend/src/api/private/users/users.controller.ts",
+     "added": 3,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "UsersController.getUser",
+     "file": "backend/src/api/private/users/users.controller.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "CsrfExempt",
+     "file": "backend/src/api/utils/decorators/csrf-exempt.decorator.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "OpenApi",
+     "file": "backend/src/api/utils/decorators/openapi.decorator.ts",
+     "added": 0,
+     "rings": 2,
+     "truncated": false
+    },
+    {
+     "fn": "extractNoteAlias",
+     "file": "backend/src/api/utils/extract-note-id-from-request.ts",
+     "added": 8,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "extractNoteIdFromRequest",
+     "file": "backend/src/api/utils/extract-note-id-from-request.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ApiTokenGuard.canActivate",
+     "file": "backend/src/api/utils/guards/api-token.guard.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "GuestsEnabledGuard.canActivate",
+     "file": "backend/src/api/utils/guards/guests-enabled.guard.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "LoginEnabledGuard.canActivate",
+     "file": "backend/src/api/utils/guards/login-enabled.guard.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "MockApiTokenGuard.canActivate",
+     "file": "backend/src/api/utils/guards/mock-api-token.guard.ts",
+     "added": 1,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "RegistrationEnabledGuard.canActivate",
+     "file": "backend/src/api/utils/guards/registration-enabled.guard.ts",
+     "added": 0,
+     "rings": 4,
+     "truncated": false
+    },
+    {
+     "fn": "GetNoteIdInterceptor.intercept",
+     "file": "backend/src/api/utils/interceptors/get-note-id.interceptor.ts",
+     "added": 1,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "NoteHeaderInterceptor.intercept",
+     "file": "backend/src/api/utils/interceptors/note-header.interceptor.ts",
+     "added": 0,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "MediaRedirectController.getMedia",
+     "file": "backend/src/media-redirect/media-redirect.controller.ts",
+     "added": 10,
+     "rings": 3,
+     "truncated": true
+    },
+    {
+     "fn": "ApiResponse.asParsedJsonObject",
+     "file": "frontend/src/api/common/api-response.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    },
+    {
+     "fn": "ApiResponse.getResponse",
+     "file": "frontend/src/api/common/api-response.ts",
+     "added": 0,
+     "rings": 1,
+     "truncated": false
+    }
+   ],
+   "skipped": [
+    {
+     "fn": "addAlias",
+     "file": "frontend/src/api/alias/index.ts",
+     "need": 12
+    },
+    {
+     "fn": "deleteAlias",
+     "file": "frontend/src/api/alias/index.ts",
+     "need": 12
+    },
+    {
+     "fn": "getAllAliases",
+     "file": "frontend/src/api/alias/index.ts",
+     "need": 12
+    },
+    {
+     "fn": "markAliasAsPrimary",
+     "file": "frontend/src/api/alias/index.ts",
+     "need": 12
+    },
+    {
+     "fn": "deleteAccessToken",
+     "file": "frontend/src/api/api-tokens/index.ts",
+     "need": 11
+    },
+    {
+     "fn": "getAccessTokenList",
+     "file": "frontend/src/api/api-tokens/index.ts",
+     "need": 11
+    },
+    {
+     "fn": "postNewAccessToken",
+     "file": "frontend/src/api/api-tokens/index.ts",
+     "need": 11
+    },
+    {
+     "fn": "logInGuest",
+     "file": "frontend/src/api/auth/guest.ts",
+     "need": 9
+    },
+    {
+     "fn": "registerGuest",
+     "file": "frontend/src/api/auth/guest.ts",
+     "need": 9
+    },
+    {
+     "fn": "checkUsernameAvailability",
+     "file": "frontend/src/api/auth/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "doLogout",
+     "file": "frontend/src/api/auth/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "doLdapLogin",
+     "file": "frontend/src/api/auth/ldap.ts",
+     "need": 9
+    },
+    {
+     "fn": "doLocalLogin",
+     "file": "frontend/src/api/auth/local.ts",
+     "need": 10
+    },
+    {
+     "fn": "doLocalPasswordChange",
+     "file": "frontend/src/api/auth/local.ts",
+     "need": 10
+    },
+    {
+     "fn": "doLocalRegister",
+     "file": "frontend/src/api/auth/local.ts",
+     "need": 10
+    },
+    {
+     "fn": "cancelPendingUser",
+     "file": "frontend/src/api/auth/pending-user.ts",
+     "need": 11
+    },
+    {
+     "fn": "confirmPendingUser",
+     "file": "frontend/src/api/auth/pending-user.ts",
+     "need": 11
+    },
+    {
+     "fn": "getPendingUserInfo",
+     "file": "frontend/src/api/auth/pending-user.ts",
+     "need": 11
+    },
+    {
+     "fn": "RateLimitError.getResetIn",
+     "file": "frontend/src/api/common/api-error.ts",
+     "need": 1
+    },
+    {
+     "fn": "ApiRequestBuilderWithBody.withBody",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder-with-body.ts",
+     "need": 11
+    },
+    {
+     "fn": "ApiRequestBuilderWithBody.withJsonBody",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder-with-body.ts",
+     "need": 11
+    },
+    {
+     "fn": "ApiRequestBuilder.determineBaseUrl",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 19
+    },
+    {
+     "fn": "ApiRequestBuilder.isSSR",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 19
+    },
+    {
+     "fn": "ApiRequestBuilder.readApiErrorResponseFromBody",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 19
+    },
+    {
+     "fn": "ApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 19
+    },
+    {
+     "fn": "ApiRequestBuilder.sendRequestAndVerifyResponse",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 19
+    },
+    {
+     "fn": "ApiRequestBuilder.withCustomOptions",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 19
+    },
+    {
+     "fn": "ApiRequestBuilder.withHeader",
+     "file": "frontend/src/api/common/api-request-builder/api-request-builder.ts",
+     "need": 19
+    },
+    {
+     "fn": "DeleteApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/delete-api-request-builder.ts",
+     "need": 8
+    },
+    {
+     "fn": "GetApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/get-api-request-builder.ts",
+     "need": 11
+    },
+    {
+     "fn": "PostApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/post-api-request-builder.ts",
+     "need": 8
+    },
+    {
+     "fn": "PutApiRequestBuilder.sendRequest",
+     "file": "frontend/src/api/common/api-request-builder/put-api-request-builder.ts",
+     "need": 8
+    },
+    {
+     "fn": "expectFetch",
+     "file": "frontend/src/api/common/api-request-builder/test-utils/expect-fetch.ts",
+     "need": 14
+    },
+    {
+     "fn": "mapCodeToText",
+     "file": "frontend/src/api/common/api-request-builder/test-utils/expect-fetch.ts",
+     "need": 14
+    },
+    {
+     "fn": "ErrorToI18nKeyMapper.orFallbackI18nKey",
+     "file": "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+     "need": 2
+    },
+    {
+     "fn": "ErrorToI18nKeyMapper.withBackendErrorName",
+     "file": "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+     "need": 2
+    },
+    {
+     "fn": "ErrorToI18nKeyMapper.withErrorMessage",
+     "file": "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+     "need": 2
+    },
+    {
+     "fn": "ErrorToI18nKeyMapper.withHttpCode",
+     "file": "frontend/src/api/common/error-to-i18n-key-mapper.ts",
+     "need": 2
+    },
+    {
+     "fn": "getConfig",
+     "file": "frontend/src/api/config/index.ts",
+     "need": 12
+    },
+    {
+     "fn": "getExplorePageEntries",
+     "file": "frontend/src/api/explore/index.ts",
+     "need": 12
+    },
+    {
+     "fn": "getPinnedNotes",
+     "file": "frontend/src/api/explore/index.ts",
+     "need": 12
+    },
+    {
+     "fn": "setPinnedState",
+     "file": "frontend/src/api/explore/index.ts",
+     "need": 12
+    },
+    {
+     "fn": "createURLSearchParams",
+     "file": "frontend/src/api/explore/utils.ts",
+     "need": 1
+    },
+    {
+     "fn": "getGroup",
+     "file": "frontend/src/api/group/index.ts",
+     "need": 8
+    },
+    {
+     "fn": "deleteUser",
+     "file": "frontend/src/api/me/index.ts",
+     "need": 11
+    },
+    {
+     "fn": "getMe",
+     "file": "frontend/src/api/me/index.ts",
+     "need": 11
+    },
+    {
+     "fn": "getMyMedia",
+     "file": "frontend/src/api/me/index.ts",
+     "need": 11
+    },
+    {
+     "fn": "updateUser",
+     "file": "frontend/src/api/me/index.ts",
+     "need": 11
+    },
+    {
+     "fn": "deleteUploadedMedia",
+     "file": "frontend/src/api/media/index.ts",
+     "need": 15
+    },
+    {
+     "fn": "getProxiedUrl",
+     "file": "frontend/src/api/media/index.ts",
+     "need": 15
+    },
+    {
+     "fn": "uploadFile",
+     "file": "frontend/src/api/media/index.ts",
+     "need": 15
+    },
+    {
+     "fn": "createNote",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 15
+    },
+    {
+     "fn": "createNoteWithPrimaryAlias",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 15
+    },
+    {
+     "fn": "deleteNote",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 15
+    },
+    {
+     "fn": "getMediaForNote",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 15
+    },
+    {
+     "fn": "getNote",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 15
+    },
+    {
+     "fn": "getNoteMetadata",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 15
+    },
+    {
+     "fn": "getNotePermissions",
+     "file": "frontend/src/api/notes/index.ts",
+     "need": 15
+    },
+    {
+     "fn": "removeGroupPermission",
+     "file": "frontend/src/api/permissions/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "removeUserPermission",
+     "file": "frontend/src/api/permissions/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "setGroupPermission",
+     "file": "frontend/src/api/permissions/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "setNoteOwner",
+     "file": "frontend/src/api/permissions/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "setNotePublic",
+     "file": "frontend/src/api/permissions/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "setUserPermission",
+     "file": "frontend/src/api/permissions/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "deleteRevisionsForNote",
+     "file": "frontend/src/api/revisions/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "getAllRevisions",
+     "file": "frontend/src/api/revisions/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "getRevision",
+     "file": "frontend/src/api/revisions/index.ts",
+     "need": 10
+    },
+    {
+     "fn": "getUserInfo",
+     "file": "frontend/src/api/users/index.ts",
+     "need": 8
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/auth/local/login.ts",
+     "need": 1
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/auth/logout.ts",
+     "need": 1
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/config.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/groups/_EVERYONE.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/groups/_LOGGED_IN.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/groups/hedgedoc-devs.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/me/index.ts",
+     "need": 4
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/me/media.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/media.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/features/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/features/revisions/019a5647-fc18-7e2d-9d8d-867be8a5ef28.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/features/revisions/019a5648-4986-7213-9067-a4a6859171c5.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/features/revisions/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/notes/slide-example/index.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/tokens.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/users/profile/erik.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/users/profile/mock.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/users/profile/molly.ts",
+     "need": 2
+    },
+    {
+     "fn": "handler",
+     "file": "frontend/src/pages/api/private/users/profile/tilman.ts",
+     "need": 2
+    }
+   ],
+   "sliceFiles": [
+    "backend/src/alias/alias.service.ts",
+    "backend/src/api-token/api-token.service.ts",
+    "backend/src/api/private/alias/alias.controller.ts",
+    "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+    "backend/src/api/private/auth/auth.controller.ts",
+    "backend/src/api/private/auth/guest/guest.controller.ts",
+    "backend/src/api/private/auth/ldap/ldap.controller.ts",
+    "backend/src/api/private/auth/local/local.controller.ts",
+    "backend/src/api/private/auth/oidc/oidc.controller.ts",
+    "backend/src/api/private/config/config.controller.ts",
+    "backend/src/api/private/csrf/csrf.controller.ts",
+    "backend/src/api/private/csrf/csrf.guard.ts",
+    "backend/src/api/private/explore/explore.controller.ts",
+    "backend/src/api/private/groups/groups.controller.ts",
+    "backend/src/api/private/me/me.controller.ts",
+    "backend/src/api/private/media/media.controller.ts",
+    "backend/src/api/private/notes/notes.controller.ts",
+    "backend/src/api/private/users/users.controller.ts",
+    "backend/src/api/utils/decorators/csrf-exempt.decorator.ts",
+    "backend/src/api/utils/decorators/fastify-file.decorator.ts",
+    "backend/src/api/utils/decorators/openapi.decorator.ts",
+    "backend/src/api/utils/decorators/request-note-id.decorator.ts",
+    "backend/src/api/utils/decorators/request-user-id.decorator.ts",
+    "backend/src/api/utils/decorators/session-authprovider.decorator.ts",
+    "backend/src/api/utils/descriptions.ts",
+    "backend/src/api/utils/extract-note-id-from-request.ts",
+    "backend/src/api/utils/guards/api-token.guard.ts",
+    "backend/src/api/utils/guards/guests-enabled.guard.ts",
+    "backend/src/api/utils/guards/login-enabled.guard.ts",
+    "backend/src/api/utils/guards/mock-api-token.guard.ts",
+    "backend/src/api/utils/guards/registration-enabled.guard.ts",
+    "backend/src/api/utils/interceptors/get-note-id.interceptor.ts",
+    "backend/src/api/utils/interceptors/note-header.interceptor.ts",
+    "backend/src/api/utils/request.type.ts",
+    "backend/src/auth/identity.service.ts",
+    "backend/src/auth/ldap/ldap.service.ts",
+    "backend/src/auth/local/local.service.ts",
+    "backend/src/auth/oidc/oidc.service.ts",
+    "backend/src/auth/session.guard.ts",
+    "backend/src/config/app.config.ts",
+    "backend/src/config/auth.config.ts",
+    "backend/src/config/customization.config.ts",
+    "backend/src/config/external-services.config.ts",
+    "backend/src/config/loglevel.enum.ts",
+    "backend/src/config/media.config.ts",
+    "backend/src/config/note.config.ts",
+    "backend/src/config/theme.enum.ts",
+    "backend/src/config/utils.ts",
+    "backend/src/config/zod-error-message.ts",
+    "backend/src/dtos/alias-create.dto.ts",
+    "backend/src/dtos/alias-update.dto.ts",
+    "backend/src/dtos/api-token-create.dto.ts",
+    "backend/src/dtos/api-token-with-secret.dto.ts",
+    "backend/src/dtos/api-token.dto.ts",
+    "backend/src/dtos/backchannel-logout.dto.ts",
+    "backend/src/dtos/branding.dto.ts",
+    "backend/src/dtos/csrf-token.dto.ts",
+    "backend/src/dtos/frontend-config.dto.ts",
+    "backend/src/dtos/group-info.dto.ts",
+    "backend/src/dtos/guest-login.dto.ts",
+    "backend/src/dtos/guest-registration-response.dto.ts",
+    "backend/src/dtos/ldap-login-response.dto.ts",
+    "backend/src/dtos/ldap-login.dto.ts",
+    "backend/src/dtos/login-user-info.dto.ts",
+    "backend/src/dtos/login.dto.ts",
+    "backend/src/dtos/logout-response.dto.ts",
+    "backend/src/dtos/media-upload.dto.ts",
+    "backend/src/dtos/note-aliases.dto.ts",
+    "backend/src/dtos/note-explore-entry.dto.ts",
+    "backend/src/dtos/note-metadata.dto.ts",
+    "backend/src/dtos/note-pin-status.dto.ts",
+    "backend/src/dtos/note.dto.ts",
+    "backend/src/dtos/pending-ldap-user-info.dto.ts",
+    "backend/src/dtos/pending-user-confirmation.dto.ts",
+    "backend/src/dtos/pending-user-info.dto.ts",
+    "backend/src/dtos/register.dto.ts",
+    "backend/src/dtos/server-version.dto.ts",
+    "backend/src/dtos/special-urls.dto.ts",
+    "backend/src/dtos/update-password.dto.ts",
+    "backend/src/dtos/user-info.dto.ts",
+    "backend/src/dtos/username-check-response.dto.ts",
+    "backend/src/dtos/username-check.dto.ts",
+    "backend/src/errors/error-mapping.ts",
+    "backend/src/errors/errors.ts",
+    "backend/src/events.ts",
+    "backend/src/explore/explore.service.ts",
+    "backend/src/frontend-config/frontend-config.service.ts",
+    "backend/src/groups/groups.service.ts",
+    "backend/src/logger/console-logger.service.ts",
+    "backend/src/media-redirect/media-redirect.controller.ts",
+    "backend/src/media/backends/azure-backend.ts",
+    "backend/src/media/backends/filesystem-backend.ts",
+    "backend/src/media/backends/imgur-backend.ts",
+    "backend/src/media/backends/s3-backend.ts",
+    "backend/src/media/backends/webdav-backend.ts",
+    "backend/src/media/media-backend.interface.ts",
+    "backend/src/media/media-response.interface.ts",
+    "backend/src/media/media.service.ts",
+    "backend/src/media/multer-file.interface.ts",
+    "backend/src/notes/note.service.ts",
+    "backend/src/permissions/permission.service.ts",
+    "backend/src/permissions/permissions.guard.ts",
+    "backend/src/permissions/require-permission.decorator.ts",
+    "backend/src/realtime/realtime-note/realtime-note-store.ts",
+    "backend/src/realtime/realtime-note/realtime-note.ts",
+    "backend/src/revisions/revisions.service.ts",
+    "backend/src/sessions/session-state.ts",
+    "backend/src/sessions/session.service.ts",
+    "backend/src/users/random-word-lists/name-randomizer.ts",
+    "backend/src/users/random-word-lists/random-words.ts",
+    "backend/src/users/users.service.ts",
+    "backend/src/utils/datetime.ts",
+    "backend/src/utils/dev-mode.ts",
+    "backend/src/utils/password.ts",
+    "backend/src/utils/server-version.ts",
+    "commons/src/file-type/extract-file-type.ts",
+    "commons/src/parse-url/parse-url.ts",
+    "commons/src/y-doc-sync/realtime-doc.ts",
+    "frontend/src/api/common/api-response.ts",
+    "frontend/src/utils/logger.ts"
+   ]
+  }
+ ],
+ "sliceFiles": [
+  "backend/src/alias/alias.service.ts",
+  "backend/src/api-token/api-token.service.ts",
+  "backend/src/api/private/alias/alias.controller.ts",
+  "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+  "backend/src/api/private/auth/auth.controller.ts",
+  "backend/src/api/private/auth/guest/guest.controller.ts",
+  "backend/src/api/private/auth/ldap/ldap.controller.ts",
+  "backend/src/api/private/auth/local/local.controller.ts",
+  "backend/src/api/private/auth/oidc/oidc.controller.ts",
+  "backend/src/api/private/config/config.controller.ts",
+  "backend/src/api/private/csrf/csrf.controller.ts",
+  "backend/src/api/private/csrf/csrf.guard.ts",
+  "backend/src/api/private/explore/explore.controller.ts",
+  "backend/src/api/private/groups/groups.controller.ts",
+  "backend/src/api/private/me/me.controller.ts",
+  "backend/src/api/private/media/media.controller.ts",
+  "backend/src/api/private/notes/notes.controller.ts",
+  "backend/src/api/private/users/users.controller.ts",
+  "backend/src/api/utils/decorators/csrf-exempt.decorator.ts",
+  "backend/src/api/utils/decorators/fastify-file.decorator.ts",
+  "backend/src/api/utils/decorators/openapi.decorator.ts",
+  "backend/src/api/utils/decorators/request-note-id.decorator.ts",
+  "backend/src/api/utils/decorators/request-user-id.decorator.ts",
+  "backend/src/api/utils/decorators/session-authprovider.decorator.ts",
+  "backend/src/api/utils/descriptions.ts",
+  "backend/src/api/utils/extract-note-id-from-request.ts",
+  "backend/src/api/utils/guards/api-token.guard.ts",
+  "backend/src/api/utils/guards/guests-enabled.guard.ts",
+  "backend/src/api/utils/guards/login-enabled.guard.ts",
+  "backend/src/api/utils/guards/mock-api-token.guard.ts",
+  "backend/src/api/utils/guards/registration-enabled.guard.ts",
+  "backend/src/api/utils/interceptors/get-note-id.interceptor.ts",
+  "backend/src/api/utils/interceptors/note-header.interceptor.ts",
+  "backend/src/api/utils/request.type.ts",
+  "backend/src/auth/identity.service.ts",
+  "backend/src/auth/ldap/ldap.service.ts",
+  "backend/src/auth/local/local.service.ts",
+  "backend/src/auth/oidc/oidc.service.ts",
+  "backend/src/auth/session.guard.ts",
+  "backend/src/config/app.config.ts",
+  "backend/src/config/auth.config.ts",
+  "backend/src/config/customization.config.ts",
+  "backend/src/config/external-services.config.ts",
+  "backend/src/config/loglevel.enum.ts",
+  "backend/src/config/media.config.ts",
+  "backend/src/config/note.config.ts",
+  "backend/src/config/theme.enum.ts",
+  "backend/src/config/utils.ts",
+  "backend/src/config/zod-error-message.ts",
+  "backend/src/dtos/alias-create.dto.ts",
+  "backend/src/dtos/alias-update.dto.ts",
+  "backend/src/dtos/api-token-create.dto.ts",
+  "backend/src/dtos/api-token-with-secret.dto.ts",
+  "backend/src/dtos/api-token.dto.ts",
+  "backend/src/dtos/backchannel-logout.dto.ts",
+  "backend/src/dtos/branding.dto.ts",
+  "backend/src/dtos/csrf-token.dto.ts",
+  "backend/src/dtos/frontend-config.dto.ts",
+  "backend/src/dtos/group-info.dto.ts",
+  "backend/src/dtos/guest-login.dto.ts",
+  "backend/src/dtos/guest-registration-response.dto.ts",
+  "backend/src/dtos/ldap-login-response.dto.ts",
+  "backend/src/dtos/ldap-login.dto.ts",
+  "backend/src/dtos/login-user-info.dto.ts",
+  "backend/src/dtos/login.dto.ts",
+  "backend/src/dtos/logout-response.dto.ts",
+  "backend/src/dtos/media-upload.dto.ts",
+  "backend/src/dtos/note-aliases.dto.ts",
+  "backend/src/dtos/note-explore-entry.dto.ts",
+  "backend/src/dtos/note-metadata.dto.ts",
+  "backend/src/dtos/note-pin-status.dto.ts",
+  "backend/src/dtos/note.dto.ts",
+  "backend/src/dtos/pending-ldap-user-info.dto.ts",
+  "backend/src/dtos/pending-user-confirmation.dto.ts",
+  "backend/src/dtos/pending-user-info.dto.ts",
+  "backend/src/dtos/register.dto.ts",
+  "backend/src/dtos/server-version.dto.ts",
+  "backend/src/dtos/special-urls.dto.ts",
+  "backend/src/dtos/update-password.dto.ts",
+  "backend/src/dtos/user-info.dto.ts",
+  "backend/src/dtos/username-check-response.dto.ts",
+  "backend/src/dtos/username-check.dto.ts",
+  "backend/src/errors/error-mapping.ts",
+  "backend/src/errors/errors.ts",
+  "backend/src/events.ts",
+  "backend/src/explore/explore.service.ts",
+  "backend/src/frontend-config/frontend-config.service.ts",
+  "backend/src/groups/groups.service.ts",
+  "backend/src/logger/console-logger.service.ts",
+  "backend/src/media-redirect/media-redirect.controller.ts",
+  "backend/src/media/backends/azure-backend.ts",
+  "backend/src/media/backends/filesystem-backend.ts",
+  "backend/src/media/backends/imgur-backend.ts",
+  "backend/src/media/backends/s3-backend.ts",
+  "backend/src/media/backends/webdav-backend.ts",
+  "backend/src/media/media-backend.interface.ts",
+  "backend/src/media/media-response.interface.ts",
+  "backend/src/media/media.service.ts",
+  "backend/src/media/multer-file.interface.ts",
+  "backend/src/notes/note.service.ts",
+  "backend/src/permissions/permission.service.ts",
+  "backend/src/permissions/permissions.guard.ts",
+  "backend/src/permissions/require-permission.decorator.ts",
+  "backend/src/realtime/realtime-note/realtime-note-store.ts",
+  "backend/src/realtime/realtime-note/realtime-note.ts",
+  "backend/src/revisions/revisions.service.ts",
+  "backend/src/sessions/session-state.ts",
+  "backend/src/sessions/session.service.ts",
+  "backend/src/users/random-word-lists/name-randomizer.ts",
+  "backend/src/users/random-word-lists/random-words.ts",
+  "backend/src/users/users.service.ts",
+  "backend/src/utils/datetime.ts",
+  "backend/src/utils/dev-mode.ts",
+  "backend/src/utils/password.ts",
+  "backend/src/utils/server-version.ts",
+  "commons/src/file-type/extract-file-type.ts",
+  "commons/src/parse-url/parse-url.ts",
+  "commons/src/y-doc-sync/realtime-doc.ts",
+  "frontend/src/api/common/api-response.ts",
+  "frontend/src/utils/logger.ts"
+ ],
+ "eval": {
+  "targets": 19,
+  "ceiling": {
+   "n": 19,
+   "selfIn": 19,
+   "callerIn": 4,
+   "parentIn": 18,
+   "authIn": 12,
+   "evident": 19,
+   "decidable": 12,
+   "rows": [
+    {
+     "fn": "renderAstToHtml",
+     "rule": "No Input Sanitization",
+     "file": "markdown-it-plugins/src/toc/toc-body-renderer.ts",
+     "isEntry": false,
+     "selfIn": true,
+     "callerIn": true,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    },
+    {
+     "fn": "ApiTokensController.postTokenRequest",
+     "rule": "Data Integrity (Foreign Key)",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "ApiTokensController.postTokenRequest",
+     "rule": "Input Validation",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "AuthController.logout",
+     "rule": "Session Fixation (Logout without Invalidation)",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "GuestController.registerGuestUser",
+     "rule": "Password Hashing",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "GuestController.registerGuestUser",
+     "rule": "Password Hashing (Weak)",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "GuestController.registerGuestUser",
+     "rule": "Registration Without Email Verification",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "GuestController.loginGuestUser",
+     "rule": "Session No Timeout",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "LdapController.loginWithLdap",
+     "rule": "Session No Timeout",
+     "file": "backend/src/api/private/auth/ldap/ldap.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    },
+    {
+     "fn": "LocalController.registerUser",
+     "rule": "Password Hashing",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "LocalController.registerUser",
+     "rule": "Password Hashing (Weak)",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "LocalController.registerUser",
+     "rule": "Registration Without Email Verification",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "LocalController.updatePassword",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "LocalController.login",
+     "rule": "Session No Timeout",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "OidcController.loginWithOpenIdConnect",
+     "rule": "Session No Timeout",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    },
+    {
+     "fn": "OidcController.callback",
+     "rule": "Authorization (Ownership Check)",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": true,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    },
+    {
+     "fn": "OidcController.callback",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": true,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    },
+    {
+     "fn": "OidcController.callback",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": true,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    },
+    {
+     "fn": "OidcController.backchannelLogout",
+     "rule": "Session Fixation (Logout without Invalidation)",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": true,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    }
+   ]
+  },
+  "byMode": {
+   "callee": {
+    "n": 19,
+    "selfIn": 18,
+    "callerIn": 3,
+    "parentIn": 0,
+    "authIn": 12,
+    "evident": 18,
+    "decidable": 12,
+    "rows": [
+     {
+      "fn": "renderAstToHtml",
+      "rule": "No Input Sanitization",
+      "file": "markdown-it-plugins/src/toc/toc-body-renderer.ts",
+      "isEntry": false,
+      "selfIn": false,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": false,
+      "decidable": false
+     },
+     {
+      "fn": "ApiTokensController.postTokenRequest",
+      "rule": "Data Integrity (Foreign Key)",
+      "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "ApiTokensController.postTokenRequest",
+      "rule": "Input Validation",
+      "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "AuthController.logout",
+      "rule": "Session Fixation (Logout without Invalidation)",
+      "file": "backend/src/api/private/auth/auth.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "GuestController.registerGuestUser",
+      "rule": "Password Hashing",
+      "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "GuestController.registerGuestUser",
+      "rule": "Password Hashing (Weak)",
+      "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "GuestController.registerGuestUser",
+      "rule": "Registration Without Email Verification",
+      "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "GuestController.loginGuestUser",
+      "rule": "Session No Timeout",
+      "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LdapController.loginWithLdap",
+      "rule": "Session No Timeout",
+      "file": "backend/src/api/private/auth/ldap/ldap.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "LocalController.registerUser",
+      "rule": "Password Hashing",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LocalController.registerUser",
+      "rule": "Password Hashing (Weak)",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LocalController.registerUser",
+      "rule": "Registration Without Email Verification",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LocalController.updatePassword",
+      "rule": "No Token Rotation After Privilege Change",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LocalController.login",
+      "rule": "Session No Timeout",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "OidcController.loginWithOpenIdConnect",
+      "rule": "Session No Timeout",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "OidcController.callback",
+      "rule": "Authorization (Ownership Check)",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": true,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "OidcController.callback",
+      "rule": "Authorization (Unauthenticated Access)",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": true,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "OidcController.callback",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": true,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "OidcController.backchannelLogout",
+      "rule": "Session Fixation (Logout without Invalidation)",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     }
+    ]
+   },
+   "import": {
+    "n": 19,
+    "selfIn": 18,
+    "callerIn": 0,
+    "parentIn": 0,
+    "authIn": 12,
+    "evident": 18,
+    "decidable": 12,
+    "rows": [
+     {
+      "fn": "renderAstToHtml",
+      "rule": "No Input Sanitization",
+      "file": "markdown-it-plugins/src/toc/toc-body-renderer.ts",
+      "isEntry": false,
+      "selfIn": false,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": false,
+      "decidable": false
+     },
+     {
+      "fn": "ApiTokensController.postTokenRequest",
+      "rule": "Data Integrity (Foreign Key)",
+      "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "ApiTokensController.postTokenRequest",
+      "rule": "Input Validation",
+      "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "AuthController.logout",
+      "rule": "Session Fixation (Logout without Invalidation)",
+      "file": "backend/src/api/private/auth/auth.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "GuestController.registerGuestUser",
+      "rule": "Password Hashing",
+      "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "GuestController.registerGuestUser",
+      "rule": "Password Hashing (Weak)",
+      "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "GuestController.registerGuestUser",
+      "rule": "Registration Without Email Verification",
+      "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "GuestController.loginGuestUser",
+      "rule": "Session No Timeout",
+      "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LdapController.loginWithLdap",
+      "rule": "Session No Timeout",
+      "file": "backend/src/api/private/auth/ldap/ldap.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "LocalController.registerUser",
+      "rule": "Password Hashing",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LocalController.registerUser",
+      "rule": "Password Hashing (Weak)",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LocalController.registerUser",
+      "rule": "Registration Without Email Verification",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LocalController.updatePassword",
+      "rule": "No Token Rotation After Privilege Change",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LocalController.login",
+      "rule": "Session No Timeout",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "OidcController.loginWithOpenIdConnect",
+      "rule": "Session No Timeout",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "OidcController.callback",
+      "rule": "Authorization (Ownership Check)",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "OidcController.callback",
+      "rule": "Authorization (Unauthenticated Access)",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "OidcController.callback",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "OidcController.backchannelLogout",
+      "rule": "Session Fixation (Logout without Invalidation)",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     }
+    ]
+   },
+   "hybrid": {
+    "n": 19,
+    "selfIn": 18,
+    "callerIn": 0,
+    "parentIn": 0,
+    "authIn": 12,
+    "evident": 18,
+    "decidable": 12,
+    "rows": [
+     {
+      "fn": "renderAstToHtml",
+      "rule": "No Input Sanitization",
+      "file": "markdown-it-plugins/src/toc/toc-body-renderer.ts",
+      "isEntry": false,
+      "selfIn": false,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": false,
+      "decidable": false
+     },
+     {
+      "fn": "ApiTokensController.postTokenRequest",
+      "rule": "Data Integrity (Foreign Key)",
+      "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "ApiTokensController.postTokenRequest",
+      "rule": "Input Validation",
+      "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "AuthController.logout",
+      "rule": "Session Fixation (Logout without Invalidation)",
+      "file": "backend/src/api/private/auth/auth.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "GuestController.registerGuestUser",
+      "rule": "Password Hashing",
+      "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "GuestController.registerGuestUser",
+      "rule": "Password Hashing (Weak)",
+      "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "GuestController.registerGuestUser",
+      "rule": "Registration Without Email Verification",
+      "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "GuestController.loginGuestUser",
+      "rule": "Session No Timeout",
+      "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LdapController.loginWithLdap",
+      "rule": "Session No Timeout",
+      "file": "backend/src/api/private/auth/ldap/ldap.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "LocalController.registerUser",
+      "rule": "Password Hashing",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LocalController.registerUser",
+      "rule": "Password Hashing (Weak)",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LocalController.registerUser",
+      "rule": "Registration Without Email Verification",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LocalController.updatePassword",
+      "rule": "No Token Rotation After Privilege Change",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "LocalController.login",
+      "rule": "Session No Timeout",
+      "file": "backend/src/api/private/auth/local/local.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": true,
+      "evident": true,
+      "decidable": true
+     },
+     {
+      "fn": "OidcController.loginWithOpenIdConnect",
+      "rule": "Session No Timeout",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "OidcController.callback",
+      "rule": "Authorization (Ownership Check)",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "OidcController.callback",
+      "rule": "Authorization (Unauthenticated Access)",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "OidcController.callback",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     },
+     {
+      "fn": "OidcController.backchannelLogout",
+      "rule": "Session Fixation (Logout without Invalidation)",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "isEntry": true,
+      "selfIn": true,
+      "callerIn": false,
+      "parentIn": false,
+      "routeParentIn": false,
+      "authIn": false,
+      "evident": true,
+      "decidable": false
+     }
+    ]
+   }
+  },
+  "baseline": {
+   "name": "hedgedoc",
+   "files": 97,
+   "n": 19,
+   "selfIn": 19,
+   "callerIn": 1,
+   "parentIn": 0,
+   "authIn": 12,
+   "evident": 19,
+   "decidable": 12,
+   "rows": [
+    {
+     "fn": "renderAstToHtml",
+     "rule": "No Input Sanitization",
+     "file": "markdown-it-plugins/src/toc/toc-body-renderer.ts",
+     "isEntry": false,
+     "selfIn": true,
+     "callerIn": true,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    },
+    {
+     "fn": "ApiTokensController.postTokenRequest",
+     "rule": "Data Integrity (Foreign Key)",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "ApiTokensController.postTokenRequest",
+     "rule": "Input Validation",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "AuthController.logout",
+     "rule": "Session Fixation (Logout without Invalidation)",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "GuestController.registerGuestUser",
+     "rule": "Password Hashing",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "GuestController.registerGuestUser",
+     "rule": "Password Hashing (Weak)",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "GuestController.registerGuestUser",
+     "rule": "Registration Without Email Verification",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "GuestController.loginGuestUser",
+     "rule": "Session No Timeout",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "LdapController.loginWithLdap",
+     "rule": "Session No Timeout",
+     "file": "backend/src/api/private/auth/ldap/ldap.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    },
+    {
+     "fn": "LocalController.registerUser",
+     "rule": "Password Hashing",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "LocalController.registerUser",
+     "rule": "Password Hashing (Weak)",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "LocalController.registerUser",
+     "rule": "Registration Without Email Verification",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "LocalController.updatePassword",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "LocalController.login",
+     "rule": "Session No Timeout",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": true,
+     "evident": true,
+     "decidable": true
+    },
+    {
+     "fn": "OidcController.loginWithOpenIdConnect",
+     "rule": "Session No Timeout",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    },
+    {
+     "fn": "OidcController.callback",
+     "rule": "Authorization (Ownership Check)",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    },
+    {
+     "fn": "OidcController.callback",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    },
+    {
+     "fn": "OidcController.callback",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    },
+    {
+     "fn": "OidcController.backchannelLogout",
+     "rule": "Session Fixation (Logout without Invalidation)",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "isEntry": true,
+     "selfIn": true,
+     "callerIn": false,
+     "parentIn": false,
+     "routeParentIn": false,
+     "authIn": false,
+     "evident": true,
+     "decidable": false
+    }
+   ]
+  },
+  "diag": {
+   "rows": [
+    {
+     "fn": "renderAstToHtml",
+     "file": "markdown-it-plugins/src/toc/toc-body-renderer.ts",
+     "selfFound": true,
+     "isEntry": false,
+     "strictCallers": 1,
+     "looseCallers": 1,
+     "importParents": 0,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "ApiTokensController.postTokenRequest",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "ApiTokensController.postTokenRequest",
+     "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "AuthController.logout",
+     "file": "backend/src/api/private/auth/auth.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "GuestController.registerGuestUser",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "GuestController.registerGuestUser",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "GuestController.registerGuestUser",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "GuestController.loginGuestUser",
+     "file": "backend/src/api/private/auth/guest/guest.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "LdapController.loginWithLdap",
+     "file": "backend/src/api/private/auth/ldap/ldap.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "LocalController.registerUser",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "LocalController.registerUser",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "LocalController.registerUser",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "LocalController.updatePassword",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "LocalController.login",
+     "file": "backend/src/api/private/auth/local/local.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "OidcController.loginWithOpenIdConnect",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "OidcController.callback",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 11,
+     "looseCallers": 50,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "OidcController.callback",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 11,
+     "looseCallers": 50,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "OidcController.callback",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 11,
+     "looseCallers": 50,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    },
+    {
+     "fn": "OidcController.backchannelLogout",
+     "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+     "selfFound": true,
+     "isEntry": true,
+     "strictCallers": 0,
+     "looseCallers": 0,
+     "importParents": 1,
+     "chainVisible": true,
+     "entryReachable": true
+    }
+   ],
+   "summary": {
+    "n": 19,
+    "noSelf": 0,
+    "entryOnly": 15,
+    "strictMissLooseHit": 0,
+    "importRescue": 15,
+    "invisible": 0
+   }
+  }
+ }
+}

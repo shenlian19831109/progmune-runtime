@@ -1,0 +1,39 @@
+{
+  "total": 66,
+  "residual": 35,
+  "c1": [
+    "verdaccio/publish::Authorization (Ownership Check)",
+    "verdaccio/publish::Authorization (Unauthenticated Access)",
+    "verdaccio/publish::Authorization (Unauthenticated Mutation)",
+    "verdaccio/publish::Authorization (Resource Ownership)"
+  ],
+  "c2": [
+    "verdaccio/canRemove::Authorization (Ownership Check)"
+  ],
+  "c5": [
+    "verdaccio/verifyJWTPayload::Authorization (Unauthenticated Access)",
+    "verdaccio/verifyJWTPayload::Authorization (Unauthenticated Mutation)"
+  ],
+  "left": [
+    "docmost/FavoriteController.removeFavorite::Authorization (Ownership Check)",
+    "docmost/FavoriteController.removeFavorite::Authorization (Resource Ownership)",
+    "docmost/AttachmentService.removeUserAvatar::Authorization (Ownership Check)",
+    "docmost/AttachmentService.removeUserAvatar::Authorization (Unauthenticated Access)",
+    "docmost/AttachmentService.removeUserAvatar::Authorization (Unauthenticated Mutation)",
+    "docmost/AttachmentService.removeUserAvatar::Authorization (Resource Ownership)",
+    "hedgedoc/AuthController.getPendingUserData::Authorization (Unauthenticated Access)",
+    "hedgedoc/AuthController.confirmPendingUserData::Authorization (Unauthenticated Mutation)",
+    "hedgedoc/AuthController.deletePendingUserData::Authorization (Ownership Check)",
+    "hoppscotch/AccessTokenController.deletePAT::Authorization (Ownership Check)",
+    "hoppscotch/AccessTokenService.createPAT::Authorization (Unauthenticated Mutation)",
+    "hoppscotch/AccessTokenService.updateLastUsedForPAT::Authorization (Ownership Check)",
+    "hoppscotch/AccessTokenService.updateLastUsedForPAT::Authorization (Unauthenticated Mutation)",
+    "hoppscotch/AdminService.addUserToTeam::Authorization (Unauthenticated Access)",
+    "hoppscotch/AdminService.addUserToTeam::Authorization (Unauthenticated Mutation)",
+    "outline/createContext::Authorization (Unauthenticated Mutation)",
+    "verdaccio/ConfigBuilder.addAuth::Authorization (Unauthenticated Mutation)",
+    "verdaccio/resolveRemoteUser::Authorization (Unauthenticated Access)",
+    "verdaccio/resolveRemoteUser::Authorization (Unauthenticated Mutation)",
+    "w3tecch-express-typescript-boilerplate/UserEventSubscriber.onUserCreate::Authorization (Unauthenticated Mutation)"
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "repo": "hedgedoc",
+  "universe": 115,
+  "hitExisting": 1,
+  "hitNew": 4,
+  "hitSoft": 1,
+  "newlySuppressed": [
+    {
+      "fn": "AliasController.removeAlias",
+      "file": "backend/src/api/private/alias/alias.controller.ts",
+      "hits": [
+        "A′:getNoteIdAndCheckIfUserCanEditAliases"
+      ]
+    },
+    {
+      "fn": "MediaController.deleteMedia",
+      "file": "backend/src/api/private/media/media.controller.ts",
+      "hits": [
+        "A″:checkMediaDeletePermission"
+      ]
+    },
+    {
+      "fn": "EditorPane",
+      "file": "frontend/src/components/editor-page/editor-pane/editor-pane.tsx",
+      "hits": [
+        "A′:useMayEdit"
+      ]
+    },
+    {
+      "fn": "useMayEdit",
+      "file": "frontend/src/hooks/common/use-may-edit.ts",
+      "hits": [
+        "A′:userCanEdit"
+      ]
+    }
+  ],
+  "softSamples": [
+    {
+      "fn": "RealtimeNote.removeClient",
+      "hits": [
+        "canBeDestroyed"
+      ]
+    }
+  ],
+  "unkHit": 0,
+  "unkLocated": 6,
+  "unk": 6,
+  "unkRows": [
+    {
+      "fn": "AuthController.getPendingUserData",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": []
+    },
+    {
+      "fn": "AuthController.confirmPendingUserData",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": []
+    },
+    {
+      "fn": "AuthController.deletePendingUserData",
+      "rule": "Authorization (Ownership Check)",
+      "hits": []
+    },
+    {
+      "fn": "OidcController.callback",
+      "rule": "Authorization (Ownership Check)",
+      "hits": [
+        "A-soft:mayUpdateIdentity"
+      ]
+    },
+    {
+      "fn": "OidcController.callback",
+      "rule": "Authorization (Unauthenticated Access)",
+      "hits": [
+        "A-soft:mayUpdateIdentity"
+      ]
+    },
+    {
+      "fn": "OidcController.callback",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "hits": [
+        "A-soft:mayUpdateIdentity"
+      ]
+    }
+  ]
+}

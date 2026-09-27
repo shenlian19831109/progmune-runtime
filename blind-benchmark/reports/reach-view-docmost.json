@@ -1,0 +1,2574 @@
+{
+ "src": "/tmp/full-docmost",
+ "goldRepo": "docmost",
+ "depth": 4,
+ "targets": 37,
+ "results": {
+  "full": {
+   "label": "全量（上界）",
+   "files": 359,
+   "nonEntry": 26,
+   "reachable": 26,
+   "authOnPath": 26,
+   "medianEntryCount": 2,
+   "actionable": 16,
+   "buckets": {
+    ">10": 9,
+    "4-10": 1,
+    "2-3": 16
+   },
+   "strictAgree": 14,
+   "strictDisagree": 0,
+   "rows": [
+    {
+     "fn": "prosemirrorNodeToYElement",
+     "rule": "No Input Sanitization",
+     "file": "src/collaboration/collaboration.util.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 13,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/page/page.controller.ts",
+      "src/core/share/share.controller.ts",
+      "src/integrations/export/export.controller.ts"
+     ],
+     "samplePath": [
+      "src/collaboration/collaboration.util.ts",
+      "src/collaboration/collaboration.handler.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthenticationExtension.onAuthenticate",
+     "rule": "Session No Timeout",
+     "file": "src/collaboration/extensions/authentication.extension.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 5,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/comment/comment.controller.ts",
+      "src/core/page/page.controller.ts"
+     ],
+     "samplePath": [
+      "src/collaboration/extensions/authentication.extension.ts",
+      "src/collaboration/collaboration.gateway.ts",
+      "src/collaboration/server/collaboration.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "JwtAuthGuard.handleRequest",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 23,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/favorite/favorite.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "JwtAuthGuard.handleRequest",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 23,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/favorite/favorite.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 23,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/favorite/favorite.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 23,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/favorite/favorite.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "normalizePostgresUrl",
+     "rule": "No Input Sanitization",
+     "file": "src/common/helpers/utils.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 21,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/page/page.controller.ts",
+      "src/integrations/export/export.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/helpers/utils.ts",
+      "src/common/helpers/index.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "FileInterceptor.intercept",
+     "rule": "File Upload Without Validation",
+     "file": "src/common/interceptors/file.interceptor.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 3,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/integrations/import/import.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/interceptors/file.interceptor.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.uploadFile",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.uploadAvatarOrLogo",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.removeIcon",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.removeIcon",
+     "rule": "Authorization (Resource Ownership)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthController.changePassword",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/auth.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthController.passwordReset",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/auth.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "CommentController.delete",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/comment/comment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "CommentService.create",
+     "rule": "No Input Sanitization",
+     "file": "src/core/comment/comment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/comment/comment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/comment/comment.service.ts",
+      "src/core/comment/comment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "GroupController.updateGroup",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "GroupController.removeGroupMember",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "GroupController.removeGroupMember",
+     "rule": "Authorization (Resource Ownership)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "GroupController.deleteGroup",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentService.saveAttachment",
+     "rule": "No Input Sanitization",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Resource Ownership)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AuthService.login",
+     "rule": "Session No Timeout",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AuthService.register",
+     "rule": "Password Hashing",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthService.register",
+     "rule": "Password Hashing (Weak)",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthService.register",
+     "rule": "Registration Without Email Verification",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthService.changePassword",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AuthService.passwordReset",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "SignupService.signup",
+     "rule": "Password Hashing",
+     "file": "src/core/auth/services/signup.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/signup.service.ts",
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "SignupService.signup",
+     "rule": "Password Hashing (Weak)",
+     "file": "src/core/auth/services/signup.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/signup.service.ts",
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "SignupService.signup",
+     "rule": "Registration Without Email Verification",
+     "file": "src/core/auth/services/signup.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/signup.service.ts",
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "TokenService.generatePdfRenderToken",
+     "rule": "No Input Sanitization",
+     "file": "src/core/auth/services/token.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 15,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/session/session.controller.ts",
+      "src/core/share/share.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/token.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "SpaceAbilityFactory.createForUser",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/core/casl/abilities/space-ability.factory.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 19,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/label/label.controller.ts",
+      "src/core/page/page.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/casl/abilities/space-ability.factory.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "SpaceAbilityFactory.createForUser",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/core/casl/abilities/space-ability.factory.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 19,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/label/label.controller.ts",
+      "src/core/page/page.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/casl/abilities/space-ability.factory.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    }
+   ]
+  },
+  "pool": {
+   "label": "池内切片 docmost",
+   "files": 118,
+   "nonEntry": 26,
+   "reachable": 26,
+   "authOnPath": 26,
+   "medianEntryCount": 1,
+   "actionable": 17,
+   "buckets": {
+    "1": 16,
+    "4-10": 9,
+    "2-3": 1
+   },
+   "strictAgree": 14,
+   "strictDisagree": 0,
+   "rows": [
+    {
+     "fn": "prosemirrorNodeToYElement",
+     "rule": "No Input Sanitization",
+     "file": "src/collaboration/collaboration.util.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 4,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/comment/comment.controller.ts"
+     ],
+     "samplePath": [
+      "src/collaboration/collaboration.util.ts",
+      "src/collaboration/collaboration.handler.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthenticationExtension.onAuthenticate",
+     "rule": "Session No Timeout",
+     "file": "src/collaboration/extensions/authentication.extension.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 3,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/comment/comment.controller.ts"
+     ],
+     "samplePath": [
+      "src/collaboration/extensions/authentication.extension.ts",
+      "src/collaboration/collaboration.gateway.ts",
+      "src/collaboration/server/collaboration.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "JwtAuthGuard.handleRequest",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 6,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/favorite/favorite.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "JwtAuthGuard.handleRequest",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 6,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/favorite/favorite.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 6,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/favorite/favorite.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 6,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/favorite/favorite.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "normalizePostgresUrl",
+     "rule": "No Input Sanitization",
+     "file": "src/common/helpers/utils.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 7,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/helpers/utils.ts",
+      "src/common/helpers/index.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "FileInterceptor.intercept",
+     "rule": "File Upload Without Validation",
+     "file": "src/common/interceptors/file.interceptor.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/interceptors/file.interceptor.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.uploadFile",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.uploadAvatarOrLogo",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.removeIcon",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.removeIcon",
+     "rule": "Authorization (Resource Ownership)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthController.changePassword",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/auth.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthController.passwordReset",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/auth.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "CommentController.delete",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/comment/comment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "CommentService.create",
+     "rule": "No Input Sanitization",
+     "file": "src/core/comment/comment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/comment/comment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/comment/comment.service.ts",
+      "src/core/comment/comment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "GroupController.updateGroup",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "GroupController.removeGroupMember",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "GroupController.removeGroupMember",
+     "rule": "Authorization (Resource Ownership)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "GroupController.deleteGroup",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentService.saveAttachment",
+     "rule": "No Input Sanitization",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Resource Ownership)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AuthService.login",
+     "rule": "Session No Timeout",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AuthService.register",
+     "rule": "Password Hashing",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthService.register",
+     "rule": "Password Hashing (Weak)",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthService.register",
+     "rule": "Registration Without Email Verification",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthService.changePassword",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AuthService.passwordReset",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "SignupService.signup",
+     "rule": "Password Hashing",
+     "file": "src/core/auth/services/signup.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/signup.service.ts",
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "SignupService.signup",
+     "rule": "Password Hashing (Weak)",
+     "file": "src/core/auth/services/signup.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/signup.service.ts",
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "SignupService.signup",
+     "rule": "Registration Without Email Verification",
+     "file": "src/core/auth/services/signup.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/signup.service.ts",
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "TokenService.generatePdfRenderToken",
+     "rule": "No Input Sanitization",
+     "file": "src/core/auth/services/token.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 5,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/token.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "SpaceAbilityFactory.createForUser",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/core/casl/abilities/space-ability.factory.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 4,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/label/label.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/casl/abilities/space-ability.factory.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "SpaceAbilityFactory.createForUser",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/core/casl/abilities/space-ability.factory.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 4,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/label/label.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/casl/abilities/space-ability.factory.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    }
+   ]
+  },
+  "closure": {
+   "label": "闭包切片(118)",
+   "files": 118,
+   "nonEntry": 26,
+   "reachable": 23,
+   "authOnPath": 23,
+   "medianEntryCount": 1,
+   "actionable": 15,
+   "buckets": {
+    "1": 13,
+    "2-3": 2,
+    "4-10": 8
+   },
+   "strictAgree": 11,
+   "strictDisagree": 0,
+   "rows": [
+    {
+     "fn": "prosemirrorNodeToYElement",
+     "rule": "No Input Sanitization",
+     "file": "src/collaboration/collaboration.util.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 3,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/comment/comment.controller.ts"
+     ],
+     "samplePath": [
+      "src/collaboration/collaboration.util.ts",
+      "src/collaboration/collaboration.handler.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthenticationExtension.onAuthenticate",
+     "rule": "Session No Timeout",
+     "file": "src/collaboration/extensions/authentication.extension.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 2,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/comment/comment.controller.ts"
+     ],
+     "samplePath": [
+      "src/collaboration/extensions/authentication.extension.ts",
+      "src/collaboration/collaboration.gateway.ts",
+      "src/collaboration/server/collaboration.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "JwtAuthGuard.handleRequest",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 8,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/favorite/favorite.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "JwtAuthGuard.handleRequest",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 8,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/favorite/favorite.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 8,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/favorite/favorite.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 8,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/favorite/favorite.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "normalizePostgresUrl",
+     "rule": "No Input Sanitization",
+     "file": "src/common/helpers/utils.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 6,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/group/group.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/helpers/utils.ts",
+      "src/common/helpers/index.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "FileInterceptor.intercept",
+     "rule": "File Upload Without Validation",
+     "file": "src/common/interceptors/file.interceptor.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/interceptors/file.interceptor.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.uploadFile",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.uploadAvatarOrLogo",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.removeIcon",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.removeIcon",
+     "rule": "Authorization (Resource Ownership)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthController.changePassword",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/auth.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthController.passwordReset",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/auth.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "CommentController.delete",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/comment/comment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "CommentService.create",
+     "rule": "No Input Sanitization",
+     "file": "src/core/comment/comment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/comment/comment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/comment/comment.service.ts",
+      "src/core/comment/comment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "GroupController.updateGroup",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "GroupController.removeGroupMember",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "GroupController.removeGroupMember",
+     "rule": "Authorization (Resource Ownership)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "GroupController.deleteGroup",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentService.saveAttachment",
+     "rule": "No Input Sanitization",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Resource Ownership)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AuthService.login",
+     "rule": "Session No Timeout",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AuthService.register",
+     "rule": "Password Hashing",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthService.register",
+     "rule": "Password Hashing (Weak)",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthService.register",
+     "rule": "Registration Without Email Verification",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthService.changePassword",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AuthService.passwordReset",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "SignupService.signup",
+     "rule": "Password Hashing",
+     "file": "src/core/auth/services/signup.service.ts",
+     "isEntry": false,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": false
+    },
+    {
+     "fn": "SignupService.signup",
+     "rule": "Password Hashing (Weak)",
+     "file": "src/core/auth/services/signup.service.ts",
+     "isEntry": false,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": false
+    },
+    {
+     "fn": "SignupService.signup",
+     "rule": "Registration Without Email Verification",
+     "file": "src/core/auth/services/signup.service.ts",
+     "isEntry": false,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": false
+    },
+    {
+     "fn": "TokenService.generatePdfRenderToken",
+     "rule": "No Input Sanitization",
+     "file": "src/core/auth/services/token.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 5,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/core/notification/notification.controller.ts",
+      "src/core/comment/comment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/token.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "SpaceAbilityFactory.createForUser",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/core/casl/abilities/space-ability.factory.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 5,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/label/label.controller.ts",
+      "src/core/page/page-access/page-access.service.ts"
+     ],
+     "samplePath": [
+      "src/core/casl/abilities/space-ability.factory.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "SpaceAbilityFactory.createForUser",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/core/casl/abilities/space-ability.factory.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 5,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/comment/comment.controller.ts",
+      "src/core/label/label.controller.ts",
+      "src/core/page/page-access/page-access.service.ts"
+     ],
+     "samplePath": [
+      "src/core/casl/abilities/space-ability.factory.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    }
+   ]
+  },
+  "roundRobin": {
+   "label": "轮转切片(118)",
+   "files": 118,
+   "nonEntry": 26,
+   "reachable": 20,
+   "authOnPath": 19,
+   "medianEntryCount": 1,
+   "actionable": 15,
+   "buckets": {
+    "1": 14,
+    "4-10": 5,
+    "2-3": 1
+   },
+   "strictAgree": 13,
+   "strictDisagree": 0,
+   "rows": [
+    {
+     "fn": "prosemirrorNodeToYElement",
+     "rule": "No Input Sanitization",
+     "file": "src/collaboration/collaboration.util.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 5,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/integrations/export/export.controller.ts"
+     ],
+     "samplePath": [
+      "src/collaboration/collaboration.util.ts",
+      "src/collaboration/collaboration.handler.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthenticationExtension.onAuthenticate",
+     "rule": "Session No Timeout",
+     "file": "src/collaboration/extensions/authentication.extension.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 3,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [
+      "src/collaboration/extensions/authentication.extension.ts",
+      "src/collaboration/collaboration.gateway.ts",
+      "src/collaboration/server/collaboration.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "JwtAuthGuard.handleRequest",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 4,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/integrations/export/export.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "JwtAuthGuard.handleRequest",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 4,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/integrations/export/export.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 4,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/integrations/export/export.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/common/guards/jwt-auth.guard.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 4,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts",
+      "src/core/auth/auth.controller.ts",
+      "src/integrations/export/export.controller.ts"
+     ],
+     "samplePath": [
+      "src/common/guards/jwt-auth.guard.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "normalizePostgresUrl",
+     "rule": "No Input Sanitization",
+     "file": "src/common/helpers/utils.ts",
+     "isEntry": false,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "FileInterceptor.intercept",
+     "rule": "File Upload Without Validation",
+     "file": "src/common/interceptors/file.interceptor.ts",
+     "isEntry": false,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.uploadFile",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.uploadAvatarOrLogo",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.removeIcon",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentController.removeIcon",
+     "rule": "Authorization (Resource Ownership)",
+     "file": "src/core/attachment/attachment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthController.changePassword",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/auth.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthController.passwordReset",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/auth.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "CommentController.delete",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/comment/comment.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "CommentService.create",
+     "rule": "No Input Sanitization",
+     "file": "src/core/comment/comment.service.ts",
+     "isEntry": false,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": false
+    },
+    {
+     "fn": "GroupController.updateGroup",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "GroupController.removeGroupMember",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "GroupController.removeGroupMember",
+     "rule": "Authorization (Resource Ownership)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "GroupController.deleteGroup",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/group/group.controller.ts",
+     "isEntry": true,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AttachmentService.saveAttachment",
+     "rule": "No Input Sanitization",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Ownership Check)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AttachmentService.removeUserAvatar",
+     "rule": "Authorization (Resource Ownership)",
+     "file": "src/core/attachment/services/attachment.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/attachment/services/attachment.service.ts",
+      "src/core/attachment/attachment.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AuthService.login",
+     "rule": "Session No Timeout",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AuthService.register",
+     "rule": "Password Hashing",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthService.register",
+     "rule": "Password Hashing (Weak)",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthService.register",
+     "rule": "Registration Without Email Verification",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "AuthService.changePassword",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "AuthService.passwordReset",
+     "rule": "No Token Rotation After Privilege Change",
+     "file": "src/core/auth/services/auth.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 1,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "SignupService.signup",
+     "rule": "Password Hashing",
+     "file": "src/core/auth/services/signup.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/signup.service.ts",
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "SignupService.signup",
+     "rule": "Password Hashing (Weak)",
+     "file": "src/core/auth/services/signup.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/signup.service.ts",
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "SignupService.signup",
+     "rule": "Registration Without Email Verification",
+     "file": "src/core/auth/services/signup.service.ts",
+     "isEntry": false,
+     "reachable": true,
+     "minDepth": 2,
+     "entryCount": 1,
+     "authOnPath": true,
+     "guardFiles": [
+      "src/core/auth/auth.controller.ts"
+     ],
+     "samplePath": [
+      "src/core/auth/services/signup.service.ts",
+      "src/core/auth/services/auth.service.ts",
+      "src/core/auth/auth.controller.ts"
+     ],
+     "strictCallerOnPath": true
+    },
+    {
+     "fn": "TokenService.generatePdfRenderToken",
+     "rule": "No Input Sanitization",
+     "file": "src/core/auth/services/token.service.ts",
+     "isEntry": false,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "SpaceAbilityFactory.createForUser",
+     "rule": "Authorization (Unauthenticated Access)",
+     "file": "src/core/casl/abilities/space-ability.factory.ts",
+     "isEntry": false,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    },
+    {
+     "fn": "SpaceAbilityFactory.createForUser",
+     "rule": "Authorization (Unauthenticated Mutation)",
+     "file": "src/core/casl/abilities/space-ability.factory.ts",
+     "isEntry": false,
+     "reachable": false,
+     "minDepth": 0,
+     "entryCount": 0,
+     "authOnPath": false,
+     "guardFiles": [],
+     "samplePath": [],
+     "strictCallerOnPath": null
+    }
+   ]
+  },
+  "narrowing": {
+   "narrowed": 26,
+   "lostReach": 0
+  }
+ }
+}

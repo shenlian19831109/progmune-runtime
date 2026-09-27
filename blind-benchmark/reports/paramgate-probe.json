@@ -1,0 +1,1952 @@
+{
+  "$what": "§44 paramGated identity 词表普查（只读探针，不写冻结母本）",
+  "$note": "params 来自重新提取的 IR；gold 来自 fp-gold.jsonl；违规面来自冻结母本 fp-pool-results.json",
+  "total": 66,
+  "v1_suppressed": 16,
+  "v2_suppressed": 15,
+  "ambiguous_identity_names": [
+    {
+      "name": "user",
+      "truths": [
+        "UNKNOWN",
+        "FP"
+      ]
+    },
+    {
+      "name": "auth",
+      "truths": [
+        "FP",
+        "UNKNOWN"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.handleRequest",
+      "file": "src/common/guards/jwt-auth.guard.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "err",
+          "type": "any"
+        },
+        {
+          "name": "user",
+          "type": "any"
+        },
+        {
+          "name": "info",
+          "type": "any"
+        },
+        {
+          "name": "ctx",
+          "type": "ExecutionContext"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:any",
+      "identityParams": [
+        "user:any"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": "ctx:ExecutionContext",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.handleRequest",
+      "file": "src/common/guards/jwt-auth.guard.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "err",
+          "type": "any"
+        },
+        {
+          "name": "user",
+          "type": "any"
+        },
+        {
+          "name": "info",
+          "type": "any"
+        },
+        {
+          "name": "ctx",
+          "type": "ExecutionContext"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:any",
+      "identityParams": [
+        "user:any"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": "ctx:ExecutionContext",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+      "file": "src/common/guards/jwt-auth.guard.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "user",
+          "type": "any"
+        },
+        {
+          "name": "ctx",
+          "type": "ExecutionContext"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:any",
+      "identityParams": [
+        "user:any"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": "ctx:ExecutionContext",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+      "file": "src/common/guards/jwt-auth.guard.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "user",
+          "type": "any"
+        },
+        {
+          "name": "ctx",
+          "type": "ExecutionContext"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:any",
+      "identityParams": [
+        "user:any"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": "ctx:ExecutionContext",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentController.uploadFile",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "req",
+          "type": "any"
+        },
+        {
+          "name": "res",
+          "type": "FastifyReply"
+        },
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspace",
+          "type": "Workspace"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentController.uploadAvatarOrLogo",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "req",
+          "type": "any"
+        },
+        {
+          "name": "res",
+          "type": "FastifyReply"
+        },
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspace",
+          "type": "Workspace"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentController.removeIcon",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "dto",
+          "type": "RemoveIconDto"
+        },
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspace",
+          "type": "Workspace"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentController.removeIcon",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "params": [
+        {
+          "name": "dto",
+          "type": "RemoveIconDto"
+        },
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspace",
+          "type": "Workspace"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "AuthController.setAuthCookie",
+      "file": "src/core/auth/auth.controller.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "res",
+          "type": "FastifyReply"
+        },
+        {
+          "name": "token",
+          "type": "string"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:token:string",
+      "identityParams": [
+        "token:string"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "heuristic",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "docmost",
+      "fn": "AuthController.setAuthCookie",
+      "file": "src/core/auth/auth.controller.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "res",
+          "type": "FastifyReply"
+        },
+        {
+          "name": "token",
+          "type": "string"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:token:string",
+      "identityParams": [
+        "token:string"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "heuristic",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "docmost",
+      "fn": "CommentController.delete",
+      "file": "src/core/comment/comment.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "input",
+          "type": "CommentIdDto"
+        },
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspace",
+          "type": "Workspace"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "FavoriteController.removeFavorite",
+      "file": "src/core/favorite/favorite.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "dto",
+          "type": "RemoveFavoriteDto"
+        },
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspace",
+          "type": "Workspace"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "docmost",
+      "fn": "FavoriteController.removeFavorite",
+      "file": "src/core/favorite/favorite.controller.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "params": [
+        {
+          "name": "dto",
+          "type": "RemoveFavoriteDto"
+        },
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspace",
+          "type": "Workspace"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "docmost",
+      "fn": "GroupController.updateGroup",
+      "file": "src/core/group/group.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "updateGroupDto",
+          "type": "UpdateGroupDto"
+        },
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspace",
+          "type": "Workspace"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "GroupController.removeGroupMember",
+      "file": "src/core/group/group.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "removeGroupUserDto",
+          "type": "RemoveGroupUserDto"
+        },
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspace",
+          "type": "Workspace"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "GroupController.removeGroupMember",
+      "file": "src/core/group/group.controller.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "params": [
+        {
+          "name": "removeGroupUserDto",
+          "type": "RemoveGroupUserDto"
+        },
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspace",
+          "type": "Workspace"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "GroupController.deleteGroup",
+      "file": "src/core/group/group.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "groupIdDto",
+          "type": "GroupIdDto"
+        },
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspace",
+          "type": "Workspace"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentService.removeUserAvatar",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "user",
+          "type": "User"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentService.removeUserAvatar",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "user",
+          "type": "User"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentService.removeUserAvatar",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "user",
+          "type": "User"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+    },
+    {
+      "repo": "docmost",
+      "fn": "AttachmentService.removeUserAvatar",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "params": [
+        {
+          "name": "user",
+          "type": "User"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+    },
+    {
+      "repo": "docmost",
+      "fn": "AuthService.getCollabToken",
+      "file": "src/core/auth/services/auth.service.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspaceId",
+          "type": "string"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "FP",
+      "conf": "heuristic",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "docmost",
+      "fn": "TokenService.verifyJwt",
+      "file": "src/core/auth/services/token.service.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "token",
+          "type": "string"
+        },
+        {
+          "name": "tokenType",
+          "type": "string"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "exposed",
+      "identityParams": [
+        "token:string"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "heuristic",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "docmost",
+      "fn": "SpaceAbilityFactory.createForUser",
+      "file": "src/core/casl/abilities/space-ability.factory.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "spaceId",
+          "type": "string"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "SpaceAbilityFactory.createForUser",
+      "file": "src/core/casl/abilities/space-ability.factory.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "spaceId",
+          "type": "string"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "docmost",
+      "fn": "WorkspaceAbilityFactory.createForUser",
+      "file": "src/core/casl/abilities/workspace-ability.factory.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "user",
+          "type": "User"
+        },
+        {
+          "name": "workspace",
+          "type": "Workspace"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "FP",
+      "conf": "heuristic",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "hedgedoc",
+      "fn": "AuthController.getPendingUserData",
+      "file": "backend/src/api/private/auth/auth.controller.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "request",
+          "type": "RequestWithSession"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:request:RequestWithSession",
+      "identityParams": [
+        "request:RequestWithSession"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "request:RequestWithSession",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "hedgedoc",
+      "fn": "AuthController.confirmPendingUserData",
+      "file": "backend/src/api/private/auth/auth.controller.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "request",
+          "type": "RequestWithSession"
+        },
+        {
+          "name": "pendingUserConfirmationData",
+          "type": "PendingUserConfirmationDto"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:request:RequestWithSession",
+      "identityParams": [
+        "request:RequestWithSession"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "request:RequestWithSession",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "hedgedoc",
+      "fn": "AuthController.deletePendingUserData",
+      "file": "backend/src/api/private/auth/auth.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "request",
+          "type": "RequestWithSession"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:request:RequestWithSession",
+      "identityParams": [
+        "request:RequestWithSession"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "request:RequestWithSession",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "hedgedoc",
+      "fn": "OidcController.callback",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "oidcIdentifier",
+          "type": "string"
+        },
+        {
+          "name": "request",
+          "type": "RequestWithSession"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:request:RequestWithSession",
+      "identityParams": [
+        "request:RequestWithSession"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "request:RequestWithSession",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": null
+    },
+    {
+      "repo": "hedgedoc",
+      "fn": "OidcController.callback",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "oidcIdentifier",
+          "type": "string"
+        },
+        {
+          "name": "request",
+          "type": "RequestWithSession"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:request:RequestWithSession",
+      "identityParams": [
+        "request:RequestWithSession"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "request:RequestWithSession",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": null
+    },
+    {
+      "repo": "hedgedoc",
+      "fn": "OidcController.callback",
+      "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "oidcIdentifier",
+          "type": "string"
+        },
+        {
+          "name": "request",
+          "type": "RequestWithSession"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:request:RequestWithSession",
+      "identityParams": [
+        "request:RequestWithSession"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "request:RequestWithSession",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": null
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AccessTokenController.deletePAT",
+      "file": "packages/hoppscotch-backend/src/access-token/access-token.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "user",
+          "type": "AuthUser"
+        },
+        {
+          "name": "id",
+          "type": "string"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:AuthUser",
+      "identityParams": [
+        "user:AuthUser"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:AuthUser",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": null
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AccessTokenService.createPAT",
+      "file": "packages/hoppscotch-backend/src/access-token/access-token.service.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "createAccessTokenDto",
+          "type": "CreateAccessTokenDto"
+        },
+        {
+          "name": "user",
+          "type": "AuthUser"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:AuthUser",
+      "identityParams": [
+        "user:AuthUser"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:AuthUser",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AccessTokenService.updateLastUsedForPAT",
+      "file": "packages/hoppscotch-backend/src/access-token/access-token.service.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "token",
+          "type": "string"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:token:string",
+      "identityParams": [
+        "token:string"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AccessTokenService.updateLastUsedForPAT",
+      "file": "packages/hoppscotch-backend/src/access-token/access-token.service.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "token",
+          "type": "string"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:token:string",
+      "identityParams": [
+        "token:string"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AdminService.addUserToTeam",
+      "file": "packages/hoppscotch-backend/src/admin/admin.service.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "teamID",
+          "type": "string"
+        },
+        {
+          "name": "userEmail",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "TeamAccessRole"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:role:TeamAccessRole",
+      "identityParams": [
+        "role:TeamAccessRole"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+    },
+    {
+      "repo": "hoppscotch",
+      "fn": "AdminService.addUserToTeam",
+      "file": "packages/hoppscotch-backend/src/admin/admin.service.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "teamID",
+          "type": "string"
+        },
+        {
+          "name": "userEmail",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "TeamAccessRole"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:role:TeamAccessRole",
+      "identityParams": [
+        "role:TeamAccessRole"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L14-Service层内部方法（上游入口已鉴权，主体由框架注入）"
+    },
+    {
+      "repo": "lujakob-nestjs-realworld-example-app",
+      "fn": "UserService.generateJWT",
+      "file": "src/user/user.service.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "user",
+          "type": "any"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:any",
+      "identityParams": [
+        "user:any"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "heuristic",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "lujakob-nestjs-realworld-example-app",
+      "fn": "UserService.generateJWT",
+      "file": "src/user/user.service.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "user",
+          "type": "any"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:any",
+      "identityParams": [
+        "user:any"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "heuristic",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "outline",
+      "fn": "createContext",
+      "file": "server/context.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "{\n  user,\n  authType = AuthenticationType.APP,\n  ip,\n  transaction,\n}",
+          "type": "{\n  user?: User;\n  authType?: AuthenticationType | null;\n  ip?: string | null;\n  transaction?: Transaction;\n}"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:{\n  user,\n  authType = AuthenticationType.APP,\n  ip,\n  transaction,\n}:{\n  user?: User;\n  authType?: AuthenticationType | null;\n  ip?: string | null;\n  transaction?: Transaction;\n}",
+      "identityParams": [
+        "{\n  user,\n  authType = AuthenticationType.APP,\n  ip,\n  transaction,\n}:{\n  user?: User;\n  authType?: AuthenticationType | null;\n  ip?: string | null;\n  transaction?: Transaction;\n}"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "verified",
+      "lead": null
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "publish",
+      "file": "packages/api/src/publish.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "router",
+          "type": "Router"
+        },
+        {
+          "name": "auth",
+          "type": "Auth"
+        },
+        {
+          "name": "storage",
+          "type": "Storage"
+        },
+        {
+          "name": "config",
+          "type": "Config"
+        },
+        {
+          "name": "logger",
+          "type": "Logger"
+        },
+        {
+          "name": "requireOtp",
+          "type": "RequestHandler"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:auth:Auth",
+      "identityParams": [
+        "auth:Auth"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "auth:Auth",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": null
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "publish",
+      "file": "packages/api/src/publish.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "router",
+          "type": "Router"
+        },
+        {
+          "name": "auth",
+          "type": "Auth"
+        },
+        {
+          "name": "storage",
+          "type": "Storage"
+        },
+        {
+          "name": "config",
+          "type": "Config"
+        },
+        {
+          "name": "logger",
+          "type": "Logger"
+        },
+        {
+          "name": "requireOtp",
+          "type": "RequestHandler"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:auth:Auth",
+      "identityParams": [
+        "auth:Auth"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "auth:Auth",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": null
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "publish",
+      "file": "packages/api/src/publish.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "router",
+          "type": "Router"
+        },
+        {
+          "name": "auth",
+          "type": "Auth"
+        },
+        {
+          "name": "storage",
+          "type": "Storage"
+        },
+        {
+          "name": "config",
+          "type": "Config"
+        },
+        {
+          "name": "logger",
+          "type": "Logger"
+        },
+        {
+          "name": "requireOtp",
+          "type": "RequestHandler"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:auth:Auth",
+      "identityParams": [
+        "auth:Auth"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "auth:Auth",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": null
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "publish",
+      "file": "packages/api/src/publish.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "params": [
+        {
+          "name": "router",
+          "type": "Router"
+        },
+        {
+          "name": "auth",
+          "type": "Auth"
+        },
+        {
+          "name": "storage",
+          "type": "Storage"
+        },
+        {
+          "name": "config",
+          "type": "Config"
+        },
+        {
+          "name": "logger",
+          "type": "Logger"
+        },
+        {
+          "name": "requireOtp",
+          "type": "RequestHandler"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:auth:Auth",
+      "identityParams": [
+        "auth:Auth"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "auth:Auth",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": null
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "stage",
+      "file": "packages/api/src/stage.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "router",
+          "type": "Router"
+        },
+        {
+          "name": "auth",
+          "type": "Auth"
+        },
+        {
+          "name": "storage",
+          "type": "Storage"
+        },
+        {
+          "name": "config",
+          "type": "Config"
+        },
+        {
+          "name": "logger",
+          "type": "Logger"
+        },
+        {
+          "name": "requireOtp",
+          "type": "RequestHandler"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:auth:Auth",
+      "identityParams": [
+        "auth:Auth"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "auth:Auth",
+      "gold": "FP",
+      "conf": "heuristic",
+      "lead": null
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "stage",
+      "file": "packages/api/src/stage.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "router",
+          "type": "Router"
+        },
+        {
+          "name": "auth",
+          "type": "Auth"
+        },
+        {
+          "name": "storage",
+          "type": "Storage"
+        },
+        {
+          "name": "config",
+          "type": "Config"
+        },
+        {
+          "name": "logger",
+          "type": "Logger"
+        },
+        {
+          "name": "requireOtp",
+          "type": "RequestHandler"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:auth:Auth",
+      "identityParams": [
+        "auth:Auth"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "auth:Auth",
+      "gold": "FP",
+      "conf": "heuristic",
+      "lead": null
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "stage",
+      "file": "packages/api/src/stage.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "router",
+          "type": "Router"
+        },
+        {
+          "name": "auth",
+          "type": "Auth"
+        },
+        {
+          "name": "storage",
+          "type": "Storage"
+        },
+        {
+          "name": "config",
+          "type": "Config"
+        },
+        {
+          "name": "logger",
+          "type": "Logger"
+        },
+        {
+          "name": "requireOtp",
+          "type": "RequestHandler"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:auth:Auth",
+      "identityParams": [
+        "auth:Auth"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "auth:Auth",
+      "gold": "FP",
+      "conf": "heuristic",
+      "lead": null
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.allow_access",
+      "file": "packages/auth/src/auth.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "{ packageName, packageVersion }",
+          "type": "pluginUtils.AuthPluginPackage"
+        },
+        {
+          "name": "user",
+          "type": "RemoteUser"
+        },
+        {
+          "name": "callback",
+          "type": "pluginUtils.AccessCallback"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:RemoteUser",
+      "identityParams": [
+        "user:RemoteUser"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:RemoteUser",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L9-Express中间件不是业务端点"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.allow_unpublish",
+      "file": "packages/auth/src/auth.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "{ packageName, packageVersion }",
+          "type": "pluginUtils.AuthPluginPackage"
+        },
+        {
+          "name": "user",
+          "type": "RemoteUser"
+        },
+        {
+          "name": "callback",
+          "type": "Callback"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:RemoteUser",
+      "identityParams": [
+        "user:RemoteUser"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:RemoteUser",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L9-Express中间件不是业务端点"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.allow_unpublish",
+      "file": "packages/auth/src/auth.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "{ packageName, packageVersion }",
+          "type": "pluginUtils.AuthPluginPackage"
+        },
+        {
+          "name": "user",
+          "type": "RemoteUser"
+        },
+        {
+          "name": "callback",
+          "type": "Callback"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:RemoteUser",
+      "identityParams": [
+        "user:RemoteUser"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:RemoteUser",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L9-Express中间件不是业务端点"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.allow_stage",
+      "file": "packages/auth/src/auth.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "{ packageName, packageVersion }",
+          "type": "pluginUtils.AuthPluginPackage"
+        },
+        {
+          "name": "user",
+          "type": "RemoteUser"
+        },
+        {
+          "name": "callback",
+          "type": "Callback"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:RemoteUser",
+      "identityParams": [
+        "user:RemoteUser"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:RemoteUser",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L9-Express中间件不是业务端点"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.allow_publish",
+      "file": "packages/auth/src/auth.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "{ packageName, packageVersion }",
+          "type": "pluginUtils.AuthPluginPackage"
+        },
+        {
+          "name": "user",
+          "type": "RemoteUser"
+        },
+        {
+          "name": "callback",
+          "type": "Callback"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:RemoteUser",
+      "identityParams": [
+        "user:RemoteUser"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:RemoteUser",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L9-Express中间件不是业务端点"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.allow_publish",
+      "file": "packages/auth/src/auth.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "{ packageName, packageVersion }",
+          "type": "pluginUtils.AuthPluginPackage"
+        },
+        {
+          "name": "user",
+          "type": "RemoteUser"
+        },
+        {
+          "name": "callback",
+          "type": "Callback"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:RemoteUser",
+      "identityParams": [
+        "user:RemoteUser"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:RemoteUser",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L9-Express中间件不是业务端点"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.setLegacyAuthCacheEntry",
+      "file": "packages/auth/src/auth.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "cacheKey",
+          "type": "string | void"
+        },
+        {
+          "name": "user",
+          "type": "RemoteUser"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:RemoteUser",
+      "identityParams": [
+        "user:RemoteUser"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:RemoteUser",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L9-Express中间件不是业务端点"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "Auth.setLegacyAuthCacheEntry",
+      "file": "packages/auth/src/auth.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "cacheKey",
+          "type": "string | void"
+        },
+        {
+          "name": "user",
+          "type": "RemoteUser"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:RemoteUser",
+      "identityParams": [
+        "user:RemoteUser"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:RemoteUser",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L9-Express中间件不是业务端点"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "getApiToken",
+      "file": "packages/auth/src/utils.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "auth",
+          "type": "TokenEncryption"
+        },
+        {
+          "name": "config",
+          "type": "Config"
+        },
+        {
+          "name": "remoteUser",
+          "type": "RemoteUser"
+        },
+        {
+          "name": "aesPassword",
+          "type": "string"
+        },
+        {
+          "name": "options",
+          "type": "{ tokenKey?: string }"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:auth:TokenEncryption",
+      "identityParams": [
+        "auth:TokenEncryption"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "auth:TokenEncryption",
+      "gold": "FP",
+      "conf": "heuristic",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "verifyJWTPayload",
+      "file": "packages/auth/src/utils.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "token",
+          "type": "string"
+        },
+        {
+          "name": "secret",
+          "type": "string"
+        },
+        {
+          "name": "security",
+          "type": "Security"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:token:string",
+      "identityParams": [
+        "token:string"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "verified",
+      "lead": null
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "verifyJWTPayload",
+      "file": "packages/auth/src/utils.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "token",
+          "type": "string"
+        },
+        {
+          "name": "secret",
+          "type": "string"
+        },
+        {
+          "name": "security",
+          "type": "Security"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:token:string",
+      "identityParams": [
+        "token:string"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "verified",
+      "lead": null
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "ConfigBuilder.addAuth",
+      "file": "packages/config/src/builder.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "auth",
+          "type": "Partial<AuthConf>"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:auth:Partial<AuthConf>",
+      "identityParams": [
+        "auth:Partial<AuthConf>"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "auth:Partial<AuthConf>",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "resolveRemoteUser",
+      "file": "packages/admin-cli/src/commands/storage/access.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "params": [
+        {
+          "name": "config",
+          "type": "Config"
+        },
+        {
+          "name": "token",
+          "type": "string"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:token:string",
+      "identityParams": [
+        "token:string"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "resolveRemoteUser",
+      "file": "packages/admin-cli/src/commands/storage/access.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "config",
+          "type": "Config"
+        },
+        {
+          "name": "token",
+          "type": "string"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:token:string",
+      "identityParams": [
+        "token:string"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "canRemove",
+      "file": "packages/admin-cli/src/commands/storage/access.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "auth",
+          "type": "Auth"
+        },
+        {
+          "name": "user",
+          "type": "RemoteUser"
+        },
+        {
+          "name": "packageName",
+          "type": "string"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:auth:Auth,user:RemoteUser",
+      "identityParams": [
+        "auth:Auth",
+        "user:RemoteUser"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "auth:Auth",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L6-内部私有工具方法"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "StorageViewCommand.deleteEntry",
+      "file": "packages/admin-cli/src/commands/storage/view.ts",
+      "rule": "Authorization (Ownership Check)",
+      "params": [
+        {
+          "name": "rl",
+          "type": "readlinePromises.Interface"
+        },
+        {
+          "name": "plugin",
+          "type": "any"
+        },
+        {
+          "name": "auth",
+          "type": "any"
+        },
+        {
+          "name": "user",
+          "type": "any"
+        },
+        {
+          "name": "entry",
+          "type": "ViewEntry"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:auth:any,user:any",
+      "identityParams": [
+        "auth:any",
+        "user:any"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "StorageViewCommand.deleteEntry",
+      "file": "packages/admin-cli/src/commands/storage/view.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "params": [
+        {
+          "name": "rl",
+          "type": "readlinePromises.Interface"
+        },
+        {
+          "name": "plugin",
+          "type": "any"
+        },
+        {
+          "name": "auth",
+          "type": "any"
+        },
+        {
+          "name": "user",
+          "type": "any"
+        },
+        {
+          "name": "entry",
+          "type": "ViewEntry"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:auth:any,user:any",
+      "identityParams": [
+        "auth:any",
+        "user:any"
+      ],
+      "primitiveIdentityOnly": true,
+      "subjectHit": null,
+      "gold": "UNKNOWN",
+      "conf": "unlabeled",
+      "lead": null
+    },
+    {
+      "repo": "w3tecch-express-typescript-boilerplate",
+      "fn": "UserEventSubscriber.onUserCreate",
+      "file": "src/api/subscribers/UserEventSubscriber.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "params": [
+        {
+          "name": "user",
+          "type": "User"
+        }
+      ],
+      "passCurrent": true,
+      "whyCurrent": "identity:user:User",
+      "identityParams": [
+        "user:User"
+      ],
+      "primitiveIdentityOnly": false,
+      "subjectHit": "user:User",
+      "gold": "FP",
+      "conf": "verified",
+      "lead": "L6-内部私有工具方法"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "variant": "V-C",
+  "total": 66,
+  "turned": 14,
+  "rows": [
+    {
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.handleRequest",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.handleRequest",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "AuthController.setAuthCookie",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "AuthController.setAuthCookie",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "AuthService.getCollabToken",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "TokenService.verifyJwt",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "SpaceAbilityFactory.createForUser",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "SpaceAbilityFactory.createForUser",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "docmost",
+      "fn": "WorkspaceAbilityFactory.createForUser",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "lujakob-nestjs-realworld-example-app",
+      "fn": "UserService.generateJWT",
+      "rule": "Authorization (Unauthenticated Access)"
+    },
+    {
+      "repo": "lujakob-nestjs-realworld-example-app",
+      "fn": "UserService.generateJWT",
+      "rule": "Authorization (Unauthenticated Mutation)"
+    },
+    {
+      "repo": "verdaccio",
+      "fn": "getApiToken",
+      "rule": "Authorization (Unauthenticated Access)"
+    }
+  ]
+}

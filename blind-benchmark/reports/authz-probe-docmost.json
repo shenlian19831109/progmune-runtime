@@ -1,0 +1,854 @@
+{
+  "repo": "docmost",
+  "targets": 26,
+  "located": 26,
+  "covered": 15,
+  "byKind": {
+    "A′": 2,
+    "A": 8,
+    "B": 19
+  },
+  "results": [
+    {
+      "id": "docmost/JwtAuthGuard.handleRequest::Authorization (Unauthenticated Access)",
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.handleRequest",
+      "file": "src/common/guards/jwt-auth.guard.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "calls": [
+        "getAllAndOverride",
+        "getHandler",
+        "getClass",
+        "debug",
+        "warn",
+        "includes",
+        "setJoinedWorkspacesCookie",
+        "__progmune_input_guard__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [],
+      "hits": [],
+      "bodyLen": 1371
+    },
+    {
+      "id": "docmost/JwtAuthGuard.handleRequest::Authorization (Unauthenticated Mutation)",
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.handleRequest",
+      "file": "src/common/guards/jwt-auth.guard.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "calls": [
+        "getAllAndOverride",
+        "getHandler",
+        "getClass",
+        "debug",
+        "warn",
+        "includes",
+        "setJoinedWorkspacesCookie",
+        "__progmune_input_guard__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [],
+      "hits": [],
+      "bodyLen": 1371
+    },
+    {
+      "id": "docmost/JwtAuthGuard.setJoinedWorkspacesCookie::Authorization (Unauthenticated Access)",
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+      "file": "src/common/guards/jwt-auth.guard.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "calls": [
+        "isCloud",
+        "getRequest",
+        "switchToHttp",
+        "getResponse",
+        "parse",
+        "includes",
+        "push",
+        "setCookie",
+        "stringify",
+        "getSubdomainHost",
+        "addDays",
+        "isHttps",
+        "__progmune_token_issued__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [],
+      "hits": [],
+      "bodyLen": 804
+    },
+    {
+      "id": "docmost/JwtAuthGuard.setJoinedWorkspacesCookie::Authorization (Unauthenticated Mutation)",
+      "repo": "docmost",
+      "fn": "JwtAuthGuard.setJoinedWorkspacesCookie",
+      "file": "src/common/guards/jwt-auth.guard.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "calls": [
+        "isCloud",
+        "getRequest",
+        "switchToHttp",
+        "getResponse",
+        "parse",
+        "includes",
+        "push",
+        "setCookie",
+        "stringify",
+        "getSubdomainHost",
+        "addDays",
+        "isHttps",
+        "__progmune_token_issued__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [],
+      "hits": [],
+      "bodyLen": 804
+    },
+    {
+      "id": "docmost/AttachmentController.uploadFile::Authorization (Ownership Check)",
+      "repo": "docmost",
+      "fn": "AttachmentController.uploadFile",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "calls": [
+        "bytes",
+        "getFileUploadSizeLimit",
+        "file",
+        "error",
+        "findById",
+        "validateCanEdit",
+        "isValidUUID",
+        "uploadFile",
+        "log",
+        "send",
+        "buildFileUrl",
+        "__progmune_auth_machinery__",
+        "__progmune_input_guard__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [
+        "@Post('files/upload')",
+        "@UseInterceptors(FileInterceptor)",
+        "@Req()",
+        "@Res()",
+        "@AuthUser()",
+        "@AuthWorkspace()"
+      ],
+      "hits": [
+        {
+          "kind": "A′",
+          "text": "validateCanEdit("
+        }
+      ],
+      "bodyLen": 2198
+    },
+    {
+      "id": "docmost/AttachmentController.uploadAvatarOrLogo::Authorization (Ownership Check)",
+      "repo": "docmost",
+      "fn": "AttachmentController.uploadAvatarOrLogo",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "calls": [
+        "bytes",
+        "file",
+        "includes",
+        "createForUser",
+        "cannot",
+        "uploadImage",
+        "send",
+        "error",
+        "__progmune_auth_machinery__",
+        "__progmune_input_guard__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [
+        "@Post('attachments/upload-image')",
+        "@UseInterceptors(FileInterceptor)",
+        "@Req()",
+        "@Res()",
+        "@AuthUser()",
+        "@AuthWorkspace()"
+      ],
+      "hits": [
+        {
+          "kind": "A",
+          "text": "cannot("
+        },
+        {
+          "kind": "B",
+          "text": "createForUser((user, workspace)"
+        },
+        {
+          "kind": "B",
+          "text": "createForUser((user, spaceId)"
+        }
+      ],
+      "bodyLen": 1925
+    },
+    {
+      "id": "docmost/AttachmentController.removeIcon::Authorization (Ownership Check)",
+      "repo": "docmost",
+      "fn": "AttachmentController.removeIcon",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "calls": [
+        "removeUserAvatar",
+        "createForUser",
+        "cannot",
+        "removeSpaceIcon",
+        "removeWorkspaceIcon",
+        "__progmune_auth_machinery__",
+        "__progmune_input_schema__",
+        "__progmune_input_guard__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [
+        "@UseGuards(JwtAuthGuard)",
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('attachments/remove-icon')",
+        "@Body()",
+        "@AuthUser()",
+        "@AuthWorkspace()"
+      ],
+      "hits": [
+        {
+          "kind": "A",
+          "text": "cannot("
+        },
+        {
+          "kind": "B",
+          "text": "removeUserAvatar((user)"
+        },
+        {
+          "kind": "B",
+          "text": "createForUser((user, spaceId)"
+        },
+        {
+          "kind": "B",
+          "text": "createForUser((user, workspace)"
+        }
+      ],
+      "bodyLen": 1152
+    },
+    {
+      "id": "docmost/AttachmentController.removeIcon::Authorization (Resource Ownership)",
+      "repo": "docmost",
+      "fn": "AttachmentController.removeIcon",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "calls": [
+        "removeUserAvatar",
+        "createForUser",
+        "cannot",
+        "removeSpaceIcon",
+        "removeWorkspaceIcon",
+        "__progmune_auth_machinery__",
+        "__progmune_input_schema__",
+        "__progmune_input_guard__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [
+        "@UseGuards(JwtAuthGuard)",
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('attachments/remove-icon')",
+        "@Body()",
+        "@AuthUser()",
+        "@AuthWorkspace()"
+      ],
+      "hits": [
+        {
+          "kind": "A",
+          "text": "cannot("
+        },
+        {
+          "kind": "B",
+          "text": "removeUserAvatar((user)"
+        },
+        {
+          "kind": "B",
+          "text": "createForUser((user, spaceId)"
+        },
+        {
+          "kind": "B",
+          "text": "createForUser((user, workspace)"
+        }
+      ],
+      "bodyLen": 1152
+    },
+    {
+      "id": "docmost/AuthController.setAuthCookie::Authorization (Unauthenticated Access)",
+      "repo": "docmost",
+      "fn": "AuthController.setAuthCookie",
+      "file": "src/core/auth/auth.controller.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "calls": [
+        "setCookie",
+        "getCookieExpiresIn",
+        "isHttps",
+        "__progmune_token_issued__"
+      ],
+      "lead": "L6-内部私有工具方法",
+      "shape": null,
+      "gold": "FP",
+      "gold_confidence": "heuristic",
+      "gold_reason": "L6-内部私有工具方法 仅启发式打标，未经逐条核验",
+      "schema": "v2",
+      "deco": [],
+      "hits": [],
+      "bodyLen": 225
+    },
+    {
+      "id": "docmost/AuthController.setAuthCookie::Authorization (Unauthenticated Mutation)",
+      "repo": "docmost",
+      "fn": "AuthController.setAuthCookie",
+      "file": "src/core/auth/auth.controller.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "calls": [
+        "setCookie",
+        "getCookieExpiresIn",
+        "isHttps",
+        "__progmune_token_issued__"
+      ],
+      "lead": "L6-内部私有工具方法",
+      "shape": null,
+      "gold": "FP",
+      "gold_confidence": "heuristic",
+      "gold_reason": "L6-内部私有工具方法 仅启发式打标，未经逐条核验",
+      "schema": "v2",
+      "deco": [],
+      "hits": [],
+      "bodyLen": 225
+    },
+    {
+      "id": "docmost/CommentController.delete::Authorization (Ownership Check)",
+      "repo": "docmost",
+      "fn": "CommentController.delete",
+      "file": "src/core/comment/comment.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "calls": [
+        "findById",
+        "validateCanComment",
+        "deleteComment",
+        "createForUser",
+        "cannot",
+        "emitCommentEvent",
+        "log",
+        "__progmune_auth_machinery__",
+        "__progmune_input_schema__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('delete')",
+        "@Body()",
+        "@AuthUser()",
+        "@AuthWorkspace()"
+      ],
+      "hits": [
+        {
+          "kind": "A",
+          "text": "cannot("
+        },
+        {
+          "kind": "A′",
+          "text": "validateCanComment("
+        },
+        {
+          "kind": "B",
+          "text": "createForUser(( user, comment.spaceId,"
+        }
+      ],
+      "bodyLen": 1504
+    },
+    {
+      "id": "docmost/FavoriteController.removeFavorite::Authorization (Ownership Check)",
+      "repo": "docmost",
+      "fn": "FavoriteController.removeFavorite",
+      "file": "src/core/favorite/favorite.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "calls": [
+        "resolveAndValidate",
+        "removeFavorite",
+        "__progmune_auth_machinery__"
+      ],
+      "lead": "L6-内部私有工具方法",
+      "shape": null,
+      "gold": "FP",
+      "gold_confidence": "heuristic",
+      "gold_reason": "L6-内部私有工具方法 仅启发式打标，未经逐条核验",
+      "schema": "v2",
+      "deco": [
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('remove')",
+        "@Body()",
+        "@AuthUser()",
+        "@AuthWorkspace()"
+      ],
+      "hits": [],
+      "bodyLen": 241
+    },
+    {
+      "id": "docmost/FavoriteController.removeFavorite::Authorization (Resource Ownership)",
+      "repo": "docmost",
+      "fn": "FavoriteController.removeFavorite",
+      "file": "src/core/favorite/favorite.controller.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "calls": [
+        "resolveAndValidate",
+        "removeFavorite",
+        "__progmune_auth_machinery__"
+      ],
+      "lead": "L6-内部私有工具方法",
+      "shape": null,
+      "gold": "FP",
+      "gold_confidence": "heuristic",
+      "gold_reason": "L6-内部私有工具方法 仅启发式打标，未经逐条核验",
+      "schema": "v2",
+      "deco": [
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('remove')",
+        "@Body()",
+        "@AuthUser()",
+        "@AuthWorkspace()"
+      ],
+      "hits": [],
+      "bodyLen": 241
+    },
+    {
+      "id": "docmost/GroupController.updateGroup::Authorization (Ownership Check)",
+      "repo": "docmost",
+      "fn": "GroupController.updateGroup",
+      "file": "src/core/group/group.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "calls": [
+        "createForUser",
+        "cannot",
+        "updateGroup",
+        "__progmune_auth_machinery__",
+        "__progmune_input_schema__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('update')",
+        "@Body()",
+        "@AuthUser()",
+        "@AuthWorkspace()"
+      ],
+      "hits": [
+        {
+          "kind": "A",
+          "text": "cannot("
+        },
+        {
+          "kind": "B",
+          "text": "createForUser((user, workspace)"
+        }
+      ],
+      "bodyLen": 290
+    },
+    {
+      "id": "docmost/GroupController.removeGroupMember::Authorization (Ownership Check)",
+      "repo": "docmost",
+      "fn": "GroupController.removeGroupMember",
+      "file": "src/core/group/group.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "calls": [
+        "createForUser",
+        "cannot",
+        "removeUserFromGroup",
+        "__progmune_auth_machinery__",
+        "__progmune_input_schema__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('members/remove')",
+        "@Body()",
+        "@AuthUser()",
+        "@AuthWorkspace()"
+      ],
+      "hits": [
+        {
+          "kind": "A",
+          "text": "cannot("
+        },
+        {
+          "kind": "B",
+          "text": "createForUser((user, workspace)"
+        }
+      ],
+      "bodyLen": 366
+    },
+    {
+      "id": "docmost/GroupController.removeGroupMember::Authorization (Resource Ownership)",
+      "repo": "docmost",
+      "fn": "GroupController.removeGroupMember",
+      "file": "src/core/group/group.controller.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "calls": [
+        "createForUser",
+        "cannot",
+        "removeUserFromGroup",
+        "__progmune_auth_machinery__",
+        "__progmune_input_schema__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('members/remove')",
+        "@Body()",
+        "@AuthUser()",
+        "@AuthWorkspace()"
+      ],
+      "hits": [
+        {
+          "kind": "A",
+          "text": "cannot("
+        },
+        {
+          "kind": "B",
+          "text": "createForUser((user, workspace)"
+        }
+      ],
+      "bodyLen": 366
+    },
+    {
+      "id": "docmost/GroupController.deleteGroup::Authorization (Ownership Check)",
+      "repo": "docmost",
+      "fn": "GroupController.deleteGroup",
+      "file": "src/core/group/group.controller.ts",
+      "rule": "Authorization (Ownership Check)",
+      "calls": [
+        "createForUser",
+        "cannot",
+        "deleteGroup",
+        "__progmune_auth_machinery__",
+        "__progmune_input_schema__"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [
+        "@HttpCode(HttpStatus.OK)",
+        "@Post('delete')",
+        "@Body()",
+        "@AuthUser()",
+        "@AuthWorkspace()"
+      ],
+      "hits": [
+        {
+          "kind": "A",
+          "text": "cannot("
+        },
+        {
+          "kind": "B",
+          "text": "createForUser((user, workspace)"
+        }
+      ],
+      "bodyLen": 293
+    },
+    {
+      "id": "docmost/AttachmentService.removeUserAvatar::Authorization (Ownership Check)",
+      "repo": "docmost",
+      "fn": "AttachmentService.removeUserAvatar",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "rule": "Authorization (Ownership Check)",
+      "calls": [
+        "startsWith",
+        "toLowerCase",
+        "getAttachmentFolderPath",
+        "deleteRedundantFile",
+        "updateUser"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [],
+      "hits": [
+        {
+          "kind": "B",
+          "text": "updateUser(( { avatarUrl: null }, user."
+        }
+      ],
+      "bodyLen": 359
+    },
+    {
+      "id": "docmost/AttachmentService.removeUserAvatar::Authorization (Unauthenticated Access)",
+      "repo": "docmost",
+      "fn": "AttachmentService.removeUserAvatar",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "calls": [
+        "startsWith",
+        "toLowerCase",
+        "getAttachmentFolderPath",
+        "deleteRedundantFile",
+        "updateUser"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [],
+      "hits": [
+        {
+          "kind": "B",
+          "text": "updateUser(( { avatarUrl: null }, user."
+        }
+      ],
+      "bodyLen": 359
+    },
+    {
+      "id": "docmost/AttachmentService.removeUserAvatar::Authorization (Unauthenticated Mutation)",
+      "repo": "docmost",
+      "fn": "AttachmentService.removeUserAvatar",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "calls": [
+        "startsWith",
+        "toLowerCase",
+        "getAttachmentFolderPath",
+        "deleteRedundantFile",
+        "updateUser"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [],
+      "hits": [
+        {
+          "kind": "B",
+          "text": "updateUser(( { avatarUrl: null }, user."
+        }
+      ],
+      "bodyLen": 359
+    },
+    {
+      "id": "docmost/AttachmentService.removeUserAvatar::Authorization (Resource Ownership)",
+      "repo": "docmost",
+      "fn": "AttachmentService.removeUserAvatar",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "rule": "Authorization (Resource Ownership)",
+      "calls": [
+        "startsWith",
+        "toLowerCase",
+        "getAttachmentFolderPath",
+        "deleteRedundantFile",
+        "updateUser"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [],
+      "hits": [
+        {
+          "kind": "B",
+          "text": "updateUser(( { avatarUrl: null }, user."
+        }
+      ],
+      "bodyLen": 359
+    },
+    {
+      "id": "docmost/AuthService.getCollabToken::Authorization (Unauthenticated Access)",
+      "repo": "docmost",
+      "fn": "AuthService.getCollabToken",
+      "file": "src/core/auth/services/auth.service.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "calls": [
+        "generateCollabToken",
+        "__progmune_token_issued__"
+      ],
+      "lead": "L6-内部私有工具方法",
+      "shape": null,
+      "gold": "FP",
+      "gold_confidence": "heuristic",
+      "gold_reason": "L6-内部私有工具方法 仅启发式打标，未经逐条核验",
+      "schema": "v2",
+      "deco": [],
+      "hits": [],
+      "bodyLen": 128
+    },
+    {
+      "id": "docmost/TokenService.verifyJwt::Authorization (Unauthenticated Access)",
+      "repo": "docmost",
+      "fn": "TokenService.verifyJwt",
+      "file": "src/core/auth/services/token.service.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "calls": [
+        "verifyAsync",
+        "getAppSecret",
+        "__progmune_token_issued__"
+      ],
+      "lead": "L6-内部私有工具方法",
+      "shape": null,
+      "gold": "FP",
+      "gold_confidence": "heuristic",
+      "gold_reason": "L6-内部私有工具方法 仅启发式打标，未经逐条核验",
+      "schema": "v2",
+      "deco": [],
+      "hits": [],
+      "bodyLen": 301
+    },
+    {
+      "id": "docmost/SpaceAbilityFactory.createForUser::Authorization (Unauthenticated Access)",
+      "repo": "docmost",
+      "fn": "SpaceAbilityFactory.createForUser",
+      "file": "src/core/casl/abilities/space-ability.factory.ts",
+      "rule": "Authorization (Unauthenticated Access)",
+      "calls": [
+        "getUserSpaceRoles",
+        "findHighestUserSpaceRole",
+        "buildSpaceAdminAbility",
+        "buildSpaceWriterAbility",
+        "buildSpaceReaderAbility"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [
+        "@docmost",
+        "@Injectable()"
+      ],
+      "hits": [
+        {
+          "kind": "B",
+          "text": "getUserSpaceRoles(( user.id, spaceId, )"
+        }
+      ],
+      "bodyLen": 514
+    },
+    {
+      "id": "docmost/SpaceAbilityFactory.createForUser::Authorization (Unauthenticated Mutation)",
+      "repo": "docmost",
+      "fn": "SpaceAbilityFactory.createForUser",
+      "file": "src/core/casl/abilities/space-ability.factory.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "calls": [
+        "getUserSpaceRoles",
+        "findHighestUserSpaceRole",
+        "buildSpaceAdminAbility",
+        "buildSpaceWriterAbility",
+        "buildSpaceReaderAbility"
+      ],
+      "lead": null,
+      "shape": null,
+      "gold": "UNKNOWN",
+      "gold_confidence": "unlabeled",
+      "gold_reason": "无任何线索命中",
+      "schema": "v2",
+      "deco": [
+        "@docmost",
+        "@Injectable()"
+      ],
+      "hits": [
+        {
+          "kind": "B",
+          "text": "getUserSpaceRoles(( user.id, spaceId, )"
+        }
+      ],
+      "bodyLen": 514
+    },
+    {
+      "id": "docmost/WorkspaceAbilityFactory.createForUser::Authorization (Unauthenticated Mutation)",
+      "repo": "docmost",
+      "fn": "WorkspaceAbilityFactory.createForUser",
+      "file": "src/core/casl/abilities/workspace-ability.factory.ts",
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "calls": [
+        "buildWorkspaceOwnerAbility",
+        "buildWorkspaceAdminAbility",
+        "buildWorkspaceMemberAbility"
+      ],
+      "lead": "L6-内部私有工具方法",
+      "shape": null,
+      "gold": "FP",
+      "gold_confidence": "heuristic",
+      "gold_reason": "L6-内部私有工具方法 仅启发式打标，未经逐条核验",
+      "schema": "v2",
+      "deco": [
+        "@casl",
+        "@docmost",
+        "@Injectable()"
+      ],
+      "hits": [],
+      "bodyLen": 373
+    }
+  ]
+}

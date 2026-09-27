@@ -393,6 +393,19 @@ function extractDirectCalls(
   if (/ownerId\s*[!=]==?|authorId\s*[!=]==?|createdBy\s*[!=]==?|\.owner\s*[!=]==?|userId\s*[!=]==?/.test(text)) {
     calls.push("__progmune_ownership_checked__");
   }
+  // §46 ②：新建资源的属主被**赋值为当前主体**（`{ userId: user.id }` / `ownerId: currentUser.id`）。
+  // 这类「创建」函数的被操作对象就是主体自己，不存在「改别人的东西」这回事 ⇒
+  // Ownership Check 不该报（合成语料上 10/10 是 FP：createTransfer / createRefund /
+  // uploadFile / placeOrder…）。调用名接口看不到对象字面量里的赋值，只能靠标记。
+  //
+  // ⚠ 只认 `<属主字段>: <主体>.id` 这一种形态，**不认** `<调用>(..., user.id, ...)`：
+  //   后者是「主体标识作实参」，实测同形状存在相反真值 ——
+  //   `deletePAT(id, user.uid)`（已按属主过滤，FP）vs `deleteWidget(id)` 里
+  //   `canSendEmail(user.id)`（user.id 与 deleteWidget 无关，真 TP）⇒ 按 R66 不得落地。
+  // 形态：`<属主字段>: <主体变量>.<标识属性>` （对象字面量内的赋值，不是查询比较）
+  if (/\b(?:userId|ownerId|authorId|createdBy|user_id|owner_id|author_id|created_by)\s*:\s*(?:user|currentUser|authUser|me|self|actor|principal|adminUser|(?:request|req|session|ctx|context)\.user)\s*\.\s*(?:id|uid|_id|userId|email|username)\b/i.test(text)) {
+    calls.push("__progmune_owner_self_assigned__");
+  }
   return [...new Set(calls)];
 }
 

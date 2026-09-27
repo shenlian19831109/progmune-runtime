@@ -1,0 +1,1624 @@
+{
+ "mode": "gold",
+ "rule": "/input validation/i",
+ "total": 75,
+ "resolved": 75,
+ "unresolved": 0,
+ "byEvidence": {
+  "D2_array_literal_check": 1,
+  "C4_celebrate_express": 1
+ },
+ "byEntry": {
+  "X3_request_object": 1,
+  "X2_route_registration": 1,
+  "X1_handler_decorator": 6,
+  "X4_param_type": 6
+ },
+ "byEffect": {
+  "S2_cache_write": 1,
+  "S3_outbound": 8,
+  "S1_orm_write": 8,
+  "S5_delegate_service": 15,
+  "S7_qb_chain": 6,
+  "S4_fs_write": 5
+ },
+ "entrySplit": {
+  "strong": 8,
+  "weakOnly": 5,
+  "none": 62
+ },
+ "effectSplit": {
+  "any": 30,
+  "none": 45
+ },
+ "cross": {
+  "tab": {
+   "TP": {
+    "withEffect": 11,
+    "noEffect": 0
+   },
+   "FP": {
+    "withEffect": 17,
+    "noEffect": 44
+   },
+   "UNKNOWN": {
+    "withEffect": 2,
+    "noEffect": 1
+   }
+  },
+  "tabLinked": {
+   "TP": {
+    "withEffect": 7,
+    "noEffect": 4
+   },
+   "FP": {
+    "withEffect": 9,
+    "noEffect": 52
+   },
+   "UNKNOWN": {
+    "withEffect": 2,
+    "noEffect": 1
+   }
+  },
+  "coarse": {
+   "tpRecall": 1,
+   "fpSuppression": 0.7213114754098361,
+   "lostTP": 0,
+   "keptFP": 17,
+   "precisionAfter": 0.39285714285714285,
+   "netGain": 44
+  },
+  "linked": {
+   "tpRecall": 0.6363636363636364,
+   "fpSuppression": 0.8524590163934426,
+   "lostTP": 4,
+   "keptFP": 9,
+   "precisionAfter": 0.4375,
+   "netGain": 48
+  },
+  "precisionBefore": 0.1527777777777778,
+  "majorityBaseline": 0.8472222222222222,
+  "labeled": 72
+ },
+ "rows": [
+  {
+   "repo": "docmost",
+   "file": "src/collaboration/services/collab-history.service.ts",
+   "name": "CollabHistoryService.addContributors",
+   "gold": "TP",
+   "goldConfidence": "verified",
+   "goldReason": "async addContributors(pageId, userIds) 只判 userIds.length===0 就 redis.sadd，无任何内容校验 ⇒ 报 Input Validation 是对的（源码确证）",
+   "status": "OK",
+   "bodyLen": 181,
+   "params": "pageId: string, userIds: string[]",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S2_cache_write"
+   ],
+   "effectLinked": [
+    "S2_cache_write"
+   ],
+   "paramNames": [
+    "pageId",
+    "userIds"
+   ]
+  },
+  {
+   "repo": "docmost",
+   "file": "src/common/helpers/utils.ts",
+   "name": "createRetryStrategy",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 151,
+   "params": "",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": []
+  },
+  {
+   "repo": "docmost",
+   "file": "src/common/helpers/utils.ts",
+   "name": "createByteCountingStream",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 369,
+   "params": "source: Readable",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S3_outbound"
+   ],
+   "effectLinked": [],
+   "paramNames": [
+    "source"
+   ]
+  },
+  {
+   "repo": "docmost",
+   "file": "src/common/logger/pino.config.ts",
+   "name": "createPinoConfig",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 2003,
+   "params": "",
+   "hits": [],
+   "entrySignals": [
+    "X3_request_object"
+   ],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": []
+  },
+  {
+   "repo": "docmost",
+   "file": "src/core/label/label.service.ts",
+   "name": "LabelService.addLabelsToPage",
+   "gold": "TP",
+   "goldConfidence": "verified",
+   "goldReason": "收 names: string[]，只做 name.trim() 就 labelRepo.findOrCreate，无校验 ⇒ 报得对（源码确证）",
+   "status": "OK",
+   "bodyLen": 644,
+   "params": "pageId: string, names: string[], workspaceId: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S1_orm_write",
+    "S3_outbound",
+    "S5_delegate_service"
+   ],
+   "effectLinked": [
+    "S1_orm_write",
+    "S3_outbound",
+    "S5_delegate_service"
+   ],
+   "paramNames": [
+    "pageId",
+    "names",
+    "workspaceId"
+   ]
+  },
+  {
+   "repo": "docmost",
+   "file": "src/common/helpers/prosemirror/utils.ts",
+   "name": "createYdocFromJson",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 321,
+   "params": "prosemirrorJson: any",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "prosemirrorJson"
+   ]
+  },
+  {
+   "repo": "docmost",
+   "file": "src/core/attachment/services/attachment.service.ts",
+   "name": "AttachmentService.uploadFile",
+   "gold": "TP",
+   "goldConfidence": "verified",
+   "goldReason": "filePath 由 getAttachmentFolderPath + attachmentId + preparedFile.fileName 拼接，fileName 来自上传文件且未 sanitize ⇒ 路径穿越面；opts 进入时无类型/大小校验（大小限制只在 Controller 层）。按 E5 确立的口径，Service 层不因组件边界豁免。",
+   "status": "OK",
+   "bodyLen": 2689,
+   "params": "opts: {\n    filePromise: Promise<MultipartFile>;\n    pageId?: string;\n    userId: string;\n    spaceId: string;\n    workspaceId: string;\n    attachmentId?: string;\n  }",
+   "hits": [
+    {
+     "id": "D2_array_literal_check",
+     "desc": "内联数组字面量的成员检查",
+     "snippet": "['.pdf', '.docx', '.txt'].includes("
+    }
+   ],
+   "entrySignals": [],
+   "effectHits": [
+    "S5_delegate_service"
+   ],
+   "effectLinked": [],
+   "paramNames": [
+    "opts"
+   ]
+  },
+  {
+   "repo": "docmost",
+   "file": "src/core/attachment/services/attachment.service.ts",
+   "name": "AttachmentService.uploadToDrive",
+   "gold": "TP",
+   "goldConfidence": "verified",
+   "goldReason": "filePath 直接透传给 storageService.upload，无任何校验或规范化 ⇒ 外部可控路径直达存储 sink。",
+   "status": "OK",
+   "bodyLen": 308,
+   "params": "filePath: string, fileContent: Buffer | Readable",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S5_delegate_service"
+   ],
+   "effectLinked": [
+    "S5_delegate_service"
+   ],
+   "paramNames": [
+    "filePath",
+    "fileContent"
+   ]
+  },
+  {
+   "repo": "docmost",
+   "file": "src/core/casl/abilities/space-ability.factory.ts",
+   "name": "SpaceAbilityFactory.createForUser",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 563,
+   "params": "user: User, spaceId: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "user",
+    "spaceId"
+   ]
+  },
+  {
+   "repo": "docmost",
+   "file": "src/core/casl/abilities/workspace-ability.factory.ts",
+   "name": "WorkspaceAbilityFactory.createForUser",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 421,
+   "params": "user: User, workspace: Workspace",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "user",
+    "workspace"
+   ]
+  },
+  {
+   "repo": "docmost",
+   "file": "src/core/favorite/services/favorite.service.ts",
+   "name": "FavoriteService.addFavorite",
+   "gold": "TP",
+   "goldConfidence": "verified",
+   "goldReason": "opts.type 仅由 TS 类型 FavoriteType 约束（运行时不校验），三个可选 ID 全未校验归属即入库。",
+   "status": "OK",
+   "bodyLen": 475,
+   "params": "userId: string, workspaceId: string, opts: {\n      type: FavoriteType;\n      pageId?: string;\n      spaceId?: string;\n      templateId?: string;\n    }",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S1_orm_write",
+    "S5_delegate_service",
+    "S7_qb_chain"
+   ],
+   "effectLinked": [],
+   "paramNames": [
+    "userId",
+    "workspaceId",
+    "opts"
+   ]
+  },
+  {
+   "repo": "docmost",
+   "file": "src/core/group/services/group-user.service.ts",
+   "name": "GroupUserService.addUsersToGroupBatch",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "有双重校验：groupService.findAndValidateGroup(groupId, workspaceId) 验组归属；随后 .where('users.workspaceId','=',workspaceId) 把跨空间 userIds 过滤掉 ⇒ 无效/越权 ID 进不到 insert。此前在 E5 判为 TP 是因为 S7 链式判据当时漏判，属误判。",
+   "status": "OK",
+   "bodyLen": 1334,
+   "params": "userIds: string[], groupId: string, workspaceId: string, trx?: KyselyTransaction",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S7_qb_chain"
+   ],
+   "effectLinked": [
+    "S7_qb_chain"
+   ],
+   "paramNames": [
+    "userIds",
+    "groupId",
+    "workspaceId",
+    "trx"
+   ]
+  },
+  {
+   "repo": "ducktors-turborepo-remote-cache",
+   "file": "src/app.ts",
+   "name": "createApp",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 1991,
+   "params": "options: FastifyServerOptions & { configOverrides?: Partial<Config> } = {}",
+   "hits": [],
+   "entrySignals": [
+    "X2_route_registration"
+   ],
+   "effectHits": [
+    "S3_outbound"
+   ],
+   "effectLinked": [],
+   "paramNames": [
+    "options"
+   ]
+  },
+  {
+   "repo": "ducktors-turborepo-remote-cache",
+   "file": "src/plugins/remote-cache/storage/azure-blob-storage.ts",
+   "name": "createAzureBlobStorage",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 3892,
+   "params": "{\n  containerName,\n  connectionString,\n}: AzureBlobStorageOptions",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S3_outbound",
+    "S4_fs_write",
+    "S5_delegate_service"
+   ],
+   "effectLinked": [],
+   "paramNames": [
+    "{\n  containerName,\n  connectionString,\n}"
+   ]
+  },
+  {
+   "repo": "ducktors-turborepo-remote-cache",
+   "file": "src/plugins/remote-cache/storage/google-cloud-storage.ts",
+   "name": "createGoogleCloudStorage",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 823,
+   "params": "{\n  bucket,\n  clientEmail,\n  privateKey,\n  projectId,\n}: GoogleCloudStorageOptions",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S4_fs_write"
+   ],
+   "effectLinked": [],
+   "paramNames": [
+    "{\n  bucket,\n  clientEmail,\n  privateKey,\n  projectId,\n}"
+   ]
+  },
+  {
+   "repo": "ducktors-turborepo-remote-cache",
+   "file": "src/plugins/remote-cache/storage/index.ts",
+   "name": "createLocation",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 5075,
+   "params": "provider: Provider, providerOptions: ProviderOptions<Provider>",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S4_fs_write"
+   ],
+   "effectLinked": [
+    "S4_fs_write"
+   ],
+   "paramNames": [
+    "provider",
+    "providerOptions"
+   ]
+  },
+  {
+   "repo": "ducktors-turborepo-remote-cache",
+   "file": "src/plugins/remote-cache/storage/local.ts",
+   "name": "createLocal",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 1555,
+   "params": "options: LocalOptions",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S4_fs_write"
+   ],
+   "effectLinked": [],
+   "paramNames": [
+    "options"
+   ]
+  },
+  {
+   "repo": "ducktors-turborepo-remote-cache",
+   "file": "src/plugins/remote-cache/storage/s3.ts",
+   "name": "createS3",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 4198,
+   "params": "{\n  accessKey = process.env.S3_ACCESS_KEY,\n  secretKey = process.env.S3_SECRET_KEY,\n  bucket,\n  region = process.env.S3_REGION,\n  endpoint,\n  maxSockets,\n  s3OptionsPassthrough = {},\n}: S3Options",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S3_outbound",
+    "S5_delegate_service"
+   ],
+   "effectLinked": [],
+   "paramNames": [
+    "{\n  accessKey = process.env.S3_ACCESS_KEY,\n  secretKey = process.env.S3_SECRET_KEY,\n  bucket,\n  region = process.env.S3_REGION,\n  endpoint,\n  maxSockets,\n  s3OptionsPassthrough = {},\n}"
+   ]
+  },
+  {
+   "repo": "hedgedoc",
+   "file": "backend/src/alias/alias.service.ts",
+   "name": "AliasService.addAlias",
+   "gold": "TP",
+   "goldConfidence": "verified",
+   "goldReason": "alias 字符串无格式/长度/保留字校验直接入库（alias 实际是 URL slug，应受限）。",
+   "status": "OK",
+   "bodyLen": 800,
+   "params": "noteId: number, alias: string, transaction?: Knex",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S1_orm_write",
+    "S7_qb_chain"
+   ],
+   "effectLinked": [
+    "S1_orm_write",
+    "S7_qb_chain"
+   ],
+   "paramNames": [
+    "noteId",
+    "alias",
+    "transaction"
+   ]
+  },
+  {
+   "repo": "hedgedoc",
+   "file": "backend/src/api-token/api-token.service.ts",
+   "name": "ApiTokenService.createToken",
+   "gold": "TP",
+   "goldConfidence": "verified",
+   "goldReason": "真创建 token（2026-09-23 源码裁决）",
+   "status": "OK",
+   "bodyLen": 2062,
+   "params": "userId: number, label: string, userDefinedValidUntil?: DateTime",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S1_orm_write",
+    "S7_qb_chain"
+   ],
+   "effectLinked": [
+    "S1_orm_write",
+    "S7_qb_chain"
+   ],
+   "paramNames": [
+    "userId",
+    "label",
+    "userDefinedValidUntil"
+   ]
+  },
+  {
+   "repo": "hedgedoc",
+   "file": "frontend/src/api/alias/index.ts",
+   "name": "addAlias",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L12-前端API客户端不是后端主体 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 214,
+   "params": "noteAlias: string, newAlias: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "noteAlias",
+    "newAlias"
+   ]
+  },
+  {
+   "repo": "hedgedoc",
+   "file": "frontend/src/api/api-tokens/index.ts",
+   "name": "postNewAccessToken",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L12-前端API客户端不是后端主体 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 340,
+   "params": "label: string, validUntil: Date",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "label",
+    "validUntil"
+   ]
+  },
+  {
+   "repo": "hedgedoc",
+   "file": "backend/src/api/private/alias/alias.controller.ts",
+   "name": "AliasController.addAlias",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "Controller 层已有两道校验：getNoteIdAndCheckIfUserCanEditAliases（权限+note 解析）与 ensureAliasIsAvailable（可用性）。",
+   "status": "OK",
+   "bodyLen": 411,
+   "params": "@RequestUserId() userId: number, @Body() newAliasDto: AliasCreateDto",
+   "hits": [],
+   "entrySignals": [
+    "X1_handler_decorator"
+   ],
+   "effectHits": [
+    "S5_delegate_service"
+   ],
+   "effectLinked": [
+    "S5_delegate_service"
+   ],
+   "paramNames": [
+    "userId",
+    "newAliasDto"
+   ]
+  },
+  {
+   "repo": "hedgedoc",
+   "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+   "name": "ApiTokensController.postTokenRequest",
+   "gold": "UNKNOWN",
+   "goldConfidence": "unlabeled",
+   "goldReason": "同上，缺全局 ValidationPipe 是否启用的信息。",
+   "status": "OK",
+   "bodyLen": 464,
+   "params": "@Body() createDto: ApiTokenCreateDto, @RequestUserId({ forbidGuests: true }) userId: User[FieldNameUser.id]",
+   "hits": [],
+   "entrySignals": [
+    "X1_handler_decorator"
+   ],
+   "effectHits": [
+    "S5_delegate_service"
+   ],
+   "effectLinked": [
+    "S5_delegate_service"
+   ],
+   "paramNames": [
+    "createDto",
+    "userId"
+   ]
+  },
+  {
+   "repo": "hoppscotch",
+   "file": "packages/hoppscotch-backend/src/access-token/helper.ts",
+   "name": "createCLIErrorResponse",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 97,
+   "params": "reason: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "reason"
+   ]
+  },
+  {
+   "repo": "hoppscotch",
+   "file": "packages/hoppscotch-backend/src/admin/admin.resolver.ts",
+   "name": "AdminResolver.createTeamByAdmin",
+   "gold": "TP",
+   "goldConfidence": "verified",
+   "goldReason": "GraphQL Mutation，@Args 收 userUid/name 后直接 adminService.createATeam，函数体内无任何输入校验 ⇒ 报 Input Validation 是对的（源码确证）",
+   "status": "OK",
+   "bodyLen": 642,
+   "params": "@GqlAdmin() adminUser: Admin, @Args({\n      name: 'userUid',\n      description: 'users uid to make team owner',\n      type: () => ID,\n    })\n    userUid: string, @Args({ name: 'name', description: 'Di",
+   "hits": [],
+   "entrySignals": [
+    "X1_handler_decorator"
+   ],
+   "effectHits": [
+    "S5_delegate_service"
+   ],
+   "effectLinked": [
+    "S5_delegate_service"
+   ],
+   "paramNames": [
+    "adminUser",
+    "userUid",
+    "name"
+   ]
+  },
+  {
+   "repo": "hoppscotch",
+   "file": "packages/hoppscotch-backend/src/admin/admin.resolver.ts",
+   "name": "AdminResolver.addUserToTeamByAdmin",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "Resolver 纯委托，校验在下游 Service 完成（validateEmail）。按 E5 口径「看参数流向」，此处参数确实流到了一个会校验的下游。",
+   "status": "OK",
+   "bodyLen": 490,
+   "params": "@GqlAdmin() adminUser: Admin, @Args() args: AddUserToTeamArgs",
+   "hits": [],
+   "entrySignals": [
+    "X1_handler_decorator",
+    "X4_param_type"
+   ],
+   "effectHits": [
+    "S5_delegate_service"
+   ],
+   "effectLinked": [
+    "S5_delegate_service"
+   ],
+   "paramNames": [
+    "adminUser",
+    "args"
+   ]
+  },
+  {
+   "repo": "hoppscotch",
+   "file": "packages/hoppscotch-backend/src/admin/admin.service.ts",
+   "name": "AdminService.addUserToTeam",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "首行即 if (!validateEmail(userEmail)) return E.left(INVALID_EMAIL)，并有用户存在性检查 ⇒ 校验明确存在。",
+   "status": "OK",
+   "bodyLen": 1004,
+   "params": "teamID: string, userEmail: string, role: TeamAccessRole",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S5_delegate_service"
+   ],
+   "effectLinked": [
+    "S5_delegate_service"
+   ],
+   "paramNames": [
+    "teamID",
+    "userEmail",
+    "role"
+   ]
+  },
+  {
+   "repo": "hoppscotch",
+   "file": "packages/hoppscotch-backend/src/admin/admin.service.ts",
+   "name": "AdminService.createATeam",
+   "gold": "TP",
+   "goldConfidence": "verified",
+   "goldReason": "调 teamService.createTeam ⇒ 真业务创建（2026-09-23 源码裁决）",
+   "status": "OK",
+   "bodyLen": 361,
+   "params": "userUid: string, name: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S5_delegate_service"
+   ],
+   "effectLinked": [
+    "S5_delegate_service"
+   ],
+   "paramNames": [
+    "userUid",
+    "name"
+   ]
+  },
+  {
+   "repo": "hoppscotch",
+   "file": "packages/hoppscotch-desktop/src/kernel/store-resource.ts",
+   "name": "createStoreResource",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 2112,
+   "params": "namespace: string, key: string, schema: z.ZodType<T, z.ZodTypeDef, any>, defaults: () => T",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "namespace",
+    "key",
+    "schema",
+    "defaults"
+   ]
+  },
+  {
+   "repo": "hoppscotch",
+   "file": "packages/hoppscotch-js-sandbox/src/cage-modules/scripting-modules.ts",
+   "name": "postRequestModule",
+   "gold": "UNKNOWN",
+   "goldConfidence": "unlabeled",
+   "goldReason": "无任何线索命中",
+   "status": "OK",
+   "bodyLen": 187,
+   "params": "config: PostRequestModuleConfig, captureHook?: { capture?: () => void; bootstrapError?: unknown }",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "config",
+    "captureHook"
+   ]
+  },
+  {
+   "repo": "hoppscotch",
+   "file": "packages/hoppscotch-js-sandbox/src/cage-modules/namespaces/hopp-namespace.ts",
+   "name": "createHoppNamespaceMethods",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 1678,
+   "params": "ctx: CageModuleCtx, envMethods: EnvMethods, requestProps: RequestProps",
+   "hits": [
+    {
+     "id": "C4_celebrate_express",
+     "desc": "express 校验中间件 celebrate/express-validator 的 check/body/query",
+     "snippet": "body("
+    }
+   ],
+   "entrySignals": [
+    "X4_param_type"
+   ],
+   "effectHits": [
+    "S1_orm_write",
+    "S7_qb_chain"
+   ],
+   "effectLinked": [
+    "S1_orm_write",
+    "S7_qb_chain"
+   ],
+   "paramNames": [
+    "ctx",
+    "envMethods",
+    "requestProps"
+   ]
+  },
+  {
+   "repo": "hoppscotch",
+   "file": "packages/hoppscotch-js-sandbox/src/cage-modules/namespaces/pm-namespace.ts",
+   "name": "createPmNamespaceMethods",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 553,
+   "params": "ctx: CageModuleCtx, config: { request: HoppRESTRequest }",
+   "hits": [],
+   "entrySignals": [
+    "X4_param_type"
+   ],
+   "effectHits": [
+    "S3_outbound"
+   ],
+   "effectLinked": [
+    "S3_outbound"
+   ],
+   "paramNames": [
+    "ctx",
+    "config"
+   ]
+  },
+  {
+   "repo": "hoppscotch",
+   "file": "packages/hoppscotch-js-sandbox/src/cage-modules/namespaces/pw-namespace.ts",
+   "name": "createPwNamespaceMethods",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 1440,
+   "params": "ctx: CageModuleCtx, envMethods: EnvMethods, requestProps: RequestProps",
+   "hits": [],
+   "entrySignals": [
+    "X4_param_type"
+   ],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "ctx",
+    "envMethods",
+    "requestProps"
+   ]
+  },
+  {
+   "repo": "hoppscotch",
+   "file": "packages/hoppscotch-js-sandbox/src/cage-modules/utils/base-inputs.ts",
+   "name": "createBaseInputs",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 4471,
+   "params": "ctx: CageModuleCtx, config: BaseInputsConfig",
+   "hits": [],
+   "entrySignals": [
+    "X4_param_type"
+   ],
+   "effectHits": [
+    "S1_orm_write",
+    "S7_qb_chain"
+   ],
+   "effectLinked": [
+    "S1_orm_write",
+    "S7_qb_chain"
+   ],
+   "paramNames": [
+    "ctx",
+    "config"
+   ]
+  },
+  {
+   "repo": "hoppscotch",
+   "file": "packages/hoppscotch-js-sandbox/src/cage-modules/utils/chai-helpers.ts",
+   "name": "createChaiMethods",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 75303,
+   "params": "ctx, testStack, getCurrentTestContext",
+   "hits": [],
+   "entrySignals": [
+    "X4_param_type"
+   ],
+   "effectHits": [
+    "S3_outbound"
+   ],
+   "effectLinked": [
+    "S3_outbound"
+   ],
+   "paramNames": [
+    "ctx",
+    "testStack",
+    "getCurrentTestContext"
+   ]
+  },
+  {
+   "repo": "lujakob-nestjs-realworld-example-app",
+   "file": "src/article/article.controller.ts",
+   "name": "ArticleController.createComment",
+   "gold": "UNKNOWN",
+   "goldConfidence": "unlabeled",
+   "goldReason": "同上：Controller 只做委托，commentData: CreateCommentDto 的校验依赖全局 pipe；切片（35 个 .ts）不含 main.ts。",
+   "status": "OK",
+   "bodyLen": 384,
+   "params": "@Param('slug') slug, @Body('comment') commentData: CreateCommentDto",
+   "hits": [],
+   "entrySignals": [
+    "X1_handler_decorator"
+   ],
+   "effectHits": [
+    "S5_delegate_service"
+   ],
+   "effectLinked": [
+    "S5_delegate_service"
+   ],
+   "paramNames": [
+    "slug",
+    "commentData"
+   ]
+  },
+  {
+   "repo": "lujakob-nestjs-realworld-example-app",
+   "file": "src/article/article.service.ts",
+   "name": "ArticleService.addComment",
+   "gold": "TP",
+   "goldConfidence": "verified",
+   "goldReason": "articleRepository.findOne({slug}) 未判空即 article.comments.push（slug 不存在 ⇒ TypeError 500）；commentData.body 无长度/内容校验直接 save。",
+   "status": "OK",
+   "bodyLen": 371,
+   "params": "slug: string, commentData",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S1_orm_write",
+    "S5_delegate_service"
+   ],
+   "effectLinked": [],
+   "paramNames": [
+    "slug",
+    "commentData"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/auth/src/auth.ts",
+   "name": "Auth.add_user",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L9-Express中间件不是业务端点 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 1383,
+   "params": "user: string, password: string, cb: (error: VerdaccioError | null, user?: RemoteUser) => void",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S3_outbound"
+   ],
+   "effectLinked": [],
+   "paramNames": [
+    "user",
+    "password",
+    "cb"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addPackageAccess",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 343,
+   "params": "pattern: string, pkgAccess: PackageAccessYaml",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "pattern",
+    "pkgAccess"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addUplink",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 109,
+   "params": "id: string, uplink: UpLinkConf",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "id",
+    "uplink"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addSecurity",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 136,
+   "params": "security: Partial<Security>",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "security"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addAuth",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 116,
+   "params": "auth: Partial<AuthConf>",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "auth"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addLogger",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 89,
+   "params": "log: LoggerConfigItem",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "log"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addServer",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 136,
+   "params": "server: Partial<ServerSettingsConf>",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "server"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addLegacyAuthCache",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 148,
+   "params": "legacyAuthCache: NonNullable<ServerSettingsConf['legacyAuthCache']>",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "legacyAuthCache"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addStorage",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 196,
+   "params": "storage: string | object",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "storage"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addWeb",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 110,
+   "params": "web: Partial<WebConf>",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "web"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addListen",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 95,
+   "params": "listen: ListenAddress",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "listen"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addHttps",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 87,
+   "params": "https: HttpsConf",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "https"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addPublish",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 137,
+   "params": "publish: Partial<PublishOptions>",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "publish"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addFlags",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 124,
+   "params": "flags: Partial<FlagsConfig>",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "flags"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addExperiments",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 154,
+   "params": "experiments: Partial<FlagsConfig>",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "experiments"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addNotify",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 113,
+   "params": "notify: Notifications | Notifications[]",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "notify"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addMiddlewares",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 137,
+   "params": "middlewares: any",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "middlewares"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addFilters",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 117,
+   "params": "filters: any",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "filters"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addMaxBodySize",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 110,
+   "params": "maxBodySize: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "maxBodySize"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addUserRateLimit",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 145,
+   "params": "rateLimit: RateLimit",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "rateLimit"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addUrlPrefix",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 101,
+   "params": "urlPrefix: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "urlPrefix"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addI18n",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 92,
+   "params": "i18n: ConfigYaml['i18n']",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "i18n"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addUserAgent",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 101,
+   "params": "userAgent: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "userAgent"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addHttpProxy",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 101,
+   "params": "httpProxy: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "httpProxy"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addHttpsProxy",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 105,
+   "params": "httpsProxy: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "httpsProxy"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addNoProxy",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 93,
+   "params": "noProxy: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "noProxy"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addPlugins",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 92,
+   "params": "plugins: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "plugins"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/builder.ts",
+   "name": "ConfigBuilder.addNotifications",
+   "gold": "FP",
+   "goldConfidence": "verified",
+   "goldReason": "L13-配置构造器装配方法 已逐条人工核验（见设计稿 §二十八）",
+   "status": "OK",
+   "bodyLen": 123,
+   "params": "notifications: Notifications",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "notifications"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/user.ts",
+   "name": "createRemoteUser",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 335,
+   "params": "name: string, pluginGroups: string[]",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "name",
+    "pluginGroups"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/config/src/user.ts",
+   "name": "createAnonymousRemoteUser",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 161,
+   "params": "",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": []
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/core/core/src/auth-utils.ts",
+   "name": "createSessionToken",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 204,
+   "params": "",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": []
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/core/core/src/crypto-utils.ts",
+   "name": "createTarballHash",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 95,
+   "params": "",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": []
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/core/core/src/file-utils.ts",
+   "name": "createTempFolder",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 152,
+   "params": "prefix: string",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "prefix"
+   ]
+  },
+  {
+   "repo": "verdaccio",
+   "file": "packages/core/core/src/file-utils.ts",
+   "name": "createTempStorageFolder",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 264,
+   "params": "prefix: string, folder = 'storage'",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [
+    "S4_fs_write"
+   ],
+   "effectLinked": [],
+   "paramNames": [
+    "prefix",
+    "folder"
+   ]
+  },
+  {
+   "repo": "w3tecch-express-typescript-boilerplate",
+   "file": "test/utils/database.ts",
+   "name": "createDatabaseConnection",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 380,
+   "params": "",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": []
+  },
+  {
+   "repo": "w3tecch-express-typescript-boilerplate",
+   "file": "src/api/resolvers/PetResolver.ts",
+   "name": "PetResolver.addPet",
+   "gold": "TP",
+   "goldConfidence": "verified",
+   "goldReason": "@Arg('pet') pet: PetInput → new PetModel(); newPet.name = pet.name; newPet.age = pet.age 直接赋值后 create，全程无校验 ⇒ 报 Input Validation 是对的（源码确证）",
+   "status": "OK",
+   "bodyLen": 251,
+   "params": "@Arg('pet') pet: PetInput",
+   "hits": [],
+   "entrySignals": [
+    "X1_handler_decorator"
+   ],
+   "effectHits": [
+    "S1_orm_write",
+    "S5_delegate_service"
+   ],
+   "effectLinked": [],
+   "paramNames": [
+    "pet"
+   ]
+  },
+  {
+   "repo": "w3tecch-express-typescript-boilerplate",
+   "file": "src/lib/graphql/index.ts",
+   "name": "createDataLoader",
+   "gold": "FP",
+   "goldConfidence": "heuristic",
+   "goldReason": "L7-工厂装配函数不是内容创建 仅启发式打标，未经逐条核验",
+   "status": "OK",
+   "bodyLen": 893,
+   "params": "obj: ObjectType<T>, options: CreateDataLoaderOptions = {}",
+   "hits": [],
+   "entrySignals": [],
+   "effectHits": [],
+   "effectLinked": [],
+   "paramNames": [
+    "obj",
+    "options"
+   ]
+  }
+ ]
+}

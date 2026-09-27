@@ -966,7 +966,293 @@ export async function createValidatedRole(input: any): Promise<void> {
   ],
 };
 
-export const WEB_PROJECTS: WebProject[] = [PROJECT_A, PROJECT_B, PROJECT_C, PROJECT_D, PROJECT_E, PROJECT_F];
+// ═══════════════════════════════════════════════════════════════
+// G 族：真实世界的**授权命名形态**（2026-09-26 §42）
+//
+// 为什么单开一族：R62 —— §38 / §40 / §41 三轮在 Authorization **抑制**方向的改动，
+// blind-benchmark 盲测触发数**全是 0**（generated 语料里没有 CASL `ability.can`、
+// 没有 `Auth.allow_*`、没有 `verifyJWTPayload`）。三轮的 LOST 0 / ADDED 0 都是
+// **零触发**，不是零漂移 ⇒ 这道门在这条轴上不提供任何信息。
+// 本族就是补这个缺口：把真实项目里出现过的授权命名形态搬进合成语料，
+// 让盲测在授权轴上重新有差分能力。
+//
+// ⚠ R19：每一刀抑制机制**正反两面都要写** —— 只写「该压的」，无条件抑制也能全绿。
+//   本族 14 条里 8 条 suppress（该压）+ 6 条 report（不许压）。
+//
+// ⚠ 触发口径提醒：Authorization 四条规则是 paramGated 且 trigger 打在
+//   **effectiveCalls**（函数名 + 函数体全部调用 + 拆词）上 ⇒ 光有函数名不够，
+//   函数体里必须有一条能命中 trigger 的调用，否则规则压根不触发，
+//   期望写成 suppress 就成了「因为没触发所以没报」的假绿（与 R56 同源）。
+//   下面每个 suppress 用例的函数体里都刻意留了一条 trigger 调用（如 repo.deleteX）。
+//
+// ⚠ 反向对照的**选型陷阱**（§42 实测踩到）：`Auth.invalidateToken` 不能拿来当 C4 的
+//   反向对照 —— C4 层它确实被 PROTECTED_VERB(invalidate) 拦下，但 §39 的 AUTH_PATTERN
+//   里本来就有 `invalidate`（登出/会话失效入口）且按 identifierParse **逐词**匹配，
+//   "invalidateToken" 会拆出 invalidate ⇒ 先被 AUTH_PATTERN 压掉。
+//   ⇒ 端到端断言它"该报"会红，而红的**原因不是 C4**。选反向对照时必须确认
+//   没有别的机制抢先命中，否则测不到你想测的那一层（与 R59 同源：口径要对齐）。
+// ═══════════════════════════════════════════════════════════════
+
+const AUTHZ_SHAPES_TS = `// webshape_G —— 真实世界授权命名形态
+declare const repo: any;
+declare const ability: any;
+declare const Auth: any;
+declare const can: any;
+declare const canSendEmail: any;
+declare const validateSpaceAccess: any;
+declare const validateCanEdit: any;
+declare const deleteByUsersWithoutSpaceAccess: any;
+
+// ── C1：裸 can（§40）—— 动作在**实参**里，不在名字里 ──────────────
+// CASL 是 ability.can(Action.Delete, subject)，verdaccio 是 can('publish')。
+// §38 的组合式谓语要求 can<动作词> ⇒ 这两种都落空。
+
+/** ① CASL：ability.can ⇒ 有授权判定 ⇒ 不该报 */
+export function deleteSpace(spaceId: any, user: any): void {
+  ability.can("delete", spaceId);
+  repo.deleteSpace(spaceId);
+}
+
+/** ② verdaccio 形态：裸 can(...) ⇒ 不该报 */
+export function deleteTemplate(templateId: any, user: any): void {
+  can("delete", templateId);
+  repo.deleteTemplate(templateId);
+}
+
+/** ③ ⚠ canSendEmail 是**限流器**不是授权（§38 实测反例）⇒ 仍须报 */
+export function deleteWidget(widgetId: any, user: any): void {
+  canSendEmail(user.id);
+  repo.deleteWidget(widgetId);
+}
+
+/** ④ 基线：什么授权都没有 ⇒ 仍须报 */
+export function deleteDraft(draftId: any, user: any): void {
+  repo.deleteDraft(draftId);
+}
+
+// ── §38 A″：函数体里调的是「像校验但不是校验」的名字 ─────────────
+
+/** ⑤ validateSpaceAccess ⇒ 有访问校验 ⇒ 不该报 */
+export function deleteComment(commentId: any, user: any): void {
+  validateSpaceAccess(user, commentId);
+  repo.deleteComment(commentId);
+}
+
+/** ⑥ validateCanEdit（AUTHZ_CAN_HELPER_RE）⇒ 不该报 */
+export function deleteAlias(aliasId: any, user: any): void {
+  validateCanEdit(user, aliasId);
+  repo.deleteAlias(aliasId);
+}
+
+/** ⑦ ⚠ deleteByUsersWithoutSpaceAccess：名字含 Access 但它是**数据删除** ⇒ 仍须报 */
+export function deleteMembers(memberIds: any, user: any): void {
+  deleteByUsersWithoutSpaceAccess(memberIds);
+  repo.deleteMembers(memberIds);
+}
+
+/** ⑧ ⚠ getUserIdsWithSpaceAccess：名字含 Access 但它是**查询** ⇒ 仍须报 */
+export function getUserIdsWithSpaceAccess(spaceId: any, user: any): any {
+  return repo.findUserIds(spaceId);
+}
+
+// ── C2：函数**自身**就是那个授权谓语（§40）─────────────────────
+
+/** ⑨ canRemove 自己就是所有权检查 ⇒ 对它报「缺检查」是自指 ⇒ 不该报
+ *  ⚠ 函数体里刻意**不放** isOwner / checkOwner / hasPermission 之类调用 ——
+ *    否则会先被 Ownership Check 自己的 safeguard 压掉，端到端就测不到 C2 了
+ *    （第一版踩了这个坑：反向验证摘掉 C2 后 0 条转红，即用例是**假绿**）。
+ *    这里只放一条能命中 trigger 的 removeMemberRow，让 C2 成为唯一的压制来源。 */
+export function canRemove(memberId: any, user: any): boolean {
+  const row = repo.findMember(memberId);
+  return row ? repo.removeMemberRow(memberId) : false;
+}
+
+// ── C4：容器严格等于裸鉴权类名（§40）+ E1：token 内嵌 acronym（§41）──
+
+export class Auth {
+  /** ⑩ Auth.allow_publish：授权决策本体 ⇒ 不该报 */
+  allow_publish(pkgName: any, user: any): boolean {
+    const spec = this.getPackageSpec(pkgName);
+    return spec !== undefined;
+  }
+
+  /** ⑪ Auth.setLegacyAuthCacheEntry：机制内部（写鉴权缓存）⇒ 不该报 */
+  setLegacyAuthCacheEntry(key: any, user: any): void {
+    this.getCache().set(key, user);
+  }
+
+  /** ⑫ ⚠ Auth.changePassword：受保护动词 change 开头 ⇒ 凭据 CRUD 真需要鉴权 ⇒ 仍须报
+   *     （不用 invalidateToken 作反向对照的原因见 PROJECT_G 头部注释：
+   *       它被 AUTH_PATTERN 的 invalidate（登出族）先命中了，测不到 C4 这一层） */
+  changePassword(userId: any, user: any): void {
+    this.updatePasswordHash(userId);
+  }
+
+  getPackageSpec(name: any): any {
+    return repo.findPackage(name);
+  }
+
+  getCache(): any {
+    return repo.cache;
+  }
+
+  updatePasswordHash(userId: any, hash?: any): void {
+    repo.updatePasswordHash(userId, hash);
+  }
+}
+
+export class AuthController {
+  /** ⑬ ⚠ AuthController.deletePendingUserData：容器是 AuthController 不是裸 Auth
+   *     —— §39 的 V-D 反向验证早就证明这类**不能**压 ⇒ 仍须报 */
+  deletePendingUserData(userId: any, user: any): void {
+    repo.deletePendingUser(userId);
+  }
+}
+
+// ── E1：token 内嵌 acronym（§41）—— 凭据语义藏在 JWT / OIDC 里 ────
+
+/** ⑭ createJWTToken：create × JWT（acronym）⇒ 鉴权机制本体 ⇒ 不该报
+ *  ⚠ 这条是 E1 唯一救回来的一类：identifierParse 只给 ["create","JWTToken"]，
+ *    对象侧拿到 "jwttoken"（既 ≠ jwt 也 ≠ token）⇒ BASE 不命中。
+ *    ⇒ 若 E1 被摘掉，这条会转红 —— 正是 R62 要的差分能力。 */
+export function createJWTToken(userId: any, user: any): string {
+  return repo.persistToken(userId);
+}
+
+/** ⑮ setJWTCookie：set × JWT ⇒ 下发鉴权 cookie ⇒ 不该报 */
+export function setJWTCookie(userId: any, user: any): void {
+  repo.persistCookie(userId);
+}
+
+/** ⑯ ⚠ setUserPassword：password 被**刻意**排除在机制对象词表外（§39）
+ *    —— 改密码最需要鉴权 ⇒ 仍须报 */
+export function setUserPassword(userId: any, user: any): void {
+  repo.persistPassword(userId);
+}
+
+/** ⑰ ⚠ deleteExpiredJWTAuditLog：acronym 认出来了（JWT）但动词不是机制动词
+ *    ⇒ 只是个普通的日志清理 ⇒ 仍须报 */
+export function deleteExpiredJWTAuditLog(before: any, user: any): void {
+  repo.deleteAuditLogs(before);
+}
+`;
+
+const PROJECT_G: WebProject = {
+  id: "webshape_G",
+  shape: "真实世界的授权命名形态（§42）：CASL 裸 can / 自指谓语 / Auth 决策类 / token 内嵌 acronym，各配反向对照",
+  files: {
+    "src/authz-shapes.ts": AUTHZ_SHAPES_TS,
+  },
+  cases: [
+    {
+      fn: "deleteSpace",
+      file: "authz-shapes.ts",
+      suppressRules: ["Authorization (Ownership Check)"],
+      why: "C1①：ability.can(Action.Delete, subject) —— 动作在实参里，§38 的 can<动作词> 够不着",
+    },
+    {
+      fn: "deleteTemplate",
+      file: "authz-shapes.ts",
+      suppressRules: ["Authorization (Ownership Check)"],
+      why: "C1②：裸 can('delete') —— verdaccio 形态",
+    },
+    {
+      fn: "deleteWidget",
+      file: "authz-shapes.ts",
+      reportRules: ["Authorization (Ownership Check)"],
+      why: "C1③ 反向：canSendEmail 是限流器 ⇒ 不得因含 can 而被压（§38 实测反例）",
+    },
+    {
+      fn: "deleteDraft",
+      file: "authz-shapes.ts",
+      reportRules: ["Authorization (Ownership Check)"],
+      why: "C1④ 反向：无授权证据的基线 ⇒ 必须还在报（防无条件抑制）",
+    },
+    {
+      fn: "deleteComment",
+      file: "authz-shapes.ts",
+      suppressRules: ["Authorization (Ownership Check)"],
+      why: "§38 A″：validateSpaceAccess 是访问校验",
+    },
+    {
+      fn: "deleteAlias",
+      file: "authz-shapes.ts",
+      suppressRules: ["Authorization (Ownership Check)"],
+      why: "§38 A′：validateCanEdit 带前缀 helper",
+    },
+    {
+      fn: "deleteMembers",
+      file: "authz-shapes.ts",
+      reportRules: ["Authorization (Ownership Check)"],
+      why: "§38 A″ 反向：deleteByUsersWithoutSpaceAccess 名字含 Access 但它是数据删除（踩过）",
+    },
+    {
+      fn: "getUserIdsWithSpaceAccess",
+      file: "authz-shapes.ts",
+      reportRules: ["Authorization (Unauthenticated Access)"],
+      why: "§38 A″ 反向：名字含 Access 但它是查询（踩过）",
+    },
+    {
+      fn: "canRemove",
+      file: "authz-shapes.ts",
+      suppressRules: ["Authorization (Ownership Check)"],
+      why: "C2/§38：函数自身就是所有权检查 ⇒ 报「缺检查」是自指。" +
+        "⚠ 这条被**两条**机制冗余覆盖：函数体无 isOwner 类 safeguard，但 ownName 会进 effectiveCalls " +
+        "⇒ §38 的 casl_predicate safeguard 与 §40 的 C2 各自都能压住它（反向验证已双向确认：摘掉任一条仍全绿）。" +
+        "故它是端到端行为护栏，不是 C2 的独占探针 —— C2 独力生效的地方只有未挂 §38 三条的 marker-gated 规则",
+    },
+    {
+      fn: "Auth.allow_publish",
+      file: "authz-shapes.ts",
+      suppressRules: ["Authorization (Unauthenticated Access)"],
+      why: "C4①：容器严格等于 Auth 且方法是 allow_* 授权决策 ⇒ 机制本体",
+    },
+    {
+      fn: "Auth.setLegacyAuthCacheEntry",
+      file: "authz-shapes.ts",
+      suppressRules: ["Authorization (Unauthenticated Mutation)"],
+      why: "C4②：Auth + 方法含 Cache（机制名词）且非受保护动词 ⇒ 机制内部",
+    },
+    {
+      fn: "Auth.changePassword",
+      file: "authz-shapes.ts",
+      reportRules: ["Authorization (Ownership Check)"],
+      why: "C4③ 反向：受保护动词 change 开头 ⇒ 凭据 CRUD 真需要鉴权，绝不能压",
+    },
+    {
+      fn: "AuthController.deletePendingUserData",
+      file: "authz-shapes.ts",
+      reportRules: ["Authorization (Ownership Check)"],
+      why: "C4④ 反向：容器是 AuthController 不是裸 Auth ⇒ §39 V-D 证明这类不能压",
+    },
+    {
+      fn: "createJWTToken",
+      file: "authz-shapes.ts",
+      suppressRules: ["Authorization (Unauthenticated Mutation)"],
+      why: "E1①：create × JWT(acronym) ⇒ 机制本体。BASE 不命中（对象是 jwttoken）⇒ 摘掉 E1 这条会转红",
+    },
+    {
+      fn: "setJWTCookie",
+      file: "authz-shapes.ts",
+      suppressRules: ["Authorization (Unauthenticated Mutation)"],
+      why: "E1②：set × JWT ⇒ 下发鉴权 cookie",
+    },
+    {
+      fn: "setUserPassword",
+      file: "authz-shapes.ts",
+      reportRules: ["Authorization (Unauthenticated Mutation)"],
+      why: "E1③ 反向：password 刻意不在机制对象词表 ⇒ 改密码必须鉴权",
+    },
+    {
+      fn: "deleteExpiredJWTAuditLog",
+      file: "authz-shapes.ts",
+      reportRules: ["Authorization (Ownership Check)"],
+      why: "E1④ 反向：acronym 认出来了但动词不是机制动词 ⇒ 只是普通日志清理，仍需鉴权",
+    },
+  ],
+};
+
+export const WEB_PROJECTS: WebProject[] = [PROJECT_A, PROJECT_B, PROJECT_C, PROJECT_D, PROJECT_E, PROJECT_F, PROJECT_G];
 
 const MARKER_TEXT: Record<Marker, string> = {
   auth_machinery: "__progmune_auth_machinery__",

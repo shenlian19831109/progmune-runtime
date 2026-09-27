@@ -1,0 +1,909 @@
+[
+  {
+    "id": "docmost/AttachmentController.uploadFile::File Upload Without Validation",
+    "repo": "docmost",
+    "fn": "AttachmentController.uploadFile",
+    "rule": "File Upload Without Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "bytes",
+      "getFileUploadSizeLimit",
+      "file",
+      "error",
+      "findById",
+      "validateCanEdit",
+      "isValidUUID",
+      "uploadFile",
+      "log",
+      "send",
+      "buildFileUrl",
+      "__progmune_auth_machinery__",
+      "__progmune_input_guard__"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "line": 89,
+      "enclosingClass": "AttachmentController",
+      "decorators": "@UseGuards(JwtAuthGuard) @HttpCode(HttpStatus.OK) @Post('files/upload') @UseInterceptors(FileInterceptor)",
+      "params": "@Req() req: any, @Res() res: FastifyReply, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace",
+      "body": "@UseGuards(JwtAuthGuard)\n  @HttpCode(HttpStatus.OK)\n  @Post('files/upload')\n  @UseInterceptors(FileInterceptor)\n  async uploadFile(\n    @Req() req: any,\n    @Res() res: FastifyReply,\n    @AuthUser() user: User,\n    @AuthWorkspace() workspace: Workspace,\n  ) {\n    const maxFileSize = bytes(this.environmentService.getFileUploadSizeLimit());\n\n    let file = null;\n    try {\n      file = await req.file({\n        limits: { fileSize: maxFileSize, fields: 3, files: 1 },\n      });\n    } catch (err: any) {\n      this.logger.error(err.message);\n      if (err?.statusCode === 413) {\n        throw new BadRequestException(\n          `File too large. Exceeds the ${this.environmentService.getFileUploadSizeLimit()} limit`,\n        );\n      }\n    }\n\n    if (!file) {\n      throw new BadRequestException('Failed to upload file');\n    }\n\n    const pageId = file.fields?.pageId?.value;\n\n    if (!pageId) {\n      throw new BadRequestException('PageId is required');\n    }\n\n    const page = await this.pageRepo.findById(pageId);\n\n    if (!page) {\n      throw new NotFoundException('Page not found');\n    }\n\n    await this.pageAccessService.validateCanEdit(page, user);\n\n    const spaceId = page.spaceId;\n\n    const attachmentId = file.fields?.attachmentId?.value;\n    if (attachmentId && !isValidUUID(attachmentId)) {\n      throw new BadRequestException('Invalid attachment id');\n    }\n\n    try {\n      const fileResponse = await this.attachmentService.uploadFile({\n        filePromise: file,\n        pageId: pageId,\n        spaceId: spaceId,\n        userId: user.id,\n        workspaceId: workspace.id,\n        attachmentId: attachmentId,\n      });\n\n      this.auditService.log({\n        event: AuditEvent.ATTACHMENT_UPLOADED,\n        resourceType: AuditResource.ATTACHMENT,\n        resourceId: fileResponse?.id ?? attachmentId,\n        spaceId,\n        metadata: {\n          fileName: fileResponse?.fileName,\n          pageId,\n          spaceId,\n        },\n      });\n\n      return res.send({\n        ...fileResponse,\n        url: this.buildFileUrl(workspace, fileResponse),\n      });\n    } catch (err: any) {\n      if (err?.statusCode === 413) {\n        const errMessage = `File too large. Exceeds the ${this.envi",
+      "fileImports": [
+        "../../common/guards/jwt-auth.guard",
+        "../auth/dto/jwt-payload",
+        "./dto/attachment.dto"
+      ]
+    }
+  },
+  {
+    "id": "docmost/AttachmentController.uploadAvatarOrLogo::File Upload Without Validation",
+    "repo": "docmost",
+    "fn": "AttachmentController.uploadAvatarOrLogo",
+    "rule": "File Upload Without Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "bytes",
+      "file",
+      "includes",
+      "createForUser",
+      "cannot",
+      "uploadImage",
+      "send",
+      "error",
+      "__progmune_auth_machinery__",
+      "__progmune_input_guard__"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/attachment/attachment.controller.ts",
+      "line": 273,
+      "enclosingClass": "AttachmentController",
+      "decorators": "@UseGuards(JwtAuthGuard) @HttpCode(HttpStatus.OK) @Post('attachments/upload-image') @UseInterceptors(FileInterceptor)",
+      "params": "@Req() req: any, @Res() res: FastifyReply, @AuthUser() user: User, @AuthWorkspace() workspace: Workspace",
+      "body": "@UseGuards(JwtAuthGuard)\n  @HttpCode(HttpStatus.OK)\n  @Post('attachments/upload-image')\n  @UseInterceptors(FileInterceptor)\n  async uploadAvatarOrLogo(\n    @Req() req: any,\n    @Res() res: FastifyReply,\n    @AuthUser() user: User,\n    @AuthWorkspace() workspace: Workspace,\n  ) {\n    const maxFileSize = bytes(MAX_AVATAR_SIZE);\n\n    let file = null;\n    try {\n      file = await req.file({\n        limits: { fileSize: maxFileSize, fields: 3, files: 1 },\n      });\n    } catch (err: any) {\n      if (err?.statusCode === 413) {\n        throw new BadRequestException(\n          `File too large. Exceeds the ${MAX_AVATAR_SIZE} limit`,\n        );\n      }\n    }\n\n    if (!file) {\n      throw new BadRequestException('Invalid file upload');\n    }\n\n    const attachmentType = file.fields?.type?.value;\n    const spaceId = file.fields?.spaceId?.value;\n\n    if (!attachmentType) {\n      throw new BadRequestException('attachment type is required');\n    }\n\n    if (\n      !validAttachmentTypes.includes(attachmentType) ||\n      attachmentType === AttachmentType.File\n    ) {\n      throw new BadRequestException('Invalid image attachment type');\n    }\n\n    if (attachmentType === AttachmentType.WorkspaceIcon) {\n      const ability = this.workspaceAbility.createForUser(user, workspace);\n      if (\n        ability.cannot(\n          WorkspaceCaslAction.Manage,\n          WorkspaceCaslSubject.Settings,\n        )\n      ) {\n        throw new ForbiddenException();\n      }\n    }\n\n    if (attachmentType === AttachmentType.SpaceIcon) {\n      if (!spaceId) {\n        throw new BadRequestException('spaceId is required');\n      }\n\n      const spaceAbility = await this.spaceAbility.createForUser(user, spaceId);\n      if (\n        spaceAbility.cannot(SpaceCaslAction.Manage, SpaceCaslSubject.Settings)\n      ) {\n        throw new ForbiddenException();\n      }\n    }\n\n    try {\n      const fileResponse = await this.attachmentService.uploadImage(\n        file,\n        attachmentType,\n        user.id,\n        workspace.id,\n        spaceId,\n      );\n\n      return res.send(fileResponse);\n    } catch (err: any) {\n      this.logger.error(err);\n      throw new BadRequestException('Error processing file upload.');\n    }\n",
+      "fileImports": [
+        "../../common/guards/jwt-auth.guard",
+        "../auth/dto/jwt-payload",
+        "./dto/attachment.dto"
+      ]
+    }
+  },
+  {
+    "id": "docmost/computeEmailSignature::Data Integrity (Foreign Key)",
+    "repo": "docmost",
+    "fn": "computeEmailSignature",
+    "rule": "Data Integrity (Foreign Key)",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T2-子实体创建未验父 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "digest",
+      "update",
+      "createHmac",
+      "toLowerCase"
+    ],
+    "lead": null,
+    "shape": "T2-子实体创建未验父",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/auth/auth.util.ts",
+      "line": 5,
+      "decorators": "",
+      "params": "email: string, workspaceId: string, appSecret: string",
+      "body": "export function computeEmailSignature(\n  email: string,\n  workspaceId: string,\n  appSecret: string,\n): string {\n  return createHmac('sha256', appSecret)\n    .update(`${email.toLowerCase()}:${workspaceId}`)\n    .digest('hex');\n}",
+      "fileImports": []
+    }
+  },
+  {
+    "id": "docmost/LabelController.assertCanReadSpace::Data Integrity (Foreign Key)",
+    "repo": "docmost",
+    "fn": "LabelController.assertCanReadSpace",
+    "rule": "Data Integrity (Foreign Key)",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T2-子实体创建未验父 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "createForUser",
+      "cannot",
+      "__progmune_auth_machinery__"
+    ],
+    "lead": null,
+    "shape": "T2-子实体创建未验父",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/label/label.controller.ts",
+      "line": 116,
+      "enclosingClass": "LabelController",
+      "decorators": "@UseGuards(JwtAuthGuard) @Controller('labels')",
+      "params": "user: User, spaceId: string",
+      "body": "private async assertCanReadSpace(user: User, spaceId: string) {\n    const ability = await this.spaceAbility.createForUser(user, spaceId);\n    if (ability.cannot(SpaceCaslAction.Read, SpaceCaslSubject.Page)) {\n      throw new ForbiddenException();\n    }\n  }",
+      "fileImports": [
+        "./dto/label.dto",
+        "../../common/guards/jwt-auth.guard"
+      ]
+    }
+  },
+  {
+    "id": "docmost/AttachmentService.uploadFile::Input Validation",
+    "repo": "docmost",
+    "fn": "AttachmentService.uploadFile",
+    "rule": "Input Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "prepareFile",
+      "findById",
+      "uuid7",
+      "getAttachmentFolderPath",
+      "createByteCountingStream",
+      "uploadToDrive",
+      "getBytesRead",
+      "updateAttachment",
+      "saveAttachment",
+      "includes",
+      "toLowerCase",
+      "add",
+      "error"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "line": 44,
+      "enclosingClass": "AttachmentService",
+      "decorators": "@Injectable()",
+      "params": "opts: {\n    filePromise: Promise<MultipartFile>;\n    pageId?: string;\n    userId: string;\n    spaceId: string;\n    workspaceId: string;\n    attachmentId?: string;\n  }",
+      "body": "async uploadFile(opts: {\n    filePromise: Promise<MultipartFile>;\n    pageId?: string;\n    userId: string;\n    spaceId: string;\n    workspaceId: string;\n    attachmentId?: string;\n  }) {\n    const { filePromise, pageId, spaceId, userId, workspaceId } = opts;\n    const preparedFile: PreparedFile = await prepareFile(filePromise, {\n      skipBuffer: true,\n    });\n\n    let isUpdate = false;\n    let attachmentId = null;\n\n    // passing attachmentId to allow for updating diagrams\n    // instead of creating new files for each save\n    if (opts?.attachmentId) {\n      const existingAttachment = await this.attachmentRepo.findById(\n        opts.attachmentId,\n      );\n      if (!existingAttachment) {\n        throw new NotFoundException(\n          'Existing attachment to overwrite not found',\n        );\n      }\n\n      if (\n        existingAttachment.pageId !== pageId ||\n        existingAttachment.fileExt !== preparedFile.fileExtension ||\n        existingAttachment.workspaceId !== workspaceId\n      ) {\n        throw new BadRequestException('File attachment does not match');\n      }\n      attachmentId = opts.attachmentId;\n      isUpdate = true;\n    } else {\n      attachmentId = uuid7();\n    }\n\n    const filePath = `${getAttachmentFolderPath(AttachmentType.File, workspaceId)}/${attachmentId}/${preparedFile.fileName}`;\n\n    const { stream, getBytesRead } = createByteCountingStream(\n      preparedFile.multiPartFile.file,\n    );\n\n    await this.uploadToDrive(filePath, stream);\n\n    // Update fileSize from the consumed stream\n    preparedFile.fileSize = getBytesRead();\n\n    let attachment: Attachment = null;\n    try {\n      if (isUpdate) {\n        attachment = await this.attachmentRepo.updateAttachment(\n          {\n            fileSize: preparedFile.fileSize,\n            updatedAt: new Date(),\n          },\n          attachmentId,\n        );\n      } else {\n        attachment = await this.saveAttachment({\n          attachmentId,\n          preparedFile,\n          filePath,\n          type: AttachmentType.File,\n          userId,\n          spaceId,\n          workspaceId,\n          pageId,\n        });\n      }\n\n      // Only index PDF, DOCX and TXT files\n      if (['.pdf', '.docx', '.txt']",
+      "fileImports": []
+    }
+  },
+  {
+    "id": "docmost/AttachmentService.uploadFile::File Upload Without Validation",
+    "repo": "docmost",
+    "fn": "AttachmentService.uploadFile",
+    "rule": "File Upload Without Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "prepareFile",
+      "findById",
+      "uuid7",
+      "getAttachmentFolderPath",
+      "createByteCountingStream",
+      "uploadToDrive",
+      "getBytesRead",
+      "updateAttachment",
+      "saveAttachment",
+      "includes",
+      "toLowerCase",
+      "add",
+      "error"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "line": 44,
+      "enclosingClass": "AttachmentService",
+      "decorators": "@Injectable()",
+      "params": "opts: {\n    filePromise: Promise<MultipartFile>;\n    pageId?: string;\n    userId: string;\n    spaceId: string;\n    workspaceId: string;\n    attachmentId?: string;\n  }",
+      "body": "async uploadFile(opts: {\n    filePromise: Promise<MultipartFile>;\n    pageId?: string;\n    userId: string;\n    spaceId: string;\n    workspaceId: string;\n    attachmentId?: string;\n  }) {\n    const { filePromise, pageId, spaceId, userId, workspaceId } = opts;\n    const preparedFile: PreparedFile = await prepareFile(filePromise, {\n      skipBuffer: true,\n    });\n\n    let isUpdate = false;\n    let attachmentId = null;\n\n    // passing attachmentId to allow for updating diagrams\n    // instead of creating new files for each save\n    if (opts?.attachmentId) {\n      const existingAttachment = await this.attachmentRepo.findById(\n        opts.attachmentId,\n      );\n      if (!existingAttachment) {\n        throw new NotFoundException(\n          'Existing attachment to overwrite not found',\n        );\n      }\n\n      if (\n        existingAttachment.pageId !== pageId ||\n        existingAttachment.fileExt !== preparedFile.fileExtension ||\n        existingAttachment.workspaceId !== workspaceId\n      ) {\n        throw new BadRequestException('File attachment does not match');\n      }\n      attachmentId = opts.attachmentId;\n      isUpdate = true;\n    } else {\n      attachmentId = uuid7();\n    }\n\n    const filePath = `${getAttachmentFolderPath(AttachmentType.File, workspaceId)}/${attachmentId}/${preparedFile.fileName}`;\n\n    const { stream, getBytesRead } = createByteCountingStream(\n      preparedFile.multiPartFile.file,\n    );\n\n    await this.uploadToDrive(filePath, stream);\n\n    // Update fileSize from the consumed stream\n    preparedFile.fileSize = getBytesRead();\n\n    let attachment: Attachment = null;\n    try {\n      if (isUpdate) {\n        attachment = await this.attachmentRepo.updateAttachment(\n          {\n            fileSize: preparedFile.fileSize,\n            updatedAt: new Date(),\n          },\n          attachmentId,\n        );\n      } else {\n        attachment = await this.saveAttachment({\n          attachmentId,\n          preparedFile,\n          filePath,\n          type: AttachmentType.File,\n          userId,\n          spaceId,\n          workspaceId,\n          pageId,\n        });\n      }\n\n      // Only index PDF, DOCX and TXT files\n      if (['.pdf', '.docx', '.txt']",
+      "fileImports": []
+    }
+  },
+  {
+    "id": "docmost/AttachmentService.uploadToDrive::Input Validation",
+    "repo": "docmost",
+    "fn": "AttachmentService.uploadToDrive",
+    "rule": "Input Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "upload",
+      "error"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "line": 243,
+      "enclosingClass": "AttachmentService",
+      "decorators": "@Injectable()",
+      "params": "filePath: string, fileContent: Buffer | Readable",
+      "body": "async uploadToDrive(filePath: string, fileContent: Buffer | Readable) {\n    try {\n      await this.storageService.upload(filePath, fileContent);\n    } catch (err) {\n      this.logger.error('Error uploading file to drive:', err);\n      throw new BadRequestException('Error uploading file to drive');\n    }\n  }",
+      "fileImports": []
+    }
+  },
+  {
+    "id": "docmost/AttachmentService.uploadToDrive::File Upload Without Validation",
+    "repo": "docmost",
+    "fn": "AttachmentService.uploadToDrive",
+    "rule": "File Upload Without Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "upload",
+      "error"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/attachment/services/attachment.service.ts",
+      "line": 243,
+      "enclosingClass": "AttachmentService",
+      "decorators": "@Injectable()",
+      "params": "filePath: string, fileContent: Buffer | Readable",
+      "body": "async uploadToDrive(filePath: string, fileContent: Buffer | Readable) {\n    try {\n      await this.storageService.upload(filePath, fileContent);\n    } catch (err) {\n      this.logger.error('Error uploading file to drive:', err);\n      throw new BadRequestException('Error uploading file to drive');\n    }\n  }",
+      "fileImports": []
+    }
+  },
+  {
+    "id": "docmost/AuthService.register::Data Integrity (Foreign Key)",
+    "repo": "docmost",
+    "fn": "AuthService.register",
+    "rule": "Data Integrity (Foreign Key)",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T2-子实体创建未验父 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "signup",
+      "createSessionAndToken",
+      "__progmune_input_schema__"
+    ],
+    "lead": null,
+    "shape": "T2-子实体创建未验父",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/auth/services/auth.service.ts",
+      "line": 106,
+      "enclosingClass": "AuthService",
+      "decorators": "@Injectable()",
+      "params": "createUserDto: CreateUserDto, workspaceId: string",
+      "body": "async register(createUserDto: CreateUserDto, workspaceId: string) {\n    const user = await this.signupService.signup(createUserDto, workspaceId);\n    return this.sessionService.createSessionAndToken(user);\n  }",
+      "fileImports": [
+        "../dto/login.dto",
+        "../dto/create-user.dto",
+        "../dto/create-admin-user.dto",
+        "../dto/change-password.dto",
+        "../dto/forgot-password.dto",
+        "../dto/password-reset.dto",
+        "../dto/verify-user-token.dto"
+      ]
+    }
+  },
+  {
+    "id": "docmost/FavoriteService.addFavorite::Data Integrity (Foreign Key)",
+    "repo": "docmost",
+    "fn": "FavoriteService.addFavorite",
+    "rule": "Data Integrity (Foreign Key)",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T2-子实体创建未验父 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "insert"
+    ],
+    "lead": null,
+    "shape": "T2-子实体创建未验父",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/favorite/services/favorite.service.ts",
+      "line": 47,
+      "enclosingClass": "FavoriteService",
+      "decorators": "@Injectable()",
+      "params": "userId: string, workspaceId: string, opts: {\n      type: FavoriteType;\n      pageId?: string;\n      spaceId?: string;\n      templateId?: string;\n    }",
+      "body": "async addFavorite(\n    userId: string,\n    workspaceId: string,\n    opts: {\n      type: FavoriteType;\n      pageId?: string;\n      spaceId?: string;\n      templateId?: string;\n    },\n  ): Promise<void> {\n    const favorite: InsertableFavorite = {\n      userId,\n      pageId: opts.pageId ?? null,\n      spaceId: opts.spaceId ?? null,\n      templateId: opts.templateId ?? null,\n      type: opts.type,\n      workspaceId,\n    };\n\n    await this.favoriteRepo.insert(favorite);\n  }",
+      "fileImports": []
+    }
+  },
+  {
+    "id": "docmost/FavoriteService.addFavorite::Input Validation",
+    "repo": "docmost",
+    "fn": "FavoriteService.addFavorite",
+    "rule": "Input Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "insert"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/favorite/services/favorite.service.ts",
+      "line": 47,
+      "enclosingClass": "FavoriteService",
+      "decorators": "@Injectable()",
+      "params": "userId: string, workspaceId: string, opts: {\n      type: FavoriteType;\n      pageId?: string;\n      spaceId?: string;\n      templateId?: string;\n    }",
+      "body": "async addFavorite(\n    userId: string,\n    workspaceId: string,\n    opts: {\n      type: FavoriteType;\n      pageId?: string;\n      spaceId?: string;\n      templateId?: string;\n    },\n  ): Promise<void> {\n    const favorite: InsertableFavorite = {\n      userId,\n      pageId: opts.pageId ?? null,\n      spaceId: opts.spaceId ?? null,\n      templateId: opts.templateId ?? null,\n      type: opts.type,\n      workspaceId,\n    };\n\n    await this.favoriteRepo.insert(favorite);\n  }",
+      "fileImports": []
+    }
+  },
+  {
+    "id": "docmost/FavoriteService.addFavorite::No Input Sanitization",
+    "repo": "docmost",
+    "fn": "FavoriteService.addFavorite",
+    "rule": "No Input Sanitization",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "insert"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/favorite/services/favorite.service.ts",
+      "line": 47,
+      "enclosingClass": "FavoriteService",
+      "decorators": "@Injectable()",
+      "params": "userId: string, workspaceId: string, opts: {\n      type: FavoriteType;\n      pageId?: string;\n      spaceId?: string;\n      templateId?: string;\n    }",
+      "body": "async addFavorite(\n    userId: string,\n    workspaceId: string,\n    opts: {\n      type: FavoriteType;\n      pageId?: string;\n      spaceId?: string;\n      templateId?: string;\n    },\n  ): Promise<void> {\n    const favorite: InsertableFavorite = {\n      userId,\n      pageId: opts.pageId ?? null,\n      spaceId: opts.spaceId ?? null,\n      templateId: opts.templateId ?? null,\n      type: opts.type,\n      workspaceId,\n    };\n\n    await this.favoriteRepo.insert(favorite);\n  }",
+      "fileImports": []
+    }
+  },
+  {
+    "id": "docmost/GroupUserService.addUsersToGroupBatch::Input Validation",
+    "repo": "docmost",
+    "fn": "GroupUserService.addUsersToGroupBatch",
+    "rule": "Input Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "dbOrTx",
+      "findAndValidateGroup",
+      "execute",
+      "where",
+      "select",
+      "selectFrom",
+      "push",
+      "onConflict",
+      "values",
+      "insertInto",
+      "log"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/group/services/group-user.service.ts",
+      "line": 54,
+      "enclosingClass": "GroupUserService",
+      "decorators": "@Injectable()",
+      "params": "userIds: string[], groupId: string, workspaceId: string, trx?: KyselyTransaction",
+      "body": "async addUsersToGroupBatch(\n    userIds: string[],\n    groupId: string,\n    workspaceId: string,\n    trx?: KyselyTransaction,\n  ): Promise<void> {\n    const db = dbOrTx(this.db, trx);\n    await this.groupService.findAndValidateGroup(groupId, workspaceId, trx);\n\n    if (userIds.length === 0) return;\n\n    // make sure we have valid workspace users\n    const validUsers = await db\n      .selectFrom('users')\n      .select(['id', 'name'])\n      .where('users.id', 'in', userIds)\n      .where('users.workspaceId', '=', workspaceId)\n      .execute();\n\n    if (validUsers.length === 0) return;\n\n    // prepare users to add to group\n    const groupUsersToInsert = [];\n    for (const user of validUsers) {\n      groupUsersToInsert.push({\n        userId: user.id,\n        groupId: groupId,\n      });\n    }\n\n    // batch insert new group users\n    await db\n      .insertInto('groupUsers')\n      .values(groupUsersToInsert)\n      .onConflict((oc) => oc.columns(['userId', 'groupId']).doNothing())\n      .execute();\n\n    for (const user of validUsers) {\n      this.auditService.log({\n        event: AuditEvent.GROUP_MEMBER_ADDED,\n        resourceType: AuditResource.GROUP,\n        resourceId: groupId,\n        changes: {\n          after: {\n            userId: user.id,\n            userName: user.name,\n          },\n        },\n      });\n    }\n  }",
+      "fileImports": []
+    }
+  },
+  {
+    "id": "docmost/GroupUserService.addUsersToGroupBatch::No Input Sanitization",
+    "repo": "docmost",
+    "fn": "GroupUserService.addUsersToGroupBatch",
+    "rule": "No Input Sanitization",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "dbOrTx",
+      "findAndValidateGroup",
+      "execute",
+      "where",
+      "select",
+      "selectFrom",
+      "push",
+      "onConflict",
+      "values",
+      "insertInto",
+      "log"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "src/core/group/services/group-user.service.ts",
+      "line": 54,
+      "enclosingClass": "GroupUserService",
+      "decorators": "@Injectable()",
+      "params": "userIds: string[], groupId: string, workspaceId: string, trx?: KyselyTransaction",
+      "body": "async addUsersToGroupBatch(\n    userIds: string[],\n    groupId: string,\n    workspaceId: string,\n    trx?: KyselyTransaction,\n  ): Promise<void> {\n    const db = dbOrTx(this.db, trx);\n    await this.groupService.findAndValidateGroup(groupId, workspaceId, trx);\n\n    if (userIds.length === 0) return;\n\n    // make sure we have valid workspace users\n    const validUsers = await db\n      .selectFrom('users')\n      .select(['id', 'name'])\n      .where('users.id', 'in', userIds)\n      .where('users.workspaceId', '=', workspaceId)\n      .execute();\n\n    if (validUsers.length === 0) return;\n\n    // prepare users to add to group\n    const groupUsersToInsert = [];\n    for (const user of validUsers) {\n      groupUsersToInsert.push({\n        userId: user.id,\n        groupId: groupId,\n      });\n    }\n\n    // batch insert new group users\n    await db\n      .insertInto('groupUsers')\n      .values(groupUsersToInsert)\n      .onConflict((oc) => oc.columns(['userId', 'groupId']).doNothing())\n      .execute();\n\n    for (const user of validUsers) {\n      this.auditService.log({\n        event: AuditEvent.GROUP_MEMBER_ADDED,\n        resourceType: AuditResource.GROUP,\n        resourceId: groupId,\n        changes: {\n          after: {\n            userId: user.id,\n            userName: user.name,\n          },\n        },\n      });\n    }\n  }",
+      "fileImports": []
+    }
+  },
+  {
+    "id": "hedgedoc/AliasService.addAlias::Data Integrity (Foreign Key)",
+    "repo": "hedgedoc",
+    "fn": "AliasService.addAlias",
+    "rule": "Data Integrity (Foreign Key)",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T2-子实体创建未验父 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "where",
+      "select",
+      "dbActor",
+      "debug",
+      "insert",
+      "notifyOthers"
+    ],
+    "lead": null,
+    "shape": "T2-子实体创建未验父",
+    "loc": {
+      "status": "OK",
+      "file": "backend/src/alias/alias.service.ts",
+      "line": 80,
+      "enclosingClass": "AliasService",
+      "decorators": "@Injectable()",
+      "params": "noteId: number, alias: string, transaction?: Knex",
+      "body": "async addAlias(noteId: number, alias: string, transaction?: Knex): Promise<void> {\n    const dbActor: Knex = transaction ? transaction : this.knex;\n    const newAlias: Alias = {\n      [FieldNameAlias.alias]: alias,\n      [FieldNameAlias.noteId]: noteId,\n      [FieldNameAlias.isPrimary]: null,\n    };\n    const oldAliases = await dbActor(TableAlias)\n      .select(FieldNameAlias.alias)\n      .where(FieldNameAlias.noteId, noteId);\n    if (oldAliases.length === 0) {\n      // The first alias is automatically made the primary aliases\n      this.logger.debug(\n        `There are no old aliases so the new one ${alias} will be primary`,\n        'addAlias',\n      );\n      newAlias[FieldNameAlias.isPrimary] = true;\n    }\n    await dbActor(TableAlias).insert(newAlias);\n    this.notifyOthers(noteId);\n  }",
+      "fileImports": [
+        "../dtos/alias.dto",
+        "../dtos/note-aliases.dto"
+      ]
+    }
+  },
+  {
+    "id": "hedgedoc/AliasService.addAlias::Input Validation",
+    "repo": "hedgedoc",
+    "fn": "AliasService.addAlias",
+    "rule": "Input Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "where",
+      "select",
+      "dbActor",
+      "debug",
+      "insert",
+      "notifyOthers"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "backend/src/alias/alias.service.ts",
+      "line": 80,
+      "enclosingClass": "AliasService",
+      "decorators": "@Injectable()",
+      "params": "noteId: number, alias: string, transaction?: Knex",
+      "body": "async addAlias(noteId: number, alias: string, transaction?: Knex): Promise<void> {\n    const dbActor: Knex = transaction ? transaction : this.knex;\n    const newAlias: Alias = {\n      [FieldNameAlias.alias]: alias,\n      [FieldNameAlias.noteId]: noteId,\n      [FieldNameAlias.isPrimary]: null,\n    };\n    const oldAliases = await dbActor(TableAlias)\n      .select(FieldNameAlias.alias)\n      .where(FieldNameAlias.noteId, noteId);\n    if (oldAliases.length === 0) {\n      // The first alias is automatically made the primary aliases\n      this.logger.debug(\n        `There are no old aliases so the new one ${alias} will be primary`,\n        'addAlias',\n      );\n      newAlias[FieldNameAlias.isPrimary] = true;\n    }\n    await dbActor(TableAlias).insert(newAlias);\n    this.notifyOthers(noteId);\n  }",
+      "fileImports": [
+        "../dtos/alias.dto",
+        "../dtos/note-aliases.dto"
+      ]
+    }
+  },
+  {
+    "id": "hedgedoc/AliasService.addAlias::No Input Sanitization",
+    "repo": "hedgedoc",
+    "fn": "AliasService.addAlias",
+    "rule": "No Input Sanitization",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "where",
+      "select",
+      "dbActor",
+      "debug",
+      "insert",
+      "notifyOthers"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "backend/src/alias/alias.service.ts",
+      "line": 80,
+      "enclosingClass": "AliasService",
+      "decorators": "@Injectable()",
+      "params": "noteId: number, alias: string, transaction?: Knex",
+      "body": "async addAlias(noteId: number, alias: string, transaction?: Knex): Promise<void> {\n    const dbActor: Knex = transaction ? transaction : this.knex;\n    const newAlias: Alias = {\n      [FieldNameAlias.alias]: alias,\n      [FieldNameAlias.noteId]: noteId,\n      [FieldNameAlias.isPrimary]: null,\n    };\n    const oldAliases = await dbActor(TableAlias)\n      .select(FieldNameAlias.alias)\n      .where(FieldNameAlias.noteId, noteId);\n    if (oldAliases.length === 0) {\n      // The first alias is automatically made the primary aliases\n      this.logger.debug(\n        `There are no old aliases so the new one ${alias} will be primary`,\n        'addAlias',\n      );\n      newAlias[FieldNameAlias.isPrimary] = true;\n    }\n    await dbActor(TableAlias).insert(newAlias);\n    this.notifyOthers(noteId);\n  }",
+      "fileImports": [
+        "../dtos/alias.dto",
+        "../dtos/note-aliases.dto"
+      ]
+    }
+  },
+  {
+    "id": "hedgedoc/AliasController.addAlias::Input Validation",
+    "repo": "hedgedoc",
+    "fn": "AliasController.addAlias",
+    "rule": "Input Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "getNoteIdAndCheckIfUserCanEditAliases",
+      "ensureAliasIsAvailable",
+      "addAlias",
+      "__progmune_auth_machinery__"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "backend/src/api/private/alias/alias.controller.ts",
+      "line": 84,
+      "enclosingClass": "AliasController",
+      "decorators": "@Post() @OpenApi(201, 400, 401, 403, 404, 409)",
+      "params": "@RequestUserId() userId: number, @Body() newAliasDto: AliasCreateDto",
+      "body": "@Post()\n  @OpenApi(201, 400, 401, 403, 404, 409)\n  async addAlias(\n    @RequestUserId() userId: number,\n    @Body() newAliasDto: AliasCreateDto,\n  ): Promise<void> {\n    const noteId = await this.getNoteIdAndCheckIfUserCanEditAliases(userId, newAliasDto.noteAlias);\n    await this.aliasService.ensureAliasIsAvailable(newAliasDto.newAlias);\n    await this.aliasService.addAlias(noteId, newAliasDto.newAlias);\n  }",
+      "fileImports": [
+        "../../../auth/session.guard",
+        "../../../dtos/alias-create.dto",
+        "../../../dtos/alias-update.dto",
+        "../../../dtos/note-aliases.dto"
+      ]
+    }
+  },
+  {
+    "id": "hedgedoc/ApiTokensController.postTokenRequest::Data Integrity (Foreign Key)",
+    "repo": "hedgedoc",
+    "fn": "ApiTokensController.postTokenRequest",
+    "rule": "Data Integrity (Foreign Key)",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T2-子实体创建未验父 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "isoStringToDateTime",
+      "createToken",
+      "__progmune_auth_machinery__"
+    ],
+    "lead": null,
+    "shape": "T2-子实体创建未验父",
+    "loc": {
+      "status": "OK",
+      "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+      "line": 39,
+      "enclosingClass": "ApiTokensController",
+      "decorators": "@Post() @OpenApi(201)",
+      "params": "@Body() createDto: ApiTokenCreateDto, @RequestUserId({ forbidGuests: true }) userId: User[FieldNameUser.id]",
+      "body": "@Post()\n  @OpenApi(201)\n  async postTokenRequest(\n    @Body() createDto: ApiTokenCreateDto,\n    @RequestUserId({ forbidGuests: true }) userId: User[FieldNameUser.id],\n  ): Promise<ApiTokenWithSecretDto> {\n    let validUntil: DateTime | undefined = undefined;\n    if (createDto.validUntil !== undefined) {\n      validUntil = isoStringToDateTime(createDto.validUntil);\n    }\n    return await this.apiTokenService.createToken(userId, createDto.label, validUntil);\n  }",
+      "fileImports": [
+        "../../../auth/session.guard",
+        "../../../dtos/api-token-create.dto",
+        "../../../dtos/api-token-with-secret.dto",
+        "../../../dtos/api-token.dto"
+      ]
+    }
+  },
+  {
+    "id": "hedgedoc/ApiTokensController.postTokenRequest::Input Validation",
+    "repo": "hedgedoc",
+    "fn": "ApiTokensController.postTokenRequest",
+    "rule": "Input Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "isoStringToDateTime",
+      "createToken",
+      "__progmune_auth_machinery__"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "backend/src/api/private/api-tokens/api-tokens.controller.ts",
+      "line": 39,
+      "enclosingClass": "ApiTokensController",
+      "decorators": "@Post() @OpenApi(201)",
+      "params": "@Body() createDto: ApiTokenCreateDto, @RequestUserId({ forbidGuests: true }) userId: User[FieldNameUser.id]",
+      "body": "@Post()\n  @OpenApi(201)\n  async postTokenRequest(\n    @Body() createDto: ApiTokenCreateDto,\n    @RequestUserId({ forbidGuests: true }) userId: User[FieldNameUser.id],\n  ): Promise<ApiTokenWithSecretDto> {\n    let validUntil: DateTime | undefined = undefined;\n    if (createDto.validUntil !== undefined) {\n      validUntil = isoStringToDateTime(createDto.validUntil);\n    }\n    return await this.apiTokenService.createToken(userId, createDto.label, validUntil);\n  }",
+      "fileImports": [
+        "../../../auth/session.guard",
+        "../../../dtos/api-token-create.dto",
+        "../../../dtos/api-token-with-secret.dto",
+        "../../../dtos/api-token.dto"
+      ]
+    }
+  },
+  {
+    "id": "hoppscotch/AccessTokenController.deletePAT::Data Integrity (Foreign Key)",
+    "repo": "hoppscotch",
+    "fn": "AccessTokenController.deletePAT",
+    "rule": "Data Integrity (Foreign Key)",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T2-子实体创建未验父 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "createCLIErrorResponse",
+      "deletePAT",
+      "isLeft",
+      "throwHTTPErr",
+      "__progmune_auth_machinery__",
+      "__progmune_input_guard__"
+    ],
+    "lead": null,
+    "shape": "T2-子实体创建未验父",
+    "loc": {
+      "status": "OK",
+      "file": "packages/hoppscotch-backend/src/access-token/access-token.controller.ts",
+      "line": 52,
+      "enclosingClass": "AccessTokenController",
+      "decorators": "@Delete('revoke') @UseGuards(JwtAuthGuard)",
+      "params": "@GqlUser() user: AuthUser, @Query('id') id: string",
+      "body": "@Delete('revoke')\n  @UseGuards(JwtAuthGuard)\n  async deletePAT(@GqlUser() user: AuthUser, @Query('id') id: string) {\n    if (!id) {\n      throw new BadRequestException(\n        createCLIErrorResponse(ACCESS_TOKENS_INVALID_DATA_ID),\n      );\n    }\n\n    const result = await this.accessTokenService.deletePAT(id, user.uid);\n\n    if (E.isLeft(result)) throwHTTPErr(result.left);\n    return result.right;\n  }",
+      "fileImports": [
+        "./dto/create-access-token.dto",
+        "src/auth/guards/jwt-auth.guard",
+        "src/guards/throttler-behind-proxy.guard",
+        "src/guards/rest-pat-auth.guard"
+      ]
+    }
+  },
+  {
+    "id": "hoppscotch/AdminResolver.updateUserDisplayNameByAdmin::No Input Sanitization",
+    "repo": "hoppscotch",
+    "fn": "AdminResolver.updateUserDisplayNameByAdmin",
+    "rule": "No Input Sanitization",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "updateUserDisplayName",
+      "isLeft",
+      "throwErr",
+      "__progmune_auth_machinery__"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "packages/hoppscotch-backend/src/admin/admin.resolver.ts",
+      "line": 159,
+      "enclosingClass": "AdminResolver",
+      "decorators": "@Mutation(() => Boolean, {\n    description: 'Update user display name',\n  }) @UseGuards(GqlAuthGuard, GqlAdminGuard)",
+      "params": "@Args({\n      name: 'userUID',\n      description: 'users UID',\n      type: () => ID,\n    })\n    userUID: string, @Args({\n      name: 'displayName',\n      description: 'users display name',\n    })\n    displayName: string",
+      "body": "@Mutation(() => Boolean, {\n    description: 'Update user display name',\n  })\n  @UseGuards(GqlAuthGuard, GqlAdminGuard)\n  async updateUserDisplayNameByAdmin(\n    @Args({\n      name: 'userUID',\n      description: 'users UID',\n      type: () => ID,\n    })\n    userUID: string,\n    @Args({\n      name: 'displayName',\n      description: 'users display name',\n    })\n    displayName: string,\n  ): Promise<boolean> {\n    const isUpdated = await this.adminService.updateUserDisplayName(\n      userUID,\n      displayName,\n    );\n    if (E.isLeft(isUpdated)) throwErr(isUpdated.left);\n    return isUpdated.right;\n  }",
+      "fileImports": [
+        "../guards/gql-auth.guard",
+        "./guards/gql-admin.guard",
+        "src/guards/gql-throttler.guard"
+      ]
+    }
+  },
+  {
+    "id": "hoppscotch/AdminResolver.addUserToTeamByAdmin::Input Validation",
+    "repo": "hoppscotch",
+    "fn": "AdminResolver.addUserToTeamByAdmin",
+    "rule": "Input Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "addUserToTeam",
+      "isLeft",
+      "throwErr",
+      "__progmune_auth_machinery__"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "packages/hoppscotch-backend/src/admin/admin.resolver.ts",
+      "line": 281,
+      "enclosingClass": "AdminResolver",
+      "decorators": "@Mutation(() => TeamMember, {\n    description: 'Add a user to a team with email and team member role',\n  }) @UseGuards(GqlAuthGuard, GqlAdminGuard)",
+      "params": "@GqlAdmin() adminUser: Admin, @Args() args: AddUserToTeamArgs",
+      "body": "@Mutation(() => TeamMember, {\n    description: 'Add a user to a team with email and team member role',\n  })\n  @UseGuards(GqlAuthGuard, GqlAdminGuard)\n  async addUserToTeamByAdmin(\n    @GqlAdmin() adminUser: Admin,\n    @Args() args: AddUserToTeamArgs,\n  ): Promise<TeamMember> {\n    const addedUser = await this.adminService.addUserToTeam(\n      args.teamID,\n      args.userEmail,\n      args.role,\n    );\n    if (E.isLeft(addedUser)) throwErr(addedUser.left);\n    return addedUser.right;\n  }",
+      "fileImports": [
+        "../guards/gql-auth.guard",
+        "./guards/gql-admin.guard",
+        "src/guards/gql-throttler.guard"
+      ]
+    }
+  },
+  {
+    "id": "hoppscotch/AdminService.updateUserDisplayName::No Input Sanitization",
+    "repo": "hoppscotch",
+    "fn": "AdminService.updateUserDisplayName",
+    "rule": "No Input Sanitization",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "updateUserDisplayName",
+      "isLeft",
+      "left",
+      "right"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "packages/hoppscotch-backend/src/admin/admin.service.ts",
+      "line": 148,
+      "enclosingClass": "AdminService",
+      "decorators": "@Injectable()",
+      "params": "userUid: string, displayName: string",
+      "body": "async updateUserDisplayName(userUid: string, displayName: string) {\n    const updatedUser = await this.userService.updateUserDisplayName(\n      userUid,\n      displayName,\n    );\n    if (E.isLeft(updatedUser)) return E.left(updatedUser.left);\n\n    return E.right(true);\n  }",
+      "fileImports": []
+    }
+  },
+  {
+    "id": "hoppscotch/AdminService.addUserToTeam::Input Validation",
+    "repo": "hoppscotch",
+    "fn": "AdminService.addUserToTeam",
+    "rule": "Input Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "validateEmail",
+      "left",
+      "findUserByEmail",
+      "isNone",
+      "getTeamMemberTE",
+      "isLeft",
+      "addMemberToTeamWithEmail",
+      "getTeamInviteByEmailAndTeamID",
+      "isRight",
+      "revokeInvitation",
+      "right"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "packages/hoppscotch-backend/src/admin/admin.service.ts",
+      "line": 345,
+      "enclosingClass": "AdminService",
+      "decorators": "@Injectable()",
+      "params": "teamID: string, userEmail: string, role: TeamAccessRole",
+      "body": "async addUserToTeam(teamID: string, userEmail: string, role: TeamAccessRole) {\n    if (!validateEmail(userEmail)) return E.left(INVALID_EMAIL);\n\n    const user = await this.userService.findUserByEmail(userEmail);\n    if (O.isNone(user)) return E.left(USER_NOT_FOUND);\n\n    const teamMember = await this.teamService.getTeamMemberTE(\n      teamID,\n      user.value.uid,\n    )();\n    if (E.isLeft(teamMember)) {\n      const addedUser = await this.teamService.addMemberToTeamWithEmail(\n        teamID,\n        userEmail,\n        role,\n      );\n      if (E.isLeft(addedUser)) return E.left(addedUser.left);\n\n      const userInvitation =\n        await this.teamInvitationService.getTeamInviteByEmailAndTeamID(\n          userEmail,\n          teamID,\n        );\n\n      if (E.isRight(userInvitation)) {\n        await this.teamInvitationService.revokeInvitation(\n          userInvitation.right.id,\n        );\n      }\n\n      return E.right(addedUser.right);\n    }\n\n    return E.left(TEAM_INVITE_ALREADY_MEMBER);\n  }",
+      "fileImports": []
+    }
+  },
+  {
+    "id": "lujakob-nestjs-realworld-example-app/ArticleController.createComment::Input Validation",
+    "repo": "lujakob-nestjs-realworld-example-app",
+    "fn": "ArticleController.createComment",
+    "rule": "Input Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "addComment"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "src/article/article.controller.ts",
+      "line": 73,
+      "enclosingClass": "ArticleController",
+      "decorators": "@ApiOperation({ summary: 'Create comment' }) @ApiResponse({ status: 201, description: 'The comment has been successfully created.'}) @ApiResponse({ status: 403, description: 'Forbidden.' }) @Post(':slug/comments')",
+      "params": "@Param('slug') slug, @Body('comment') commentData: CreateCommentDto",
+      "body": "@ApiOperation({ summary: 'Create comment' })\n  @ApiResponse({ status: 201, description: 'The comment has been successfully created.'})\n  @ApiResponse({ status: 403, description: 'Forbidden.' })\n  @Post(':slug/comments')\n  async createComment(@Param('slug') slug, @Body('comment') commentData: CreateCommentDto) {\n    return await this.articleService.addComment(slug, commentData);\n  }",
+      "fileImports": [
+        "./dto"
+      ]
+    }
+  },
+  {
+    "id": "lujakob-nestjs-realworld-example-app/ArticleService.addComment::Input Validation",
+    "repo": "lujakob-nestjs-realworld-example-app",
+    "fn": "ArticleService.addComment",
+    "rule": "Input Validation",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T1-业务服务写入方法 仅判据匹配，未经逐条核验"
+    },
+    "calls": [
+      "findOne",
+      "push",
+      "save"
+    ],
+    "lead": null,
+    "shape": "T1-业务服务写入方法",
+    "loc": {
+      "status": "OK",
+      "file": "src/article/article.service.ts",
+      "line": 101,
+      "enclosingClass": "ArticleService",
+      "decorators": "@Injectable()",
+      "params": "slug: string, commentData",
+      "body": "async addComment(slug: string, commentData): Promise<ArticleRO> {\n    let article = await this.articleRepository.findOne({slug});\n\n    const comment = new Comment();\n    comment.body = commentData.body;\n\n    article.comments.push(comment);\n\n    await this.commentRepository.save(comment);\n    article = await this.articleRepository.save(article);\n    return {article}\n  }",
+      "fileImports": [
+        "./dto"
+      ]
+    }
+  },
+  {
+    "id": "verdaccio/ConfigBuilder.addUplink::Data Integrity (Foreign Key)",
+    "repo": "verdaccio",
+    "fn": "ConfigBuilder.addUplink",
+    "rule": "Data Integrity (Foreign Key)",
+    "current": {
+      "gold": "TP",
+      "confidence": "heuristic",
+      "reason": "T2-子实体创建未验父 仅判据匹配，未经逐条核验"
+    },
+    "calls": [],
+    "lead": null,
+    "shape": "T2-子实体创建未验父",
+    "loc": {
+      "status": "OK",
+      "file": "packages/config/src/builder.ts",
+      "line": 44,
+      "enclosingClass": "ConfigBuilder",
+      "decorators": "",
+      "params": "id: string, uplink: UpLinkConf",
+      "body": "public addUplink(id: string, uplink: UpLinkConf) {\n    this.config.uplinks[id] = uplink;\n    return this;\n  }",
+      "fileImports": []
+    }
+  }
+]

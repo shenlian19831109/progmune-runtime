@@ -530,6 +530,147 @@
           "why": "有副作用（redis.sadd）但已 validateContent ⇒ 校验位优先 ⇒ 不该报"
         }
       ]
+    },
+    "webshape_G": {
+      "shape": "真实世界的授权命名形态（§42）：CASL 裸 can / 自指谓语 / Auth 决策类 / token 内嵌 acronym，各配反向对照",
+      "cases": [
+        {
+          "fn": "deleteSpace",
+          "file": "authz-shapes.ts",
+          "suppressRules": [
+            "Authorization (Ownership Check)"
+          ],
+          "why": "C1①：ability.can(Action.Delete, subject) —— 动作在实参里，§38 的 can<动作词> 够不着"
+        },
+        {
+          "fn": "deleteTemplate",
+          "file": "authz-shapes.ts",
+          "suppressRules": [
+            "Authorization (Ownership Check)"
+          ],
+          "why": "C1②：裸 can('delete') —— verdaccio 形态"
+        },
+        {
+          "fn": "deleteWidget",
+          "file": "authz-shapes.ts",
+          "reportRules": [
+            "Authorization (Ownership Check)"
+          ],
+          "why": "C1③ 反向：canSendEmail 是限流器 ⇒ 不得因含 can 而被压（§38 实测反例）"
+        },
+        {
+          "fn": "deleteDraft",
+          "file": "authz-shapes.ts",
+          "reportRules": [
+            "Authorization (Ownership Check)"
+          ],
+          "why": "C1④ 反向：无授权证据的基线 ⇒ 必须还在报（防无条件抑制）"
+        },
+        {
+          "fn": "deleteComment",
+          "file": "authz-shapes.ts",
+          "suppressRules": [
+            "Authorization (Ownership Check)"
+          ],
+          "why": "§38 A″：validateSpaceAccess 是访问校验"
+        },
+        {
+          "fn": "deleteAlias",
+          "file": "authz-shapes.ts",
+          "suppressRules": [
+            "Authorization (Ownership Check)"
+          ],
+          "why": "§38 A′：validateCanEdit 带前缀 helper"
+        },
+        {
+          "fn": "deleteMembers",
+          "file": "authz-shapes.ts",
+          "reportRules": [
+            "Authorization (Ownership Check)"
+          ],
+          "why": "§38 A″ 反向：deleteByUsersWithoutSpaceAccess 名字含 Access 但它是数据删除（踩过）"
+        },
+        {
+          "fn": "getUserIdsWithSpaceAccess",
+          "file": "authz-shapes.ts",
+          "reportRules": [
+            "Authorization (Unauthenticated Access)"
+          ],
+          "why": "§38 A″ 反向：名字含 Access 但它是查询（踩过）"
+        },
+        {
+          "fn": "canRemove",
+          "file": "authz-shapes.ts",
+          "suppressRules": [
+            "Authorization (Ownership Check)"
+          ],
+          "why": "C2/§38：函数自身就是所有权检查 ⇒ 报「缺检查」是自指。⚠ 这条被**两条**机制冗余覆盖：函数体无 isOwner 类 safeguard，但 ownName 会进 effectiveCalls ⇒ §38 的 casl_predicate safeguard 与 §40 的 C2 各自都能压住它（反向验证已双向确认：摘掉任一条仍全绿）。故它是端到端行为护栏，不是 C2 的独占探针 —— C2 独力生效的地方只有未挂 §38 三条的 marker-gated 规则"
+        },
+        {
+          "fn": "Auth.allow_publish",
+          "file": "authz-shapes.ts",
+          "suppressRules": [
+            "Authorization (Unauthenticated Access)"
+          ],
+          "why": "C4①：容器严格等于 Auth 且方法是 allow_* 授权决策 ⇒ 机制本体"
+        },
+        {
+          "fn": "Auth.setLegacyAuthCacheEntry",
+          "file": "authz-shapes.ts",
+          "suppressRules": [
+            "Authorization (Unauthenticated Mutation)"
+          ],
+          "why": "C4②：Auth + 方法含 Cache（机制名词）且非受保护动词 ⇒ 机制内部"
+        },
+        {
+          "fn": "Auth.changePassword",
+          "file": "authz-shapes.ts",
+          "reportRules": [
+            "Authorization (Ownership Check)"
+          ],
+          "why": "C4③ 反向：受保护动词 change 开头 ⇒ 凭据 CRUD 真需要鉴权，绝不能压"
+        },
+        {
+          "fn": "AuthController.deletePendingUserData",
+          "file": "authz-shapes.ts",
+          "reportRules": [
+            "Authorization (Ownership Check)"
+          ],
+          "why": "C4④ 反向：容器是 AuthController 不是裸 Auth ⇒ §39 V-D 证明这类不能压"
+        },
+        {
+          "fn": "createJWTToken",
+          "file": "authz-shapes.ts",
+          "suppressRules": [
+            "Authorization (Unauthenticated Mutation)"
+          ],
+          "why": "E1①：create × JWT(acronym) ⇒ 机制本体。BASE 不命中（对象是 jwttoken）⇒ 摘掉 E1 这条会转红"
+        },
+        {
+          "fn": "setJWTCookie",
+          "file": "authz-shapes.ts",
+          "suppressRules": [
+            "Authorization (Unauthenticated Mutation)"
+          ],
+          "why": "E1②：set × JWT ⇒ 下发鉴权 cookie"
+        },
+        {
+          "fn": "setUserPassword",
+          "file": "authz-shapes.ts",
+          "reportRules": [
+            "Authorization (Unauthenticated Mutation)"
+          ],
+          "why": "E1③ 反向：password 刻意不在机制对象词表 ⇒ 改密码必须鉴权"
+        },
+        {
+          "fn": "deleteExpiredJWTAuditLog",
+          "file": "authz-shapes.ts",
+          "reportRules": [
+            "Authorization (Ownership Check)"
+          ],
+          "why": "E1④ 反向：acronym 认出来了但动词不是机制动词 ⇒ 只是普通日志清理，仍需鉴权"
+        }
+      ]
     }
   }
 }

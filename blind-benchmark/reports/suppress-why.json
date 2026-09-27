@@ -1,0 +1,303 @@
+[
+ {
+  "repo": "docmost",
+  "fn": "PersistenceExtension.onStoreDocument",
+  "file": "src/collaboration/extensions/persistence.extension.ts",
+  "rule": "Data Mutation Without Audit Trail",
+  "reason": "enqueuePageHistory"
+ },
+ {
+  "repo": "docmost",
+  "fn": "AttachmentController.uploadFile",
+  "file": "src/core/attachment/attachment.controller.ts",
+  "rule": "Authorization (Ownership Check)",
+  "reason": "validateCanEdit"
+ },
+ {
+  "repo": "docmost",
+  "fn": "AttachmentController.uploadAvatarOrLogo",
+  "file": "src/core/attachment/attachment.controller.ts",
+  "rule": "Authorization (Ownership Check)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "AttachmentController.uploadAvatarOrLogo",
+  "file": "src/core/attachment/attachment.controller.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "AttachmentController.removeIcon",
+  "file": "src/core/attachment/attachment.controller.ts",
+  "rule": "Authorization (Ownership Check)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "AttachmentController.removeIcon",
+  "file": "src/core/attachment/attachment.controller.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "AttachmentController.removeIcon",
+  "file": "src/core/attachment/attachment.controller.ts",
+  "rule": "Authorization (Resource Ownership)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "AuthController.login",
+  "file": "src/core/auth/auth.controller.ts",
+  "rule": "Session No Timeout",
+  "reason": "validateSsoEnforcement"
+ },
+ {
+  "repo": "docmost",
+  "fn": "CommentController.delete",
+  "file": "src/core/comment/comment.controller.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.getWorkspaceGroups",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Unauthenticated Access)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.getWorkspaceGroups",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.getGroup",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Unauthenticated Access)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.getGroup",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.createGroup",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.updateGroup",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Ownership Check)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.updateGroup",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.getGroupMembers",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Unauthenticated Access)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.getGroupMembers",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.addGroupMember",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.removeGroupMember",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Ownership Check)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.removeGroupMember",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.removeGroupMember",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Resource Ownership)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.deleteGroup",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Ownership Check)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupController.deleteGroup",
+  "file": "src/core/group/group.controller.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "LabelController.assertCanReadSpace",
+  "file": "src/core/label/label.controller.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "cannot"
+ },
+ {
+  "repo": "docmost",
+  "fn": "AttachmentService.uploadImage",
+  "file": "src/core/attachment/services/attachment.service.ts",
+  "rule": "File Upload Without Validation",
+  "reason": "validateFileType"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupService.createGroup",
+  "file": "src/core/group/services/group.service.ts",
+  "rule": "Data Integrity (Foreign Key)",
+  "reason": "findByName"
+ },
+ {
+  "repo": "docmost",
+  "fn": "GroupService.updateGroup",
+  "file": "src/core/group/services/group.service.ts",
+  "rule": "Data Mutation Without Audit Trail",
+  "reason": "diffAuditTrackedFields"
+ },
+ {
+  "repo": "hedgedoc",
+  "fn": "AliasController.addAlias",
+  "file": "backend/src/api/private/alias/alias.controller.ts",
+  "rule": "Data Integrity (Foreign Key)",
+  "reason": "getNoteIdAndCheckIfUserCanEditAliases"
+ },
+ {
+  "repo": "hedgedoc",
+  "fn": "LdapController.loginWithLdap",
+  "file": "backend/src/api/private/auth/ldap/ldap.controller.ts",
+  "rule": "Authorization (Ownership Check)",
+  "reason": "mayUpdateIdentity"
+ },
+ {
+  "repo": "hedgedoc",
+  "fn": "OidcController.callback",
+  "file": "backend/src/api/private/auth/oidc/oidc.controller.ts",
+  "rule": "Authorization (Ownership Check)",
+  "reason": "mayUpdateIdentity"
+ },
+ {
+  "repo": "hoppscotch",
+  "fn": "AccessTokenController.fetchCollection",
+  "file": "packages/hoppscotch-backend/src/access-token/access-token.controller.ts",
+  "rule": "Data Integrity (Foreign Key)",
+  "reason": "getCollectionForCLI"
+ },
+ {
+  "repo": "hoppscotch",
+  "fn": "AccessTokenController.fetchEnvironment",
+  "file": "packages/hoppscotch-backend/src/access-token/access-token.controller.ts",
+  "rule": "Data Integrity (Foreign Key)",
+  "reason": "getTeamEnvironmentForCLI"
+ },
+ {
+  "repo": "hoppscotch",
+  "fn": "AdminService.createATeam",
+  "file": "packages/hoppscotch-backend/src/admin/admin.service.ts",
+  "rule": "Data Integrity (Foreign Key)",
+  "reason": "findUserById"
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "publish",
+  "file": "packages/api/src/publish.ts",
+  "rule": "Authorization (Ownership Check)",
+  "reason": "can"
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "publish",
+  "file": "packages/api/src/publish.ts",
+  "rule": "Authorization (Unauthenticated Access)",
+  "reason": "can"
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "publish",
+  "file": "packages/api/src/publish.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "can"
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "publish",
+  "file": "packages/api/src/publish.ts",
+  "rule": "Authorization (Resource Ownership)",
+  "reason": "can"
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "publish",
+  "file": "packages/api/src/publish.ts",
+  "rule": "Data Mutation Without Audit Trail",
+  "reason": "getVersionFromTarball"
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "stage",
+  "file": "packages/api/src/stage.ts",
+  "rule": "Authorization (Unauthenticated Access)",
+  "reason": "can"
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "stage",
+  "file": "packages/api/src/stage.ts",
+  "rule": "Authorization (Unauthenticated Mutation)",
+  "reason": "can"
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "StorageViewCommand.deleteEntry",
+  "file": "packages/admin-cli/src/commands/storage/view.ts",
+  "rule": "Authorization (Ownership Check)",
+  "reason": "canRemove"
+ },
+ {
+  "repo": "verdaccio",
+  "fn": "StorageViewCommand.deleteEntry",
+  "file": "packages/admin-cli/src/commands/storage/view.ts",
+  "rule": "Authorization (Resource Ownership)",
+  "reason": "canRemove"
+ }
+]

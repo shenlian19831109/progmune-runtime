@@ -2,7 +2,7 @@
   "name": "fix-regression-corpus",
   "version": 2,
   "created": "2026-09-11",
-  "updated": "2026-09-23",
+  "updated": "2026-09-26",
   "method": "真实安全修复回归：对每个修复，扫描「修复前 parent commit」——引擎在该位置/该类型上能否报出违规；再扫修复后确认不误报。来源=GitHub 安全公告数据库（GHSA/CVE），SHA 均经 api.github.com 实测核验。",
   "methodology_rules": [
     {
@@ -355,6 +355,189 @@
       "source": "补核时有 3 条卡住：判定取决于项目是否启用 NestJS 全局 ValidationPipe（DTO 注解在此生效），而该信息只写在入口文件 main.ts 里。切片不含入口文件 ⇒ 这 3 条只能标 UNKNOWN。其中 lujakob 那条后来发现切片**其实含** main.ts，读后发现没有 useGlobalPipes ⇒ 立即定判为 TP；hedgedoc 两条因切片确实不含入口，仍为 UNKNOWN。",
       "rule": "池切片必须显式包含入口文件（main.ts / app.ts / server.ts）；取样器的「优先目录」打分不得把入口文件排在截断线之外。判 Input Validation 时「全局校验中间件（如 NestJS 的 useGlobalPipes(new ValidationPipe())）是否启用」是关键上下文，缺了它该组合下的条目就只能标 UNKNOWN。⚠ 影响面要写实：**只影响「Input Validation × 依赖全局校验中间件」这一组合**（2026-09-23 实测 UNKNOWN 101 条里只有 2 条属此类），不是普适大类。别把一条窄规律写成宽规律。",
       "why": "与 R45 同族的两个方向：R45 是语料**误覆盖**（注释冒充代码），R47 是语料**缺上下文**（入口文件被切掉）。两者都不会让闸门报错，只会让判定做不下去或做错。判断「缺什么信息」时要先确认切片里到底有没有该文件，再谈补信息（R41）。⚠ 本条的自我修正：初版写成「一大类条目不可判定」，随后统计 101 条 UNKNOWN 的构成发现只有 2 条属此类（主体是 Authorization 28 + Session/Password/Token 30+，那些需要的是**跨函数/跨文件的调用链上下文**，不是入口文件）⇒ 已收窄。教训同 R19：机制的影响面也要有分母，不能凭印象写「一大类」。"
+    },
+    {
+      "id": "R48-corpus-sampling-strategy-caps-any-call-chain-mechanism",
+      "added": "2026-09-24",
+      "source": "原型 build-call-chain.ts 在 docmost 切片（118 个 .ts）上跑 37 条 UNKNOWN：只有 7 条（19%）能追溯出调用者。逐条查证根因不是实现——AuthService.register 的调用者根本不在切片里（切片内的 auth.controller.ts 只调 login/setup/changePassword/forgotPassword 等）。docmost 后端 apps/server/src 共 444 个 .ts，切片 118 ⇒ 采样率约 27%，一条调用链两端同时被采中的概率大致是采样率的平方，与实测 19% 量级吻合。",
+      "rule": "任何依赖调用链/跨函数上下文的机制，可行性上限由**语料采样方式**决定，不由实现决定。按文件独立采样（随机或按目录轮转）会系统性切断调用链。要建这类机制，语料必须改为**按入口取调用闭包**采样（从一个入口出发把它的调用闭包整个切下来），而不是提高随机采样率——闭包采样既保证链完整，文件数也可控（一个入口的闭包通常 10–30 文件）。评估这类机制前，先报切片的调用链连通率，连通率低就先改采样，不要在低连通语料上判机制的死活。",
+      "why": "与 R23 同族但更具体：R23 说语料没覆盖机制会导致空过，R48 补充「覆盖」对调用链类机制有特殊含义——不是文件被采到就算覆盖，而是**链的两端要同时被采到**。这也解释了 §二十九 的 jev 实验为什么做不出结论：喂给 Jev 的 state 之所以薄，一半原因是当时没有调用链视图，另一半是即便有了，在现有切片上也只能覆盖 19%。"
+    },
+    {
+      "id": "R49-call-graph-edges-precision-over-recall-ambiguity-means-drop",
+      "added": "2026-09-24",
+      "source": "同一个原型两轮收紧：第一版按裸名索引，`SpaceAbilityFactory.createForUser` 冒出 25 个「调用者」，`CommentController.delete` 冒出 18 个——因为 delete/createForUser 这类常见名把所有同名调用都当成了调用边。加接收者限定 + 裸名唯一才采信后降到 11 条；再收紧为「有接收者时只认强边、绝不裸名兜底」后降到 7 条。边数 14→11→7，但剩下的 7 条**全是干净单边、零噪声**。",
+      "rule": "建调用图时，**假边比漏边有害得多**：假边会让整个视图不可用（没人敢信），漏边只是覆盖少一点，且覆盖率是可观测的。判定规则必须偏严格：① 调用抽取要带接收者；② 有接收者时只认「属性名转类名 + 方法名」的强边，绝不用裸名兜底（反例：`this.storageService.delete()` 里的 delete 若恰好全局唯一，裸名兜底会把它误判成 CommentController.delete 的调用者）；③ 无接收者的裸调用，名字全局唯一才采信，有歧义一律丢弃。每次收紧都要同时报边数与抽检噪声率，不能只看边数涨了就以为更好。",
+      "why": "与 R43 同族（取舍原则优先于数字好看），但方向相反：R43 判据取舍时取召回高的（漏报比误报贵），R49 建图时取精度高的。这是因为两者的下游不同——判据漏一条直接丢真报，而图上的假边会污染所有下游结论，且假边造成的错误**不可见**（看起来边更多、覆盖更广）。"
+    },
+    {
+      "id": "R50-sampler-must-be-swept-on-budget-axis-with-ceiling",
+      "added": "2026-09-24",
+      "source": "§三十六：做闭包采样器时先只比了 120 文件这一个点，结论是「闭包 32/20 输给旧切片 34/20」；把预算轴扫开才发现 80 文件时闭包 27/16 对旧切片 16/11，差一倍。同一对采样器，换个预算结论就反了。",
+      "rule": "换/评采样器必须三步：① 先算**全量上界**（把全部源文件当切片能到多少），确认天花板到底在采样侧还是判据侧；② 在**预算轴**上扫（30/50/80/120/180/…），不能只比一个文件数；③ 至少两个仓库复验，且第二个仓库要与第一个**目标构成不同**（本次 hedgedoc 19 条里 15 条自身是入口 ⇒ 采样方式影响≈0，不具备判别力，白复验了一次）。",
+      "why": "采样器优劣是预算的函数，单点比较会给出相反结论；而单仓库结论常常只是那个仓库目标构成的产物。"
+    },
+    {
+      "id": "R51-stratify-the-metric-denominator-by-target-type",
+      "added": "2026-09-24",
+      "source": "§三十六 第一版口径照抄 §三十五（「调用者在片内」= 链完整），把 37 条里 11 条**自身就是入口**的控制器方法判成「追不到调用者」——入口的鉴权上下文写在自己的装饰器上，向上追溯对它本就无意义。",
+      "rule": "建「证据是否充分」这类指标时，分母要按目标类型分层：入口类（路由/控制器方法）看**自身**（鉴权在自己身上），非入口类才看**上游**（谁调用我）。用统一口径会把天生完整的一类算成缺失，进而把「改采样」当成解法，而真问题在指标。",
+      "why": "与 R19（全组分母须含被判据拒掉的那些）、R17（确证前不得登记成员名）同族：名字级/结构级机制的边界条件里，最容易漏的就是「被这套口径排除在外的那些」。"
+    },
+    {
+      "id": "R52-two-tier-edges-sampling-vs-verdict",
+      "added": "2026-09-24",
+      "source": "§三十六：闭包采样用「调用边 ∪ import 边」明显优于只用调用边（120 预算下证据完整 32 vs 28），但 import ≠ call，拿它当判据就是假边。",
+      "rule": "边分两级，用途不可混：**采样边**（决定哪些文件进切片）用高召回（调用边 ∪ import 边），假边只浪费名额；**判据边**（决定这条链有没有鉴权）只认高精度调用边，假边直接导致误判。R49 的「精度优先」约束的是判据边，不是采样边。",
+      "why": "同一种图、两种用途、相反的召回取向。混用要么浪费预算（判据规则去管采样），要么制造误判（import 边去当判据）。"
+    },
+    {
+      "id": "R53-reachability-hint-must-report-entry-count",
+      "added": "2026-09-25",
+      "source": "§三十七：可达性视图第一版只报「可达率」，docmost 26/26 看起来满分；verdaccio 也是 6/27 可达，但入口数中位 19 ⇒ 一条都人工核不了。可达 ≠ 可用。",
+      "rule": "「谁会走到我」这类提示**必须同时报入口数**，并把「可人工核」定义为 **≤3 个入口**；不报入口数的可达率是自欺。另：切片上入口数变少必须做**真假校验**（文件缺失也会砍掉路径 ⇒ 收窄是假精确），并把假收窄单列计数，不得计为收益。",
+      "why": "可达性是布尔，可用性是分布。只报布尔会把「提示弥散到等于没说」包装成重大进展。"
+    },
+    {
+      "id": "R54-import-graph-must-resolve-workspace-aliases",
+      "added": "2026-09-25",
+      "source": "§三十七：verdaccio（monorepo）上 import 边几乎全断——跨包引用写包名（@verdaccio/core）、tsconfig 还有 paths 别名，只认相对说明符 ⇒ 图是空的但**不报错**，表现为可达性恒 0。",
+      "rule": "建仓库内 import 图必须解析三类说明符：相对路径、monorepo 工作区包名（各 package.json 的 name → 目录）、tsconfig paths 通配别名。缺任一 ⇒ monorepo 上整张图静默为空。同样地，入口识别不能只认装饰器，须补文件级路由注册（router.get( / app.post( / .route(）。",
+      "why": "图类机制的失败模式是**静默为空**，不是报错。与 R47（切片缺入口文件）同族：都是「缺了但不吭声」，只能靠主动补解析规则来防。"
+    },
+    {
+      "id": "R55-composition-rules-not-enumeration-when-vocabulary-explodes",
+      "added": "2026-09-25",
+      "source": "§三十八：Ownership Check 的 satisfier 是动词白名单（canModify|canDelete|canEdit|…），在 docmost/verdaccio 全量上抑制 **0 条**——真实谓语是 `can/cannot/may + 任意授权动作` 的**组合式**（cannot(Manage,Settings)、canRemove、canPublish、validateCanEdit），枚举永远追不上组合。",
+      "rule": "当一个词表表现出「枚举追不上」时（新增词的速度赶不上遗漏的速度），改成**组合规则**（前缀/谓语 × 受约束的动作词集合）。升级时必须同时加三条约束，缺一就会放水：① **无后缀的特例单列**（把 `cannot` 塞进 `[A-Z_]\\w*` 后缀组 ⇒ 它自己都不匹配，26 条只命中 2 条）；② **动作词集合要有语义边界**（`can<X>` 的 X 必须是授权动作词，否则 `canSendEmail` 限流器、`canParse` 都会混进来；刻意排除 Send/Emit/Notify/Render/Parse —— 「能不能做」和「许不许做」词形同形）；③ **词尾类规则要约束前缀**（只要求名字含 Access ⇒ `deleteByUsersWithoutSpaceAccess` 这种**数据操作**被当**校验**，含 Access/Rights 的数据操作远多于校验）。",
+      "why": "组合规则放大召回的同时放大歧义，约束是唯一的价格。三条都是实测抓到的假阳性，不是推演。"
+    },
+    {
+      "id": "R56-zero-drift-is-not-verification",
+      "added": "2026-09-25",
+      "source": "§三十八：改完判据跑盲测，2865 条 **LOST 0 / ADDED 0**。看似完美，但同时意味着新判据在盲测语料上**一条都没触发**——blind-benchmark/generated/ 是合成项目，里面根本没有 CASL 形态。零漂移只证明「没回归」，没证明「生效」。",
+      "rule": "盲测零漂移是**必要条件不是充分条件**。每次改判据后必须额外回答「这次改动在哪个语料上被**触发**了」；若没有任何语料触发，则本次改动是零覆盖进主干（等同 3.7.28 正则死循环溜过 CI 的同形缺口）。处置：① 在**含有该形态的真实语料**上重放（本次用 fp-pool-results.json 的 9 片真实扫描做 simulate）；② 补**正/反向 fixture**（本次新建 src/protocol-detector-authz.test.ts，11 条）；③ 做**鉴别力对照**：全量命中率 vs 目标批命中率，比值≈1× 说明形态无判别力。",
+      "why": "与 R47（切片缺入口文件）、R54（import 图静默为空）同族：机制失效的失败模式是**静默**，而零漂移会给静默穿上一层「一切正常」的外衣。另注：写 fixture 时函数名本身必须能触发 trigger，否则恒 0，测不出东西（本次第一版就写错了）。"
+    },
+    {
+      "id": "R57-suppression-changes-must-prove-zero-TP-loss-and-show-the-wide-variant",
+      "added": "2026-09-25",
+      "source": "§三十九：给自指排除扩词表时，第一版做成「容器含 token/session 即算」，正例 6/6 满分、负例 0 误吃，看起来完美；反向验证才发现它比窄版多压 15 条，其中包括 ApiTokensController.deleteToken / AccessTokenController.deletePAT / AccessTokenService.updateLastUsedForPAT 的 Ownership Check —— 对**凭据做增删改**恰恰是最需要鉴权的地方。",
+      "rule": "改动方向是**压掉告警**（抑制类）时，验收必须多出两样，缺一不可：① **TP 零损失核对** —— 在真值集上重放，回答「压掉几条 / 其中已确认 FP 几条 / 已确认 TP 几条」，**TP 必须为 0**（本次 8 FP / 6 UNKNOWN / 0 TP）；② **宽变体对照** —— 同时跑一个明显更宽的候选并列出它多压的条目，用来证明窄版那条线不是随手划的，且把「越界形态」显式记录下来。",
+      "why": "抑制类改动的失败模式是**不可见的漏报**（R49 的镜像：假边污染下游，误压丢掉真漏洞）。召回类改动漏了只是少报几条，抑制类漏了是把真漏洞永久藏起来。R18 的反向验证在召回方向是「退回去是否转红」，在抑制方向必须换成这两个数。"
+    },
+    {
+      "id": "R58-design-pattern-suffix-is-not-a-semantic-signal",
+      "added": "2026-09-25",
+      "source": "§三十九：为识别「鉴权机制类」，第一版用容器后缀 Guard|Strategy|AbilityFactory。Guard/Strategy 是**通用设计模式后缀** —— NestJS 的 ThrottlerGuard 是限流不是鉴权，CacheStrategy/PaymentStrategy/RetryStrategy 与鉴权毫无关系，直接按后缀压掉 authorization 规则就是真漏报。",
+      "rule": "Strategy / Guard / Factory / Handler / Manager / Service 这类**设计模式后缀**不能直接当语义信号用，必须再乘一个**语义名词约束**（本次：容器后缀 × 凭据名词 auth|jwt|token|session|cookie|credential|passport|identity|oauth|oidc|ldap|saml|bearer|apikey|ability|permission）。同理，收名词时**只收通用词**，产品专有缩写（如 hoppscotch 的 PAT）是过拟合到单个仓库，会把该仓库里真正需要鉴权的操作一起吃掉。",
+      "why": "R55 说的是「词表追不上 → 改组合规则」，但组合规则的两半都可能自己就是噪声源：一半是同形（can<X> 的能力 vs 权限），另一半就是这里的**结构后缀 vs 语义类别**。两者都要约束，只约束一半等于没约束。"
+    },
+    {
+      "id": "R59-probe-criteria-must-import-the-shipped-regex-not-keep-its-own-wordlist",
+      "added": "2026-09-25",
+      "source": "§四十：探针 authz-probe.ts 自己维护了一份 AUTHZ_ACTION 词表并用 ^(…)$ 全等匹配，而落地到 src 的 AUTHZ_PREDICATE_RE 是前缀匹配（无结束锚）。结果探针判定「这条没救」，落地代码其实早就救了 —— 差点据此去改一个根本不存在的缺口（候选 C3 就是这么作废的）。",
+      "rule": "只读探针（用于决定「要不要改、改了能救几条」的脚本）里的判据，**必须 import 落地代码里的同一份正则/常量**，不得自带一份词表或自行改写锚点。若落地侧常量未导出，就把它导出，而不是在探针里复制一份。",
+      "why": "两份判据会静默漂移，而漂移的方向总是「探针落后于落地」，症状是**去修一个已经修好的缺口** —— 既有工作量浪费，也会让人误判剩余池的规模（本次差了 3 条）。同源 import 是唯一能保证「探针说的就是代码做的」的办法。"
+    },
+    {
+      "id": "R60-suppression-regex-meaning-a-callee-name-needs-calls-only",
+      "added": "2026-09-25",
+      "source": "§四十：把裸 can（AUTHZ_BARE_CAN_RE）挂成 safeguard 时没加 callsOnly，结果它在 effectiveCalls 上匹配，而 effectiveCalls 含 identifierParse 拆出的词 ⇒ canSendEmail 拆出 \"can\" ⇒ §38 钉死的负对照直接转绿、5 条 fixture 报错。",
+      "rule": "safeguard 正则的语义若是「函数体里**调用了**某个名字」（而不是「名字里含某个词」），挂到规则上时必须显式写 callsOnly: true；只在 rawCalls/原始调用名上匹配。凡是用 ^…$ 精确匹配整名的正则，都默认按这条处理。",
+      "why": "effectiveCalls = 原始调用名 ∪ identifierParse 拆出的单词。拆词会把 canSendEmail 变成 can，把任何复合名拆碎 —— 精确匹配在拆词结果上等于**词级包含匹配**，约束全失效（与 R59 同源：都是「你以为在匹配名字，其实在匹配词」）。"
+    },
+    {
+      "id": "R61-suppression-needs-a-reverse-audit-of-already-suppressed-items",
+      "added": "2026-09-25",
+      "source": "§38–§41 连着五轮都在把告警压下去，每轮验收只有两条：新增压掉的条目 gold 全是 FP + fixture 全绿。但 gold 是我们自己核的，而且只从「已经被判成违规的那一批」里挑 —— 只有漏救的才进 gold，gold 里永远不会出现「被误压的真漏洞」，于是每轮都稳拿 TP=0。这是循环论证。",
+      "rule": "每轮（或每若干轮）抑制类改动，必须额外做一次**反向审计**：用反事实法列出「早已被压掉」的条目并抽样核验，确认其中没有真漏洞。两侧各有一种反事实：① 改 enclosingFuncName 为中性名 ⇒ 抓 isAuthFunction 自指排除造成的抑制（blind-benchmark/suppress-audit.ts）；② drop-one 逐个剔除一个 call 再 detect ⇒ 抓 safeguard 造成的抑制并给出「压制理由」归因（blind-benchmark/suppress-why.ts）。",
+      "why": "只用「新增压掉的没有 TP」自我验证，是通过挑样本实现的：你不会去核你没压过的东西。§41 首次在 879 个真实 exported 函数上做反向审计（自指侧 18 条 + safeguard 侧 43 条，零误压），这才让「继续压 Service 层」这类更大的动作有了前提——先证明过去没压错，才谈得上再压。另：safeguard 侧审计的重点是**通用名**（includes/String/debug）有没有充当压制理由；那就意味着某条正则宽到失去意义。"
+    },
+    {
+      "id": "R62-blind-benchmark-has-zero-coverage-on-authorization-suppression-changes",
+      "added": "2026-09-25",
+      "source": "R56 第三次复现。§38（组合式谓语）盲测触发 0；§40（裸 can / 容器=Auth / 自身谓语）触发 0/0/1；§41（机制对象侧 acronym）触发 0。三次的 LOST 0 / ADDED 0 全是零触发，不是零漂移。",
+      "rule": "凡在 Authorization **抑制**方向的改动，blind-benchmark/batch-scan 盲测**不提供任何信息**：generated 合成语料里没有一类真实世界的授权命名形态（无 CASL ability.can、无 Auth.allow_*、无 verifyJWTPayload）。这类改动的真证据必须来自 fixture + fp-pool 真实池审计；盲测只作为「没有横向污染」的弱信号。并在下一个可执行时机给 generate-projects-webshape.ts 补一个授权形态族（webshape_G），让这道门在这条轴上重新有差分能力。",
+      "why": "连续三轮零覆盖说明这不是运气，是语料的结构性缺口：合成项目用什么名字是我们写的，而真实项目用的是 CASL / verdaccio / NestJS 守卫那套命名。只要记 abstention 而不补语料，这道门就永远是摆设，且每轮都要花时间解释一遍「为什么全绿不代表通过」。",
+      "resolved": "2026-09-26 §42：webshape_G 已补（17 条期望），盲测 Authorization 族 938→947、项目 117→118；反向验证确认 C1 / E1 / C4 / §38-A″ / §38-A′ 五刀承重。R62 的「记 abstention」阶段结束 —— 但仍需每轮按 R56 检查触发数，不能因为补了一族就默认永远有覆盖。"
+    },
+    {
+      "id": "R63-attribute-full-test-failures-with-a-git-worktree-head-baseline-not-stash",
+      "added": "2026-09-26",
+      "source": "§41 全量 vitest 跑 3h+ 后 V8 OOM 崩溃，日志里 40 条失败无汇总行。要判断这 40 条是不是本次改动造成的，最容易想到的是 git stash（有丢失未提交工作的风险），最容易犯的是凭印象说「这些是既有的」。",
+      "rule": "遇到「全量/批量测试出现一堆失败」时，用 `git worktree add /tmp/<name> --detach <HEAD-sha>` 建基线树并软链主仓库的 node_modules（不重复装依赖），在基线与工作树上跑**同一批**测试文件做逐条比对。禁止用 stash；禁止凭印象断言「既有失败」。并且**同一批要在工作树上跑两次** —— 单次结果无法区分稳定红与 flaky。",
+      "why": "本次实测：基线 16/80、工作树 16/80 与 17/80 —— 同一棵树两次不同，证明这组测试本身 flaky；三次全失败的稳定红才 12 条，且全部落在无关子系统，本次引入的新失败 = 0。若只跑一次，会拿 16 vs 17 的差集去追两个不存在的回归；若用 stash，一次中断就丢掉整轮未提交的工作。worktree 是只读主工作树的，零风险。"
+    },
+    {
+      "id": "R64-a-suppression-expectation-is-only-real-if-reverse-verification-turns-it-red",
+      "added": "2026-09-26",
+      "source": "§42 给 generated 语料补了 17 条授权形态期望，webshape 闸门 66/66 全绿。但按 R56 做反向验证（逐刀摘掉判据）时发现：C2 那一刀摘掉后 **0 条转红** —— 全绿里混着**假绿**。",
+      "rule": "新增的任何语料期望（尤其是 suppress 方向的）**必须过反向验证才算数**：把对应机制摘掉（退回旧行为，不是 return null），该条期望**必须转红**。不转红 ⇒ 它是假绿，原因只有两种：① 规则压根没触发（vacuous pass）；② 被别的机制抢先压制了。两种都要修用例，不能靠读代码推断。",
+      "why": "「闸门全绿」与「这条期望有约束力」是两件事。§42 实测：17 条里 5 刀承重（摘掉即转红）、1 刀不承重。若不逐刀反向验证，就会把假绿当证据写进文档 —— 与 R56（盲测零漂移可能是零触发）是同一个病，只是发生在语料期望层而不是盲测层。"
+    },
+    {
+      "id": "R65-check-the-sole-suppression-source-before-claiming-a-case-covers-a-mechanism",
+      "added": "2026-09-26",
+      "source": "§42 选反向对照时连续踩两次「别的机制抢先命中」：`Auth.invalidateToken` 端到端该报却没报 —— 不是 C4 放行了它，而是 §39 的 AUTH_PATTERN 里有 `invalidate`（登出族）且按 identifierParse 逐词匹配，先把它压了；`canRemove` 摘掉 C2 仍全绿 —— 因为 ownName 会进 effectiveCalls，§38 的 casl_predicate safeguard 同样能压住它。",
+      "rule": "写正/反向对照前先确认该形态的**唯一压制来源**：把其它候选机制逐个排除（函数名自身、函数体里的调用、ownName 进入 effectiveCalls、AUTH_PATTERN 逐词匹配都可能抢先）。确认不了唯一来源时，不要声称这条用例「覆盖了某机制」—— 把它降级为端到端行为护栏，并在 why 里写明是哪几条机制冗余覆盖。",
+      "why": "同一形态被多条机制冗余覆盖是常态（§38/§39/§40/§41 层层叠加后尤其如此）。冗余本身不是缺陷，但会让「摘掉某机制看是否转红」测不出东西，进而误判成「用例没写对」或「机制没生效」。§42 的最终处置：canRemove 保留为端到端护栏并在 why 里注明「C2 与 §38 casl_predicate 冗余覆盖，C2 独力生效的地方只有未挂 §38 三条的 marker-gated 规则」；invalidateToken 换成 changePassword 作 C4 反向对照。"
+    },
+    {
+      "id": "R66-a-criterion-without-a-same-shape-opposite-truth-counterexample-has-no-discriminating-power",
+      "added": "2026-09-26",
+      "source": "§43 评估「容器名以 Service 结尾 ⇒ 抑制 Authorization」：池内压 13 条且 TP 0，看起来很划算。但 ① 盲测 118 项目 / 947 条 Authorization 里 Service 容器命中 **0**（零覆盖，R56 第四次复现）；② 更根本的是——该判据只看容器后缀，**造不出「同样是 Service 方法、但真值相反」的样例**：真缺鉴权的 Service 方法与上游已鉴权的 Service 方法在这个轴上完全同形。",
+      "rule": "落地任何判据前先问：**能不能造出同形状、相反真值的反例？**造不出来就说明这条轴不承载真值信息，只承载命名习惯 ⇒ **不得落地**（写了也只是在语料上记一笔「恒绿」，对判别力零贡献）。R64 管的是「期望要能转红」，R66 管的是更前置的一层：**判据本身要能表达否**。若某族 FP 只能靠跨函数/跨文件证据区分（如 Service 层授权），正确做法是先把证据通道建起来，而不是先用命名后缀占个位。",
+      "why": "命名后缀型判据的诱惑在于「池内 TP 0、压得干净」，但池内 TP 0 往往只是因为池里根本没有该形态的真漏洞——这是分母缺失，不是安全性证明。§43 实测：Authorization 族在 gold 里 verified TP 就是 0（24 条 TP 全在 Input Validation / Data Integrity / Sanitization / Upload），所以「压掉 0 条 TP」这句话在 Authorization 族上几乎恒真，毫无鉴别力。"
+    },
+    {
+      "id": "R67-a-frozen-mother-run-is-not-a-same-moment-baseline",
+      "added": "2026-09-26",
+      "source": "§44 第一次比对直接拿 `reports/fp-pool-results.json`（冻结于 2026-09-23）当基线，得到 LOST 48，其中 12 条 UNKNOWN、还压着 `AttachmentController.uploadFile` / `CommentController.delete` 等真实 Controller（`user: User` 是领域类型，本不该被压）—— 差点判成严重召回回归。真因是母本早于 §41/§42，48 条里绝大部分是前几轮的抑制。改用「摘掉本轮这一刀重跑」的同刻基线后，真实净效应是 LOST 4、全 verified FP、TP 0 / UNKNOWN 0。",
+      "rule": "冻结母本（`fp-pool-results.json`）只能当 simulate 的 universe，**不能当同刻基线**。评估任何判据改动的净效应，必须用「把这一刀摘掉、其余不动」重跑出来的同刻结果作分母（脚本化，跑完自动恢复源码）。跨了多个轮次的数据比对出来的 LOST/ADDED 是多个改动混在一起的，逐条归因会全部归错。",
+      "why": "母本之所以冻结，是为了让 `--simulate` 永远有相同的 universe；代价就是它与当前引擎的距离会随时间拉大。这两件事必须分开：universe 用冻结的，基线用同刻的。"
+    },
+    {
+      "id": "R68-a-dist-is-not-a-same-source-copy-of-src-check-before-offline-replay",
+      "added": "2026-09-26",
+      "source": "§45 用 `node -e require('./dist/protocol-detector.js')` 做判定（R29 离线重放的真身），得到一串「calls=[] 却报 Ownership Check」的怪结果。根因是 dist/protocol-detector.js 落后于 §44 之后的 src —— 喂进去的是旧行为。改从 src 加载后结论立刻自洽（getAllTransfers / listTransfers 的 ownName 其实自己就命中 trigger）。",
+      "rule": "离线重放（R29）依赖 dist，而 dist 不随 src 自动更新 ⇒ **重放前必须先确认 dist 与 src 同源**（重新 build，或直接用 tsx 加载 src）。判定类正则一律 import src（R59）；手抄到 python/node 复刻必错 —— §45 手抄 trigger 时忽略了 `/i` 让 `[A-Z]` 也匹配小写、`\\w*` 的组合远多于手推。",
+      "why": "dist 是构建产物，它的陈旧是静默的：不报错、不警告，只是给出上一个版本的答案。"
+    },
+    {
+      "id": "R69-same-family-safeguard-vocabularies-drift-check-with-set-diff",
+      "added": "2026-09-26",
+      "source": "§45 发现 Authorization 两条规则（`Unauthenticated Access` 与 `Unauthenticated Mutation`）的 auth_check 词表相差 5 个词。其中 `getSession` / `validateSession` / `verifyToken` 只在后者 ⇒ 体里有 `getSession(token); if (!user) return null;` 的读类函数被判成「未认证即可访问」，合成语料上 8 条 FP（filestorage 4 + realestate_B/C 4）。",
+      "rule": "同一族多条规则共享同类 safeguard 时，**每新增一个词就要对同族规则做一次集合 diff**。漂移不会报错，只会变成「同形状的一条报、一条不报」。补齐时**只补有语义支撑的项，不做机械对齐** —— §45 里 `create_access_token` / `create_jwt_token` / `create_refresh_token` 三个 mint 词虽然也存在漂移，但语义是「签发令牌」而非「校验调用者」，故**不补**。",
+      "why": "词表是按需求逐个堆起来的，天然会漂移；diff 是唯一能把它变成可见项的手段。而机械对齐会把「另一条规则为什么有这个词」的历史语境一起抹掉。"
+    },
+    {
+      "id": "R70-a-safeguard-label-must-match-its-semantics-else-it-becomes-a-next-diff-bait",
+      "added": "2026-09-26",
+      "source": "§46 ①：`create_access_token|create_refresh_token|create_jwt_token` 混在 `Authorization (Unauthenticated Mutation)` 的 `auth_check` 词表里。溯源 git log -S 到 e0e415a9 —— 那笔提交的 message 里写着「bare jwt.encode deliberately excluded…（签发类函数本身就是漏洞）」，却把这三个签发词从 Token Security 的 satisfier 表整体复制进了 auth_check。语义上「签发」与「校验调用者」是相反的。",
+      "rule": "一条 safeguard 的 label 必须与它的**语义**一致。语义不符的机制要**单独成立条目**（新 label + 注释写明它压的是哪类 FP、以及它的局限），不要并入既有 label。否则下一次做集合 diff（R69）时，它会以「另一条规则缺了这个词」的面目出现，诱导人做机械对齐。§46 的处置不是删除（它确实在压 login/register 那批 FP），而是**移出**——行为不变、语义自洽、诱饵消除。",
+      "why": "词表是按需求逐个堆起来的，label 是唯一能表达「为什么有这个词」的载体。label 撒谎，diff 就会撒谎。"
+    },
+    {
+      "id": "R71-a-judge-a-criterion-on-both-synthetic-and-real-samples-their-truth-can-be-opposite",
+      "added": "2026-09-26",
+      "source": "§46 ②：`SUBJECT_ARG` 形态（主体标识作调用实参）在真实切片里 **3/3 是 FP**（`deletePAT(id, user.uid)` / `removeFavorite(user.id, …)` / `updateUser({…}, user.id, …)`），在合成语料里 **1/1 是 TP**（`webshape_G/deleteWidget` 里 `canSendEmail(user.id)` 与 `repo.deleteWidget(widgetId)` 毫无关系）。只看任一边都会得出错误结论。",
+      "rule": "评估任何判据，真值必须**两边都看**：合成语料（有设计意图）+ 真实切片（有人工标注）。两边真值相反时，说明这条轴在这两个分布上承载的信息不同 ⇒ 按 R66 不落地，并**明确记录被放弃的那一边**（§46 里是真实池那 3 条 FP 保留告警）。不要用「合成语料 N/N 全绿」或「真实池 N/N 全 FP」单独下结论。",
+      "why": "合成语料是「教科书式」的写法分布，真实代码是「框架式」的写法分布。同一条正则在两者上的精度可以完全相反。"
+    },
+    {
+      "id": "R72-a-tightening-must-prove-every-newly-added-finding-is-real",
+      "added": "2026-09-26",
+      "source": "§46 ③：`safeguard` 只看「是否调用」auth 函数、不看「是否检查其结果」是真实的顶层债务。量化后：合成语料 1615 函数里 GUARDED 405 / BARE 154，真实切片 245 函数里 GUARDED **0** / BARE 5（且 5 条全是鉴权机制自身，已被 §39 AUTH_PATTERN 压）。用真实判别器做反事实后，收紧的增报面精确为 **26 条，全部是 handleRequest** —— 而 §44 已证明 dispatcher 在 Authorization 上 100% 是重复投影。",
+      "rule": "**收紧类（增报方向）改动必须逐条证明「新增的每一条都是真发现」。** R66 管抑制类（要造得出同形状相反真值的反例），R72 管收紧类：收紧天然会增报，增报本身不是收益，只有**真发现**才是。若新增的全是重复投影 / 已知 FP ⇒ 收益为 0、成本 > 0，**不落地**。判定时用「反事实」而不是估：对每个受影响函数比较 `detect(calls)` 与 `detect(calls 去掉该机制)`。",
+      "why": "收紧看起来总是「更严格、更安全」，但在没有真发现可捞的分布上，它只生产噪音，而且方向与降噪目标相反。§46 ③ 就是这种诱惑：债务真实存在，但修它的可观测收益为零。"
+    },
+    {
+      "id": "R73-the-previous-results-file-is-not-a-same-moment-baseline-either",
+      "added": "2026-09-26",
+      "source": "§46 ② 第一次比对拿 `batch-scan-results.pre-46.json`（上一次扫描的结果）当分母，得到 LOST 12；反向验证摘刀后却新增 185，两个数字对不上。真因是两次扫描之间重跑了 `generate-projects-webshape.ts` / `generate-projects-taintpath.ts`，语料被重建。改用「摘掉这一刀重跑」的同刻比对，真实压制数是 **197** —— 低估了 16 倍。",
+      "rule": "**「上一次的 results 文件」同样不是同刻基线**（R67 说冻结母本不是，这条说上一次 results 也不是）。任何跨越了「语料重新生成」的比对都不可比。判定某刀是否承重、压了多少条，唯一可靠的分母是**摘掉这一刀、其余不动、重跑**出来的结果（脚本化，跑完自动恢复源码）。**LOST 与反向验证的 ADDED 必须对得上**，对不上就是基线错了，不要靠推测调和。",
+      "why": "语料生成器会重建 generated/，多数批次内容一致，所以这个错误是**静默**的：不报错，只是数字偏小。§46 是靠「反向验证的数字与正向对不上」才发现的——**交叉验证两个方向，是抓出基线错误的实用手段**。"
     }
   ],
   "entries": [

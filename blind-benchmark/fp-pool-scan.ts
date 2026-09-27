@@ -27,7 +27,14 @@ import {
 import { detectResourceViolations } from "../src/resource-detector";
 
 const POOL_DIR = path.resolve(__dirname, "fp-pool");
-const OUT = path.resolve(__dirname, "reports/fp-pool-results.json");
+// §44：`reports/fp-pool-results.json` 是**冻结的模拟母本**（authz-probe / selfref-probe
+// 的 --simulate 以它为 universe）。改判据后要做前后对比时，用 `--out <路径>` 写到别处，
+// **不要覆盖母本** —— 覆盖了 simulate 就再也压不出东西，反向验证装置作废。
+// ⚠ 用**环境变量**而不是 `--out` 参数：实测 tsx 会把未知 `--` 参数当成 node 自己的
+// 选项吞掉，脚本里 `process.argv.indexOf("--out")` 时有时无，靠不住。
+const OUT = process.env.FP_POOL_OUT
+  ? path.resolve(process.env.FP_POOL_OUT)
+  : path.resolve(__dirname, "reports/fp-pool-results.json");
 
 interface PoolScanResult {
   repo: string;
@@ -95,12 +102,15 @@ function isExposed(name: string, exposed: Set<string>): boolean {
   return exposed.has(name) || exposed.has(name.split(".").pop() || name);
 }
 
-const only = process.argv[2];
+const only = process.argv.slice(2).find((a) => !a.startsWith("--"));
 const repos = fs
   .readdirSync(POOL_DIR, { withFileTypes: true })
   .filter((e) => e.isDirectory() && (!only || e.name === only))
   .map((e) => e.name)
   .sort();
+console.log(
+  `[fp-pool-scan] OUT=${path.relative(process.cwd(), OUT)}  repos=${repos.length}${only ? ` (only=${only})` : ""}`
+);
 
 const results: PoolScanResult[] = [];
 
@@ -131,7 +141,9 @@ for (const repo of repos) {
       f.name,
       "typescript",
       (f.params || []).map((p) => p.name),
-      isExposed(f.name, exposed)
+      isExposed(f.name, exposed),
+      // §44：参数类型通道 —— 没有它 paramGated 只能靠参数名，会把被操作对象当身份
+      (f.params || []).map((p) => p.type || "")
     );
     const pv = detectProtocolViolations(calls);
     if (sv.length || pv.length) {
