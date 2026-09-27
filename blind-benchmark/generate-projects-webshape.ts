@@ -1252,7 +1252,124 @@ const PROJECT_G: WebProject = {
   ],
 };
 
-export const WEB_PROJECTS: WebProject[] = [PROJECT_A, PROJECT_B, PROJECT_C, PROJECT_D, PROJECT_E, PROJECT_F, PROJECT_G];
+// webshape_H —— 签名级会话证据（§47）
+// 真实原型：hedgedoc 的 pending-user 三接口 + OidcController.callback。它们受
+// `@UseGuards(SessionGuard)` 保护、身份从 `request.session.*` 上取 ——
+// **一个认证函数都不调用**，所以凡是只看 calls 的判据在这类形态上都读不到证据。
+// 这一族专门构造「函数体会不会泄漏：不看体，只看签名类型」的形态。
+const SESSION_SHAPES_TS = `// webshape_H —— 会话承载型请求：身份在**参数类型**里，不在调用列表里
+
+export interface PendingUserInfo {
+  displayName?: string;
+  email?: string;
+}
+
+export interface RequestWithSession {
+  session: {
+    pendingUser?: PendingUserInfo;
+    userId?: number;
+  };
+}
+
+/** 名字 sake：普通请求 —— 类型里没有 session，不得触发 §47 */
+export interface Request {
+  headers: Record<string, string>;
+}
+
+export interface SessionOptions {
+  rolling?: boolean;
+  resave?: boolean;
+}
+
+export interface Note {
+  id: string;
+  ownerId: string;
+  body: string;
+}
+
+declare const notes: {
+  lookupNote(id: string): Note;
+  persist(note: Note): void;
+  readPending(u: PendingUserInfo): PendingUserInfo;
+  commit(userId: number): void;
+  fetchStats(): number;
+};
+
+/** ① 会话型请求 ⇒ 落在会话上下文里，不是「任何人无需凭证即可读」 */
+export function getPendingUserData(request: RequestWithSession): PendingUserInfo {
+  return notes.readPending(request.session.pendingUser || {});
+}
+
+/** ② 同上的变更版 */
+export function updatePendingUserData(request: RequestWithSession): void {
+  notes.commit(request.session.userId || 0);
+}
+
+/** ③ 反向：类型里没有 session ⇒ 必须仍然报未认证读取（防无条件抑制） */
+export function getPublicStats(request: Request): number {
+  return notes.fetchStats();
+}
+
+/** ④ R66 否命题：有会话 ≠ 有权。Unauthenticated 熄灭，但 Ownership 必须继续亮 */
+export function updateSharedNote(request: RequestWithSession, id: string): void {
+  const n = notes.lookupNote(id);
+  n.body = n.body + " touched";
+  notes.persist(n);
+}
+
+/** ⑤ 边界：SessionOptions 是配置对象，不是会话本身 ⇒ 不得被吃掉 */
+export function createReport(auth: SessionOptions, id: string): void {
+  notes.persist(notes.lookupNote(id));
+}
+`;
+
+const PROJECT_H: WebProject = {
+  id: "webshape_H",
+  shape: "签名级会话证据（§47）：身份在参数类型里而不在调用列表里，配反向对照与类型边界",
+  files: {
+    "src/session-shapes.ts": SESSION_SHAPES_TS,
+  },
+  cases: [
+    {
+      fn: "getPendingUserData",
+      file: "session-shapes.ts",
+      suppressRules: ["Authorization (Unauthenticated Access)"],
+      why: "§47①：request: RequestWithSession ⇒ 已在会话上下文中（hedgedoc getPendingUserData 原型）",
+    },
+    {
+      fn: "updatePendingUserData",
+      file: "session-shapes.ts",
+      suppressRules: ["Authorization (Unauthenticated Mutation)"],
+      why: "§47②：同上，变更侧（hedgedoc confirmPendingUserData 原型，名字换成能被 trigger 命中的 update*）",
+    },
+    {
+      fn: "getPublicStats",
+      file: "session-shapes.ts",
+      reportRules: ["Authorization (Unauthenticated Access)"],
+      why: "§47③ 反向：req: Request 类型里没有 session ⇒ 不得被免（防无条件抑制）",
+    },
+    {
+      fn: "updateSharedNote",
+      file: "session-shapes.ts",
+      suppressRules: ["Authorization (Unauthenticated Mutation)"],
+      why: "§47④ R66 否命题上半：有会话 ⇒ 「未认证」这条熄灭",
+    },
+    {
+      fn: "updateSharedNote",
+      file: "session-shapes.ts",
+      reportRules: ["Authorization (Ownership Check)"],
+      why: "§47④ R66 否命题下半：同一函数里「越权修改」必须仍然亮 —— 否则这一刀就是把越权洗白",
+    },
+    {
+      fn: "createReport",
+      file: "session-shapes.ts",
+      reportRules: ["Authorization (Unauthenticated Mutation)"],
+      why: "§47⑤ 边界：SessionOptions 是配置对象，不以 Session 收尾 ⇒ 不得被当成会话（verdaccio addAuth 类形态）",
+    },
+  ],
+};
+
+export const WEB_PROJECTS: WebProject[] = [PROJECT_A, PROJECT_B, PROJECT_C, PROJECT_D, PROJECT_E, PROJECT_F, PROJECT_G, PROJECT_H];
 
 const MARKER_TEXT: Record<Marker, string> = {
   auth_machinery: "__progmune_auth_machinery__",

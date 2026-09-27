@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-27T07:35:47.007Z",
+  "generated": "2026-09-27T07:37:06.420Z",
   "projects": [
     {
       "project": "analytics_A",
@@ -43535,7 +43535,15 @@
             "__progmune_input_effect__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": []
+          "safeguardViolations": [
+            {
+              "rule": "Authorization (Unauthenticated Access)",
+              "category": "authorization",
+              "type": "missing_safeguard",
+              "detail": "Data access function does not check authentication. Anyone can access data without credentials.",
+              "conceptDetail": "Missing: AuthenticationCheck, AccessControl. Expected at least one of: token validation, session check, auth middleware"
+            }
+          ]
         },
         {
           "name": "updatePendingUserData",
@@ -43552,6 +43560,13 @@
               "type": "missing_safeguard",
               "detail": "Mutation operation does not verify that the acting user owns the resource or holds the required permission before modifying data.",
               "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: ownerId comparison, authorId check, permission check"
+            },
+            {
+              "rule": "Authorization (Unauthenticated Mutation)",
+              "category": "authorization",
+              "type": "missing_safeguard",
+              "detail": "Mutation function does not check authentication. Anyone can create or modify data without credentials.",
+              "conceptDetail": "Missing: AuthenticationCheck, AccessControl. Expected at least one of: token validation, session check, auth middleware"
             },
             {
               "rule": "Data Mutation Without Audit Trail",
@@ -43595,6 +43610,13 @@
               "type": "missing_safeguard",
               "detail": "Mutation operation does not verify that the acting user owns the resource or holds the required permission before modifying data.",
               "conceptDetail": "Missing: OwnershipCheck, AuthorizationGuard. Expected at least one of: ownerId comparison, authorId check, permission check"
+            },
+            {
+              "rule": "Authorization (Unauthenticated Mutation)",
+              "category": "authorization",
+              "type": "missing_safeguard",
+              "detail": "Mutation function does not check authentication. Anyone can create or modify data without credentials.",
+              "conceptDetail": "Missing: AuthenticationCheck, AccessControl. Expected at least one of: token validation, session check, auth middleware"
             },
             {
               "rule": "Data Mutation Without Audit Trail",

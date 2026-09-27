@@ -1,0 +1,101 @@
+
+── webshape_A ── NestJS Controller + HTTP 装饰器（E2 装饰器鉴权标记）
+    FilesController.readGuarded            ✓   [auth_machinery,path_traversal]
+    FilesController.readGuardedAndChecked  ✓   [auth_machinery]
+    FilesController.readUnguarded          ✓   [path_traversal]
+    FilesController.health                 ✓   [—]
+    FilesController.throttled              ✓   [path_traversal]
+
+── webshape_B ── DTO + class-validator 校验装饰器（E3 schema 校验标记）
+    CommentsController.createValidated     ✓   [input_schema,input_effect]
+    CommentsController.updateValidated     ✓   [input_schema,input_effect]
+    CommentsController.createLoose         ✓   [input_effect]
+    CommentsController.createUntyped       ✓   [input_effect]
+
+── webshape_C ── 类方法作为入口（无框架装饰器，单独验证类方法轴）
+    ArchiveService.extract                 ✓   [input_effect,path_traversal]
+    ArchiveService.extractChecked          ✓   [input_effect]
+    ArchiveService.extractConstant         ✓   [input_effect]
+
+── webshape_D ── 分发器：入口名不含 create，创建动作在项目外（F 轮 / exposed 通道）
+    handleSubmit                           ✓   [input_effect]
+    handleRequest                          ✓   [—]
+    handleHash                             ✓   [input_effect]
+    handleSubmitValidated                  ✓   [input_effect]
+    handleSubmitPathChecked                ✓   [input_effect]
+    createPost                             ✓   [input_effect]
+
+── webshape_E ── 函数体里的输入校验证据（E4）：limits 选项 / 判空抛 4xx，以及三类反例
+    uploadAvatar                           ✓   [input_guard,input_effect]
+    uploadBanner                           ✓   [input_effect]
+    uploadIcon                             ✓   [input_effect]
+    uploadThumb                            ✓   [input_effect]
+    uploadCover                            ✓   [input_effect]
+
+── webshape_F ── 参数流向外部副作用的证据（E5）：ORM/链式/出站三类 sink，以及纯装配与工厂两类反例
+    createWidget                           ✓   [input_effect]
+    addWidgetToCache                       ✓   [—]
+    createStorageClient                    ✓   [—]
+    createOrder                            ✓   [input_effect]
+    postMetric                             ✓   [input_effect]
+    uploadDraft                            ✓   [input_effect]
+    addUserRole                            ✓   [input_effect]
+    createAuditLog                         ✓   [input_effect]
+    createAccountRow                       ✓   [input_effect]
+    createTicket                           ✓   [input_effect]
+    addEventToQueue                        ✓   [input_effect]
+    postNotice                             ✓   [input_effect]
+    uploadAsset                            ✓   [input_effect]
+    postWelcomeMail                        ✓   [input_effect]
+    createMemberRemoval                    ✓   [input_effect]
+    createProfileUpdate                    ✓   [input_effect]
+    createSession                          ✓   [input_effect]
+    postWebhook                            ✓   [input_effect]
+    createLocalDriver                      ✓   [—]
+    addPackageAccess                       ✓   [—]
+    createWidgetPreview                    ✓   [—]
+    createCartTotal                        ✓   [—]
+    createLogger                           ✓   [—]
+    addRoute                               ✓   [—]
+    createWidgetSchema                     ✓   [—]
+    createValidatedRole                    ✓   [input_effect]
+
+── webshape_G ── 真实世界的授权命名形态（§42）：CASL 裸 can / 自指谓语 / Auth 决策类 / token 内嵌 acronym，各配反向对照
+    deleteSpace                            ✓   [input_effect]
+    deleteTemplate                         ✓   [input_effect]
+    deleteWidget                           ✓   [input_effect]
+    deleteDraft                            ✓   [input_effect]
+    deleteComment                          ✓   [input_effect]
+    deleteAlias                            ✓   [input_effect]
+    deleteMembers                          ✓   [input_effect]
+    getUserIdsWithSpaceAccess              ✓   [—]
+    canRemove                              ✓   [input_effect]
+    Auth.allow_publish                     ✓   [—]
+    Auth.setLegacyAuthCacheEntry           ✓   [—]
+    Auth.changePassword                    ✓   [—]
+    AuthController.deletePendingUserData   ✓   [input_effect]
+    createJWTToken                         ✓   [input_effect]
+    setJWTCookie                           ✓   [input_effect]
+    setUserPassword                        ✓   [input_effect]
+    deleteExpiredJWTAuditLog               ✓   [input_effect]
+
+── webshape_H ── 签名级会话证据（§47）：身份在参数类型里而不在调用列表里，配反向对照与类型边界
+  ! getPendingUserData                     ✗ 不该报 Authorization (Unauthenticated Access) 却在报   [input_effect]
+       why: §47①：request: RequestWithSession ⇒ 已在会话上下文中（hedgedoc getPendingUserData 原型）
+  ! updatePendingUserData                  ✗ 不该报 Authorization (Unauthenticated Mutation) 却在报   [input_effect]
+       why: §47②：同上，变更侧（hedgedoc confirmPendingUserData 原型，名字换成能被 trigger 命中的 update*）
+    getPublicStats                         ✓   [—]
+  ! updateSharedNote                       ✗ 不该报 Authorization (Unauthenticated Mutation) 却在报   [input_effect]
+       why: §47④ R66 否命题上半：有会话 ⇒ 「未认证」这条熄灭
+    updateSharedNote                       ✓   [input_effect]
+    createReport                           ✓   [input_effect]
+
+合计 72 条：失败 3
+📦 外部函数: 3 (动态=0 回退=1 未签名=2, from 5 total calls)
+📦 外部函数: 4 (动态=0 回退=0 未签名=4, from 4 total calls)
+📦 外部函数: 3 (动态=0 回退=1 未签名=2, from 5 total calls)
+📦 外部函数: 7 (动态=0 回退=5 未签名=2, from 11 total calls)
+📦 外部函数: 10 (动态=0 回退=0 未签名=10, from 10 total calls)
+📦 外部函数: 27 (动态=0 回退=2 未签名=25, from 31 total calls)
+📦 外部函数: 18 (动态=0 回退=0 未签名=18, from 26 total calls)
+📦 外部函数: 6 (动态=0 回退=0 未签名=6, from 6 total calls)

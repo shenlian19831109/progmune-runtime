@@ -4333,3 +4333,107 @@ R67 说的是「冻结母本不能当同刻基线」，这次踩的是它的近�
 **③ 没有改 src** —— 用数据否决，见 46.3。
 
 规则至 **73 条**：R70（label 必须与语义一致）/ R71（真值要两边都看）/ R72（增报类要逐条证明）/ R73（上一次的 results 也不是同刻基线）。
+
+---
+
+## §四十七：签名级会话证据 —— 参数类型里有 Session，不该再报「未认证」（2026-09-27）
+
+### 47.1 起点：12 个仍报的确认误报，按「瓶颈在哪」分类
+
+上一轮（§46）收尾时授权族还剩 18 条确认误报仍报同一条规则（唯一函数 12 个）。
+逐条读源码后按**瓶颈类型**分成三堆：
+
+| 堆 | 函数 | 瓶颈 | 能否靠改判据解决 |
+|---|---|---|---|
+| A | hedgedoc `getPendingUserData` / `confirmPendingUserData` / `deletePendingUserData` / `OidcController.callback` | `@UseGuards(SessionGuard)` 保护，身份从 `request.session.*` 上取，**一个认证函数都不调用** | **能** —— 证据在**签名**里 |
+| B | outline `createContext`、w3tecch `onUserCreate`、verdaccio `ConfigBuilder.addAuth` | 压根没有数据操作（分别是纯工厂 / 只打日志 / merge 内存配置），却被 `create*` 触发成「未认证变更」 | **不能安全解决**，见 47.2 |
+| C | docmost `removeFavorite` / `removeUserAvatar`、hoppscotch `deletePAT` / `createPAT` / `addUserToTeam` | 归属通过 `user.id` 作实参下沉，保护来自上游装饰器 | 不上 See §46 R71（真值相反） |
+
+### 47.2 否决 B 堆：缺席型判据在本工程的证据通道上不可靠
+
+B 堆看着很好刀——「没有写入 ⇒ 不该报未认证变更」。但它依赖 **`calls` 里不存在某个东西**。
+而本工程的证据通道是有损的：fp-pool 切片里入边为 0 的函数占 36%~42%（2026-09 实测），
+`createContext` 的 calls 是空的、`Knex` 类的调用经常抽不出来。
+
+⇒ **「提取失败」和「函数真的不写东西」在结果里长得一模一样**（本项目反复出现的失败模式：机制失效是**静默**的，不报错）。
+真漏洞若出现在这种函数上，会被无声洗白，而且**现有 gold 里查不出来**（见 47.6）。
+⇒ 按 R57（抑制方向必须能量化 TP 影响）/ R72 否决，本轮不落地。
+
+### 47.3 落地的是 A 堆：改用**正向**证据，且来自 AST 签名
+
+新增 `paramTypeSafeguards`，喂 `detectSafeguardViolations` 已有的 `paramTypes` 通道（不改签名）：
+
+```
+const SESSION_BEARING_TYPE_RE = /(?:^|[A-Za-z])Session$/i;
+```
+
+命中即视为「已认证」，挂在 **Unauthenticated Access / Unauthenticated Mutation** 两条规则上。
+语义：函数手里握着一个 session 对象 ⇒ 这次调用必然落在某个会话上下文里，
+「任何人无需凭证即可访问/修改」不成立。
+
+**为什么是正向证据**：它依赖「签名上存在某个东西」，而不是「调用列表里缺少某个东西」；
+签名不依赖调用图连通 ⇒ 在切片的 36%~42% 盲区里依然成立，正是 47.2 那个坑的反面。
+
+### 47.4 为什么**不**给 Ownership / Resource Ownership 补（R66 的否命题）
+
+有会话 ≠ 操作对象属于自己。要是把 Ownership 家族也一并补上，就会变成：
+越权读取 `getOthersData(req: RequestWithSession)` 的「未认证」熄灭的同时，「越权」也熄灭
+⇒ 这一刀就成了洗白越权漏洞的工具。
+否命题由 fixture 反向② 组承担：`removeSharedFile` / `deleteOtherUsersNote` 必须
+Unauthenticated 熄灭、**Ownership 继续亮**。
+
+### 47.5 数据
+
+| 场 | LOST | ADDED | 成分 |
+|---|---|---|---|
+| 真实池（fp-pool，同刻摘刀对照） | **4** | **0** | 全部 hedgedoc 的 `RequestWithSession`，全部 gold 确认 FP |
+| 合成语料（batch-scan，同刻摘刀对照） | **3** | **0** | 全部 webshape_H（本轮新补，见 47.7） |
+| 24 条确认真漏洞 | 漏报 **0** | — | 见 47.6 的重要限定 |
+
+授权族确认误报：判据压掉 24→**28** 条（66 条中占比 36%→42%）；
+仍报同一条规则 18→**14** 条。
+
+### 47.6 ⚠ 一条必须写下来的限定：本族的 TP 安全论证在本语料内不可证伪
+
+核对发现：**24 条确认真漏洞当前**没有一条**会触发授权族规则**
+（它们触发的是 Input Validation 22 / FK 15 / Sanitization 7 / File Upload 4 / 其他 4）。
+
+⇒ 上轮建立的「24/24 仍报」对照，对**授权族专用**的抑制改动来说是**平凡成立**的：
+结构就压不到它们。真正承担安全性论证的只有两处 ——
+① 合成语料的正反向 fixture（摘刀时正向组必须转红）；② 被压掉的 4 条 hedgedoc 函数逐行读过源码复核。
+**报告的时候必须连带报这个限定**，否则又是一次「分母缺失当成绩」。
+
+### 47.7 补上覆盖缺口（R56 的操作版）
+
+第一次跑合成盲测时是 **LOST 0 / ADDED 0**。按 R56 这不是通过，而是**没被触发** ——
+batch-scan 的语料里没有任何函数带 Session 类型参数。若不处理，这一刀以后会被静默回归。
+⇒ 新增 `webshape_H`（7 条期望 → 全库 66→**72** 条），正反双向与类型边界（SessionOptions 不得被吃）齐备。
+
+### 47.8 反向验证（R64）
+
+摘掉这一刀后重跑 webshape 门 —— 期望、**且实际**正好那 3 条 suppress 组转红，
+3 条 report 组保持绿 ⇒ 刀承重，不是被别机制抢先压。跑完源码自动还原，
+`src/protocol-detector.ts` 与备份逐字节一致。
+
+### 47.9 四门
+
+tsc 0 错 / webshape **72-0** / taintpath **160-0** / fr-007 pre5·post0 / fr-016 pre7·post0 /
+相关单测 **10 文件 342 条全绿**（另有 1 条 `onTaskUpdate` RPC 超时，机器负载 100+ 所致，非测试失败）。
+
+### 47.10 本轮改动清单
+
+**改了 src 的**
+- `src/protocol-detector.ts`：`SafeguardRule` 增 `paramTypeSafeguards?: RegExp[]`；新增
+  `SESSION_BEARING_TYPE_RE` 与求值分支；挂在 Unauthenticated Access / Mutation 两条规则上
+
+**改了语的**
+- `blind-benchmark/generate-projects-webshape.ts`：新增 `webshape_H`（§47 会话形态 + 反向 + 类型边界）
+
+**新增文件**
+- `src/protocol-detector-session-param.test.ts`（13 条，正/反/边界）
+- `blind-benchmark/principal-param-probe.ts`（参数类型探针，只读）
+- `blind-benchmark/base-47.py`（同刻基线 + 反向验证，跑完自动还原源码）
+- `blind-benchmark/diff-47.py`（同刻比对 + LOST 逐条归因 + gold 核验）
+
+规则至 **77 条**：R75（缺席型判据在有损的 calls 通道上不可靠）/ R76（零漂移先答触发场，补语料族再判）
+/ R77（动族前先查 TP 是否触发该族规则；不触发则该族论证不可证伪，须声明）。

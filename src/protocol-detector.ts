@@ -332,6 +332,13 @@ interface SafeguardRule {
   /** Stricter safeguard patterns used when param names are known
    *  (parentRefGated rules); the default `safeguards` stay for legacy callers. */
   strictSafeguards?: Array<{ pattern: RegExp; label: string; callsOnly?: boolean }>;
+  /**
+   * §47（2026-09-27）**签名级**身份证据：用**参数类型**（不是调用列表）压制「未认证」结论。
+   * 与 `__progmune_*` 标记互补 —— 标记要靠调用图/体扫描补齐，而参数类型直接来自 AST
+   * 签名，**不依赖调用图是否连通**。这一点在 fp-pool 上很关键：该切片入边为 0 的函数占
+   * 36%~42%（2026-09 实测），凡是依赖 calls 的机制在那些函数上都会静默失效。
+   */
+  paramTypeSafeguards?: RegExp[];
 }
 
 /**
@@ -386,6 +393,23 @@ export const AUTHZ_BARE_CAN_RE = /^(?:can|cannot)$|\.(?:can|cannot)$/i;
  * ⇒ `canSendEmail` 会拆出单词 "can" ⇒ 裸 can 误命中 ⇒ §38 的负对照直接转绿。
  * callsOnly 把匹配限定在**原始调用名**上（`can` 作为被调名才作数）。
  */
+
+/**
+ * §47（2026-09-27）**会话承载型请求**：参数类型名以 `Session` 结尾
+ * （`RequestWithSession` / `AuthenticatedSession` / `HttpSession` / `Session`）。
+ *
+ * 语义：函数手里握着一个 session 对象 ⇒ 这次调用**已经落在某个会话上下文里**，
+ * 「任何人无需凭证即可访问/修改」这个结论不成立。这是**正向**证据且来自 AST 签名，
+ * 不像「calls 里没有 xxx」那样会被提取失败伪装过去（fp-pool 入边为 0 的函数占
+ * 36%~42%，依赖 calls 的机制在那些函数上会静默失效）。
+ *
+ * ⚠ 只喂给「未认证」两条规则，**不**给 Ownership / Resource Ownership 补 ——
+ *   有会话 ≠ 操作对象属于自己。R66 的否命题由这对组合承担：
+ *   同形状的越权读取 `getOthersData(req: RequestWithSession)` 应当
+ *   Unauthenticated 熄灭、**Ownership 继续亮**（fixture 见
+ *   src/protocol-detector-session-param.test.ts 的反向组）。
+ */
+const SESSION_BEARING_TYPE_RE = /(?:^|[A-Za-z])Session$/i;
 
 const SAFEGUARD_RULES: SafeguardRule[] = [
   // ── Password Hashing ──
@@ -480,6 +504,8 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     category: "authorization",
     languages: ["typescript", "javascript", "python"],
     paramGated: true,
+    // §47：签名带 session ⇒ 已落在会话上下文中（详见 SESSION_BEARING_TYPE_RE 注释）
+    paramTypeSafeguards: [SESSION_BEARING_TYPE_RE],
     trigger: /\b(list|download|view|fetch)(?:[A-Z]\w*|_\w+)|get(?:[A-Z]\w+|_\w+)/i,
     safeguards: [
       { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|jwt\.decode|decode_token|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__)\b/i, label: "auth_check" },
@@ -512,6 +538,8 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     category: "authorization",
     languages: ["typescript", "javascript", "python"],
     paramGated: true,
+    // §47：同上 —— 只压制「未认证」，不压制「越权」
+    paramTypeSafeguards: [SESSION_BEARING_TYPE_RE],
     // Note: "post" deliberately excluded — it collides with the Post entity name
     // (listPosts/getPost/deletePost fire via identifier-parsed words).
     trigger: /\b(add|create|update|set|publish|insert|submit)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Add|Create|Update|Set|Publish|Insert|Submit)\b/i,
@@ -1584,6 +1612,12 @@ export function detectSafeguardViolations(calls: string[], enclosingFuncName?: s
         return classifyParamType(t) !== "scalar";
       });
       if (!hasIdentity && !exposed) continue;
+    }
+
+    // §47（2026-09-27）签名级会话证据：命中即视为「已认证」，与 calls 类 safeguard 并列。
+    // 放在 `guards.find` 之前，语义上等价于命中了一个 safeguard。
+    if (rule.paramTypeSafeguards && paramTypes) {
+      if (paramTypes.some((t) => t && rule.paramTypeSafeguards!.some((re) => re.test(t)))) continue;
     }
 
     // Check if at least one safeguard matches

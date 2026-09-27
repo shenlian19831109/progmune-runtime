@@ -1740,5 +1740,30 @@
         "blind-benchmark/auth-result-impact-probe.ts（反事实 + --bare 交叉）"
       ]
     }
+  },
+  "s47_session_signature_2026_09_27": {
+    "$what": "§47 —— 签名级会话证据：参数类型以 Session 收尾 ⇒ 不再报 Unauthenticated Access / Mutation",
+    "target": "上一轮（§46）收尾时仍报同一条规则的 18 条确认误报（12 个唯一函数）",
+    "change": "SafeguardRule 新增 paramTypeSafeguards；SESSION_BEARING_TYPE_RE = /(?:^|[A-Za-z])Session$/i；只挂 Unauthenticated Access / Mutation 两条，不挂 Ownership / Resource Ownership",
+    "why_not_ownership": "有会话 ≠ 操作对象属于自己。若一并补上，越权读取的「未认证」熄灭的同时「越权」也熄灭 ⇒ 这一刀会变成洗白越权漏洞的工具。否命题由 fixture 反向② 承担。",
+    "rejected_absence_knife": {
+      "what": "「calls 里找不到写入 ⇒ 不报未认证变更」（针对 createContext / onUserCreate / addAuth）",
+      "why": "缺席型判据要求『看不到 == 不存在』，但 calls 通道有损（切片入边 0 占 36%~42%），提取失败会被伪装成『真的不写东西』⇒ 真漏洞静默消失且 gold 查不出来。记为 R75。"
+    },
+    "measured": {
+      "real_pool": "LOST 4 / ADDED 0 —— 全部 hedgedoc 的 RequestWithSession，全部 gold 确认 FP",
+      "synthetic": "LOST 3 / ADDED 0 —— 全部 webshape_H（本轮补的语料族）",
+      "authorz_confirmed_fp": "判据压掉 24 → 28 条（66 条中占比 36% → 42%）",
+      "still_same_rule": "18 → 14 条"
+    },
+    "$honesty_tp_denominator": "24 条确认真漏洞当前**无一条**触发授权族规则 ⇒ 「24/24 仍报」对这一族是平凡成立。本轮安全性实际由合成正反向 fixture + 被压 4 条逐行读源码承担（记为 R77）。",
+    "coverage_gap_fixed": "合成盲测首次 LOST 0 / ADDED 0 ⇒ 不是安全而是没被触发（R76）。补 webshape_H 后同刻重跑转为 LOST 3 / ADDED 0，webshape 期望 66 → 72 条。",
+    "reverse_verification": "摘刀重跑 webshape 门：webshape_H 的 3 条 suppress 组精确转红，3 条 report 组保持绿 ⇒ 刀承重",
+    "tools_added": [
+      "blind-benchmark/principal-param-probe.ts",
+      "blind-benchmark/base-47.py",
+      "blind-benchmark/diff-47.py"
+    ],
+    "gates": "tsc 0 / webshape 72-0 / taintpath 160-0 / fr-007 pre5·post0 / fr-016 pre7·post0 / 单测 10 文件 342 条全绿"
   }
 }

@@ -435,8 +435,14 @@ const PATH_TRAVERSAL_MARKER = "__progmune_path_traversal__";
 // __progmune_auth_machinery__，TS 侧此前从未产出 ⇒ 规则侧零改动。
 //
 // 边界（写死在这里，别想当然）：只有**接受标记的规则**会受益。
-// Input Validation 的 safeguard 不接受任何 __progmune_* 标记（protocol-detector.ts:481
-// 是纯词形匹配），装饰器对它无效；实测注入后 Input Validation 条仍在。
+//
+// ⚠ 2026-09-27 更正（别删这段）：本注释此前长期写着
+//     「Input Validation 的 safeguard 不接受任何 __progmune_* 标记，装饰器对它无效」。
+//   **该结论已失效** —— 本文件 E3 的 __progmune_input_schema__ 通道现已接通，
+//   见 protocol-detector.ts:647 的 input_validation safeguard（含
+//   __progmune_input_schema__|__progmune_input_guard__）。
+//   保留这条更正，是因为「注释说通道断着、实际早已通」比没有注释更危险：
+//   它会让人把瓶颈判错地方（2026-09-27 摸底时差点据此重开一条已修好的通道）。
 // ═══════════════════════════════════════════════════════════════
 const AUTH_MACHINERY_MARKER = "__progmune_auth_machinery__";
 /** 显式免鉴权装饰器 —— 出现即不注入。把公开端点判成「有鉴权」是最危险的假阴性。 */

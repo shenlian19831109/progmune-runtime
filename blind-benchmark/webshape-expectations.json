@@ -671,6 +671,59 @@
           "why": "E1④ 反向：acronym 认出来了但动词不是机制动词 ⇒ 只是普通日志清理，仍需鉴权"
         }
       ]
+    },
+    "webshape_H": {
+      "shape": "签名级会话证据（§47）：身份在参数类型里而不在调用列表里，配反向对照与类型边界",
+      "cases": [
+        {
+          "fn": "getPendingUserData",
+          "file": "session-shapes.ts",
+          "suppressRules": [
+            "Authorization (Unauthenticated Access)"
+          ],
+          "why": "§47①：request: RequestWithSession ⇒ 已在会话上下文中（hedgedoc getPendingUserData 原型）"
+        },
+        {
+          "fn": "updatePendingUserData",
+          "file": "session-shapes.ts",
+          "suppressRules": [
+            "Authorization (Unauthenticated Mutation)"
+          ],
+          "why": "§47②：同上，变更侧（hedgedoc confirmPendingUserData 原型，名字换成能被 trigger 命中的 update*）"
+        },
+        {
+          "fn": "getPublicStats",
+          "file": "session-shapes.ts",
+          "reportRules": [
+            "Authorization (Unauthenticated Access)"
+          ],
+          "why": "§47③ 反向：req: Request 类型里没有 session ⇒ 不得被免（防无条件抑制）"
+        },
+        {
+          "fn": "updateSharedNote",
+          "file": "session-shapes.ts",
+          "suppressRules": [
+            "Authorization (Unauthenticated Mutation)"
+          ],
+          "why": "§47④ R66 否命题上半：有会话 ⇒ 「未认证」这条熄灭"
+        },
+        {
+          "fn": "updateSharedNote",
+          "file": "session-shapes.ts",
+          "reportRules": [
+            "Authorization (Ownership Check)"
+          ],
+          "why": "§47④ R66 否命题下半：同一函数里「越权修改」必须仍然亮 —— 否则这一刀就是把越权洗白"
+        },
+        {
+          "fn": "createReport",
+          "file": "session-shapes.ts",
+          "reportRules": [
+            "Authorization (Unauthenticated Mutation)"
+          ],
+          "why": "§47⑤ 边界：SessionOptions 是配置对象，不以 Session 收尾 ⇒ 不得被当成会话（verdaccio addAuth 类形态）"
+        }
+      ]
     }
   }
 }
