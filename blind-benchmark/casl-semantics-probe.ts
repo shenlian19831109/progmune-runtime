@@ -255,6 +255,34 @@ const missing = rows
 console.log(`   ⇒ R77：这就是这条路能影响的**分母**，低于它的收益不值这一轮工程`);
 missing.forEach((m) => console.log(`     未命中：${m}`));
 
+// ── Q4：结构化输出（§49.14）—— 给排序评估用 ──
+// 路线 B 的真问题不是「能不能解析」（Q1/Q2 都是 100%），而是**解析出来能影响几条告警**（Q3）。
+// 但「影响几条」还不够：还要知道这部分的**边际收益** —— 已经有 §49.13 的排序方案（AUC 0.895）了，
+// B 只能在它的基础上加。所以这里把每条 gold 的 CASL 命中情况导出，交给 rank-signals 侧去算
+// 「加上这个信号后 AUC 变不变」。若不变，B 就不值那个工程量（R77 的分母意识）。
+// ⚠ `get` 是 parseArgs 内部的局部函数，这里拿不到 ⇒ 直接从 argv 取
+const _argv = process.argv.slice(2);
+const _ji = _argv.indexOf("--json");
+const jsonOut = _ji >= 0 ? _argv[_ji + 1] : undefined;
+if (jsonOut) {
+  const lines = rows.map((r: any) => {
+    const fn = String(r.fn ?? "");
+    const bare = bareOf(fn);
+    const f = String(r.file ?? "");
+    return JSON.stringify({
+      repo: r.repo,
+      fn,
+      file: f,
+      rule: String(r.rule ?? ""),
+      gold: String(r.gold ?? ""),
+      caslOwner: [...ownerSet].some((o) => o === fn || bareOf(o) === bare) ? 1 : 0,
+      caslFile: [...fileSet].some((k) => k === f || k.endsWith(f)) ? 1 : 0,
+    });
+  });
+  fs.writeFileSync(path.resolve(jsonOut), lines.join("\n") + "\n", "utf8");
+  console.log(`[casl] 结构化输出 ${lines.length} 条 → ${jsonOut}`);
+}
+
 console.log("\n读法：");
 console.log("  ① Q1 过不了就没必要往下做（连定义都抽不出来）；");
 console.log("  ② Q2 的「两个都不可解析」占比直接等于**额外工程量**——它要求跨函数常量传播；");
