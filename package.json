@@ -23,7 +23,7 @@
   },
   "scripts": {
     "prepare": "npm run build",
-    "build": "tsc -p tsconfig.json && tsc -p tsconfig.mcp.json && mv dist-mcp/mcp-server.js dist/mcp-server.mjs && rm -rf dist-mcp",
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.mcp.json && mv dist-mcp/mcp-server.js dist/mcp-server.mjs && (rm -rf dist-mcp || true)",
     "start": "node dist/mcp-server.mjs",
     "test": "node dist/check.js",
     "test:unit": "vitest run --exclude '**/stress/**' --exclude '**/soak/**' --exclude '**/chaos/**'",
