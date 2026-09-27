@@ -50,6 +50,8 @@ interface Args {
   nodi: boolean;
   /** §49.8：额外建一张关 DI 的图做边级对照（同进程两张图，内存翻倍） */
   auditDi: boolean;
+  /** §49.10：把每条 gold 的链上特征落成 JSON，供排序可行性量化（路线 A）使用 */
+  json?: string;
 }
 
 function parseArgs(): Args {
@@ -72,6 +74,7 @@ function parseArgs(): Args {
     show: Number(get("--show") ?? 8),
     nodi: a.includes("--nodi"),
     auditDi: a.includes("--audit-di"),
+    json: get("--json"),
   };
 }
 
@@ -223,6 +226,9 @@ const basename = (p: string) => (p.split("/").pop() ?? p);
 
 const args = parseArgs();
 
+/** §49.10：逐条 gold 的链上特征，--json 时落盘供排序量化用 */
+const DUMP: Array<Record<string, unknown>> = [];
+
 console.log(`\n══ §49.1 入边摸底：${args.repo} ══`);
 console.log(`全量根目录：${args.root}`);
 if (args.slice) console.log(`切片目录：${args.slice}`);
@@ -275,6 +281,21 @@ for (const r of rows) {
 
 for (const [label, list] of [...groups.entries()].sort((a, b) => b[1].length - a[1].length)) {
   const feats = list.map((r: any) => chainFeat(gFull, r.fn, r.file, args.depth));
+  // §49.10：逐条落地，供排序可行性量化（路线 A）。只记录可以自证的特征，不做任何打分。
+  list.forEach((r: any, i: number) =>
+    DUMP.push({
+      repo: args.repo,
+      fn: String(r.fn),
+      file: String(r.file ?? ""),
+      rule: String(r.rule ?? ""),
+      gold: String(r.gold ?? "?"),
+      inDeg: feats[i].inDeg,
+      upReached: feats[i].upReached,
+      reachReq: feats[i].reachReq,
+      reachAuth: feats[i].reachAuth,
+      reachRoute: feats[i].reachRoute,
+    })
+  );
   const m = feats.filter((f) => f.matched);
   const withIn = feats.filter((f) => f.inDeg > 0);
   console.log(
@@ -446,3 +467,8 @@ console.log("\n读法提示：");
 console.log("  ① 全量入边为 0 的比例若显著低于切片的 36%~42% ⇒ 入边缺失是切片损失，不是世界真相；");
 console.log("  ② ② 的各组分布**只做对照不做判据**——分布可分不等于判据安全（R79）；");
 console.log("  ③ 未定位（✗）多的组说明 gold 的函数名/文件与全量源码对不上，先修定位再谈传播。\n");
+
+if (args.json) {
+  fs.writeFileSync(args.json, DUMP.map((d) => JSON.stringify(d)).join("\n") + "\n");
+  console.log(`[dump] ${DUMP.length} 条 gold 特征 → ${args.json}`);
+}

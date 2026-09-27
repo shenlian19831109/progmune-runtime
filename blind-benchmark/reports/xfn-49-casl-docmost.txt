@@ -1,0 +1,50 @@
+
+══ §49.11 路线 B 可行性：docmost ══
+全量根目录：/tmp/full-docmost
+源文件 359 个
+
+── Q1 能力定义点 ──
+   引用 @casl/ability 的文件 2 个
+   枚举 25 个，其中可解析的字符串成员 183 条
+   能力定义内的规则点 33 条（can/cannot 调用）
+   两个参数都能解析成字面值的 33 / 33 (100%)
+   样例：
+     src/core/casl/abilities/space-ability.factory.   can(manage, settings)
+     src/core/casl/abilities/space-ability.factory.   can(manage, member)
+     src/core/casl/abilities/space-ability.factory.   can(manage, page)
+     src/core/casl/abilities/space-ability.factory.   can(manage, share)
+     src/core/casl/abilities/space-ability.factory.   can(read, settings)
+     src/core/casl/abilities/space-ability.factory.   can(read, member)
+
+── Q2 使用点（业务代码里真正做判定的那句）──
+   使用点 59 条
+   动作+资源都可解析 59 (100%)  ← 这条路能直接吃到
+   只有动作可解析   0 (0%)  ← 还要把资源追出来
+   只有资源可解析   0 (0%)
+   两个都不可解析   0 (0%)  ← 必须做跨函数常量传播
+   样例：
+     AttachmentController.uploadAvatarO   cannot(WorkspaceCaslAction.Ma, WorkspaceCaslSubject.S)
+     AttachmentController.uploadAvatarO   cannot(SpaceCaslAction.Manage, SpaceCaslSubject.Setti)
+     AttachmentController.removeIcon      cannot(SpaceCaslAction.Manage, SpaceCaslSubject.Setti)
+     AttachmentController.removeIcon      cannot(WorkspaceCaslAction.Ma, WorkspaceCaslSubject.S)
+     CommentController.delete             cannot(SpaceCaslAction.Manage, SpaceCaslSubject.Setti)
+     GroupController.getWorkspaceGroups   cannot(WorkspaceCaslAction.Re, WorkspaceCaslSubject.G)
+     GroupController.getGroup             cannot(WorkspaceCaslAction.Re, WorkspaceCaslSubject.G)
+     GroupController.createGroup          cannot(WorkspaceCaslAction.Ma, WorkspaceCaslSubject.G)
+
+── Q3 gold 覆盖上界（docmost 114 条）──
+   ① **同一函数里**就写了权限判定 18 (16%)  ← 严格的天花板：只有这些能直接用 (动作, 资源) 去比对
+   ② 同一文件里有权限判定     19 (17%)  ← 宽松上界：还要靠文件级归属去够，可信度低得多
+   ③ 两者之差 1 条需要「跨函数把权限意图挪过来」才能真正用上
+   ⇒ R77：这就是这条路能影响的**分母**，低于它的收益不值这一轮工程
+     未命中：prosemirrorNodeToYElement                UNKNOWN  src/collaboration/collaboration.util.ts
+     未命中：removeYjsMarkByAttribute                 FP       src/collaboration/yjs.util.ts
+     未命中：updateYjsMarkAttribute                   FP       src/collaboration/yjs.util.ts
+     未命中：AuthenticationExtension.onAuthenticate   UNKNOWN  src/collaboration/extensions/authentication.extension.ts
+     未命中：AuthenticationExtension.onAuthenticate   FP       src/collaboration/extensions/authentication.extension.ts
+
+读法：
+  ① Q1 过不了就没必要往下做（连定义都抽不出来）；
+  ② Q2 的「两个都不可解析」占比直接等于**额外工程量**——它要求跨函数常量传播；
+  ③ Q3 的天花板低于底座收益时，这条路就不值（R77：先看清分母）。
+
