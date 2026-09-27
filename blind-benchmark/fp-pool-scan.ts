@@ -91,14 +91,16 @@ function countFiles(dir: string): number {
 
 /** 与 batch-scan 同口径：被 web-handler 调到的函数算「暴露面」 */
 const WEB_HANDLER = /\b(handle_request|handleRequest|request_handler|requestHandler)\b/i;
-function computeExposed(funcs: Array<{ name: string; calls?: string[] }>): Set<string> {
+// §49.12：导出给 xfn-signal-probe 复用。**不要**在别处照记忆重写这个函数
+// （R59）——重写出来的版本与这里的口径一旦不同，两边的结果就不可比。
+export function computeExposed(funcs: Array<{ name: string; calls?: string[] }>): Set<string> {
   const exposed = new Set<string>();
   for (const f of funcs) {
     if (WEB_HANDLER.test(f.name)) for (const c of f.calls || []) exposed.add(c);
   }
   return exposed;
 }
-function isExposed(name: string, exposed: Set<string>): boolean {
+export function isExposed(name: string, exposed: Set<string>): boolean {
   return exposed.has(name) || exposed.has(name.split(".").pop() || name);
 }
 
