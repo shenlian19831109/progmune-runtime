@@ -48,7 +48,7 @@ CWE_MAP = {
     "CWE-284": ("Authorization (Ownership Check)", "weak"),
     "CWE-285": ("Authorization (Unauthenticated Access)", "strong"),
     "CWE-862": ("Authorization (Unauthenticated Mutation)", "strong"),
-    "CWE-863": ("Authorization (Cross-User Resource Write)", "strong"),
+    "CWE-863": ("Authorization (Cross-User Resource Write) / Authorization (Ownership Check)", "strong"),
     "CWE-287": ("Authorization (Unauthenticated Access)", "weak"),
     "CWE-306": ("Authorization (Unauthenticated Mutation)", "weak"),
     "CWE-269": ("Privilege Escalation (Admin without Role Check)", "strong"),

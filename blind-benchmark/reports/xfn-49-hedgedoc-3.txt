@@ -1,0 +1,92 @@
+
+══ §49.1 入边摸底：hedgedoc ══
+全量根目录：/tmp/full-hedgedoc
+切片目录：blind-benchmark/fp-pool/hedgedoc
+上溯深度：3
+[graph] 发现 1132 个源文件，加载中…
+[graph] 已加载 1132 文件，抽出 3510 个 callable
+[graph] 调用边 1671 条（v4：this/super 同类 + import 作用域裸名）
+
+── 全量 hedgedoc ──
+   callable 3510 个，入边为 0 的 2825 个（80.5%）
+   入边分布 0:2825  1:464  2:109  3:35  4:22  5+:55
+   入口输入痕迹：req.* 字面 9 个｜@Body() 类装饰器 42 个｜合计 51 个（1%）
+[graph] 发现 97 个源文件，加载中…
+[graph] 已加载 97 文件，抽出 136 个 callable
+[graph] 调用边 84 条（v4：this/super 同类 + import 作用域裸名）
+
+── 切片 hedgedoc ──
+   callable 136 个，入边为 0 的 74 个（54.4%）
+   入边分布 0:74  1:52  2:6  3:2  4:1  5+:1
+
+── gold 样本（hedgedoc）：57 条 ──
+
+  [FP] 36 条｜图上定位到 36｜有入边 23 (64%)
+      上溯 3 层可达节点中位数 1
+      撞到 req 入口  3 (8%)  ← 字面 0 / 装饰器 3
+      撞到 auth 痕迹 3 (8%)
+      撞到 route 痕迹 3 (8%)
+        Data Mutation Without Audit Trail    AliasService.removeAlias                   in=1 up=1 REQ AUTH ROUTE
+        Data Mutation Without Audit Trail    ApiTokenService.removeToken                in=1 up=1 REQ AUTH ROUTE
+        Data Mutation Without Audit Trail    ApiTokenService.handleCron                 in=0 up=0 ·   ·    ·
+
+  [UNKNOWN] 16 条｜图上定位到 16｜有入边 1 (6%)
+      上溯 3 层可达节点中位数 0
+      撞到 req 入口  0 (0%)  ← 字面 0 / 装饰器 0
+      撞到 auth 痕迹 0 (0%)
+      撞到 route 痕迹 0 (0%)
+        No Input Sanitization                renderAstToHtml                            in=1 up=1 ·   ·    ·
+        Data Integrity (Foreign Key)         ApiTokensController.postTokenRequest       in=0 up=0 ·   ·    ·
+        Input Validation                     ApiTokensController.postTokenRequest       in=0 up=0 ·   ·    ·
+
+  [TP] 5 条｜图上定位到 5｜有入边 5 (100%)
+      上溯 3 层可达节点中位数 4
+      撞到 req 入口  5 (100%)  ← 字面 0 / 装饰器 5
+      撞到 auth 痕迹 5 (100%)
+      撞到 route 痕迹 5 (100%)
+        Data Integrity (Foreign Key)         AliasService.addAlias                      in=2 up=4 REQ AUTH ROUTE
+        Input Validation                     AliasService.addAlias                      in=2 up=4 REQ AUTH ROUTE
+        No Input Sanitization                AliasService.addAlias                      in=2 up=4 REQ AUTH ROUTE
+
+══ §49.6 前端/后端分层（hedgedoc）══
+   文件 1132 个 ⇒ 前端 781 / 后端 351
+   信号命中：目录 775｜.tsx 385｜前端包 import 469｜JSX/Hook 461
+   只被单一信号命中：目录 282｜.tsx 0｜包 6｜JSX 3  ← 只看这里能判断哪些信号是「凑数」的
+     检出前端样本：frontend/cypress.config.ts  [dir]
+     检出前端样本：frontend/cypress/fixtures/languages.ts  [dir]
+     检出前端样本：frontend/cypress/support/check-links.ts  [dir]
+     检出前端样本：frontend/cypress/support/config.ts  [dir]
+     检出前端样本：frontend/cypress/support/e2e.ts  [dir]
+     检出前端样本：frontend/cypress/support/fill.ts  [dir]
+
+── 全量 hedgedoc（不分层，对照） ──
+   callable 3510 个，入边为 0 的 2825 个（80.5%）
+   入边分布 0:2825  1:464  2:109  3:35  4:22  5+:55
+
+── **后端层** hedgedoc ──
+   callable 512 个，入边为 0 的 232 个（45.3%）
+   入边分布 0:232  1:178  2:56  3:17  4:12  5+:17
+
+── 前端层 hedgedoc（分母稀释源） ──
+   callable 2998 个，入边为 0 的 2593 个（86.5%）
+   入边分布 0:2593  1:286  2:53  3:18  4:10  5+:38
+   ⚠ gold 分层校验：前端层:FP 15
+
+══ §49.7 后端层入边为 0 的 232 个 callable 里，有多少是真断链 ══
+   **有人调用它、但边没连上** 77 (33%)  ← 有证据的可修上界
+   断链原因分解：this.缺失 4｜依赖注入 this.svc.x() 62｜裸调用重名歧义 11｜本仓库无此定义 0
+     MeController.deleteUser                  断链类=inj 调用点=1 来自 1 文件
+     NotesController.createNote               断链类=dup 调用点=1 来自 1 文件
+     LocalService.createUserWithLocalIdenti   断链类=inj 调用点=1 来自 1 文件
+     LocalService.updateLocalPassword         断链类=inj 调用点=1 来自 1 文件
+     LocalService.checkLocalPassword          断链类=inj 调用点=2 来自 1 文件
+     GroupsService.getGroupInfoDtoByName      断链类=inj 调用点=1 来自 1 文件
+     ConsoleLoggerService.getContext          断链类=inj 调用点=32 来自 11 文件
+     ConsoleLoggerService.error               断链类=inj 调用点=25 来自 23 文件
+   真无调用参照 155 (67%)  ← 无任何调用点提及，是死代码或图外的动态入口
+
+读法提示：
+  ① 全量入边为 0 的比例若显著低于切片的 36%~42% ⇒ 入边缺失是切片损失，不是世界真相；
+  ② ② 的各组分布**只做对照不做判据**——分布可分不等于判据安全（R79）；
+  ③ 未定位（✗）多的组说明 gold 的函数名/文件与全量源码对不上，先修定位再谈传播。
+

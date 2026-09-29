@@ -1,0 +1,50 @@
+
+══ §49.1 入边摸底：verdaccio ══
+全量根目录：/tmp/full-verdaccio
+切片目录：blind-benchmark/fp-pool/verdaccio
+上溯深度：3
+[graph] 发现 555 个源文件，加载中…
+[graph] 已加载 555 文件，抽出 961 个 callable
+[graph] 调用边 905 条（v4：this/super 同类 + import 作用域裸名）
+
+── 全量 verdaccio ──
+   callable 961 个，入边为 0 的 434 个（45.2%）
+   入边分布 0:434  1:350  2:101  3:37  4:12  5+:27
+   入口输入痕迹：req.* 字面 19 个｜@Body() 类装饰器 0 个｜合计 19 个（2%）
+[graph] 发现 72 个源文件，加载中…
+[graph] 已加载 72 文件，抽出 249 个 callable
+[graph] 调用边 227 条（v4：this/super 同类 + import 作用域裸名）
+
+── 切片 verdaccio ──
+   callable 249 个，入边为 0 的 110 个（44.2%）
+   入边分布 0:110  1:94  2:24  3:12  4:3  5+:6
+
+── gold 样本（verdaccio）：112 条 ──
+
+  [FP] 89 条｜图上定位到 89｜有入边 36 (40%)
+      上溯 3 层可达节点中位数 0
+      撞到 req 入口  20 (22%)  ← 字面 20 / 装饰器 0
+      撞到 auth 痕迹 17 (19%)
+      撞到 route 痕迹 0 (0%)
+        Password Hashing                     runAdminCli                                in=0 up=0 ·   ·    ·
+        Password Hashing (Weak)              runAdminCli                                in=0 up=0 ·   ·    ·
+        Registration Without Email Verific   runAdminCli                                in=0 up=0 ·   ·    ·
+        Authorization (Ownership Check)      publish                                    in=0 up=0 ·   ·    ·
+        Authorization (Unauthenticated Acc   publish                                    in=0 up=0 ·   ·    ·
+
+  [UNKNOWN] 23 条｜图上定位到 23｜有入边 13 (57%)
+      上溯 3 层可达节点中位数 1
+      撞到 req 入口  1 (4%)  ← 字面 1 / 装饰器 0
+      撞到 auth 痕迹 1 (4%)
+      撞到 route 痕迹 0 (0%)
+        No Token Rotation After Privilege    Auth.changePassword                        in=1 up=1 REQ AUTH ·
+        Password Hashing                     TfaStore.registerFailure                   in=1 up=2 ·   ·    ·
+        Password Hashing (Weak)              TfaStore.registerFailure                   in=1 up=2 ·   ·    ·
+        Registration Without Email Verific   TfaStore.registerFailure                   in=1 up=2 ·   ·    ·
+        No Input Sanitization                InfoCommand.execute                        in=0 up=0 ·   ·    ·
+
+读法提示：
+  ① 全量入边为 0 的比例若显著低于切片的 36%~42% ⇒ 入边缺失是切片损失，不是世界真相；
+  ② ② 的各组分布**只做对照不做判据**——分布可分不等于判据安全（R79）；
+  ③ 未定位（✗）多的组说明 gold 的函数名/文件与全量源码对不上，先修定位再谈传播。
+

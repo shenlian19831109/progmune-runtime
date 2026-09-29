@@ -1,0 +1,61 @@
+
+══ §49.1 入边摸底：docmost ══
+全量根目录：/tmp/full-docmost
+切片目录：blind-benchmark/fp-pool/docmost
+上溯深度：3
+[graph] 发现 359 个源文件，加载中…
+[graph] 已加载 359 文件，抽出 1146 个 callable
+[graph] 调用边 1511 条（v4：this/super 同类 + import 作用域裸名）
+
+── 全量 docmost ──
+   callable 1146 个，入边为 0 的 453 个（39.5%）
+   入边分布 0:453  1:471  2:107  3:41  4:27  5+:47
+   入口输入痕迹：req.* 字面 11 个｜@Body() 类装饰器 122 个｜合计 133 个（12%）
+[graph] 发现 118 个源文件，加载中…
+[graph] 已加载 118 文件，抽出 260 个 callable
+[graph] 调用边 172 条（v4：this/super 同类 + import 作用域裸名）
+
+── 切片 docmost ──
+   callable 260 个，入边为 0 的 143 个（55.0%）
+   入边分布 0:143  1:89  2:16  3:6  4:3  5+:3
+
+── gold 样本（docmost）：114 条 ──
+
+  [FP] 83 条｜图上定位到 83｜有入边 40 (48%)
+      上溯 3 层可达节点中位数 0
+      撞到 req 入口  30 (36%)  ← 字面 0 / 装饰器 30
+      撞到 auth 痕迹 30 (36%)
+      撞到 route 痕迹 31 (37%)
+        Data Mutation Without Audit Trail    removeYjsMarkByAttribute                   in=0 up=0 ·   ·    ·
+        Data Mutation Without Audit Trail    updateYjsMarkAttribute                     in=1 up=1 ·   ·    ·
+        Data Mutation Without Audit Trail    AuthenticationExtension.onAuthenticate     in=0 up=0 ·   ·    ·
+        Data Mutation Without Audit Trail    PersistenceExtension.onLoadDocument        in=0 up=0 ·   ·    ·
+        Data Mutation Without Audit Trail    PersistenceExtension.onChange              in=0 up=0 ·   ·    ·
+
+  [UNKNOWN] 18 条｜图上定位到 18｜有入边 8 (44%)
+      上溯 3 层可达节点中位数 0
+      撞到 req 入口  5 (28%)  ← 字面 0 / 装饰器 5
+      撞到 auth 痕迹 5 (28%)
+      撞到 route 痕迹 5 (28%)
+        No Input Sanitization                prosemirrorNodeToYElement                  in=0 up=0 ·   ·    ·
+        Session No Timeout                   AuthenticationExtension.onAuthenticate     in=0 up=0 ·   ·    ·
+        No Input Sanitization                normalizePostgresUrl                       in=0 up=0 ·   ·    ·
+        File Upload Without Validation       FileInterceptor.intercept                  in=0 up=0 ·   ·    ·
+        No Token Rotation After Privilege    AuthController.changePassword              in=0 up=0 ·   ·    ·
+
+  [TP] 13 条｜图上定位到 13｜有入边 10 (77%)
+      上溯 3 层可达节点中位数 1
+      撞到 req 入口  10 (77%)  ← 字面 0 / 装饰器 10
+      撞到 auth 痕迹 10 (77%)
+      撞到 route 痕迹 10 (77%)
+        Data Integrity (Foreign Key)         CollabHistoryService.addContributors       in=0 up=0 ·   ·    ·
+        Input Validation                     CollabHistoryService.addContributors       in=0 up=0 ·   ·    ·
+        Data Integrity (Foreign Key)         LabelService.addLabelsToPage               in=1 up=1 REQ AUTH ROUTE
+        Input Validation                     LabelService.addLabelsToPage               in=1 up=1 REQ AUTH ROUTE
+        Input Validation                     AttachmentService.uploadFile               in=1 up=1 REQ AUTH ROUTE
+
+读法提示：
+  ① 全量入边为 0 的比例若显著低于切片的 36%~42% ⇒ 入边缺失是切片损失，不是世界真相；
+  ② ② 的各组分布**只做对照不做判据**——分布可分不等于判据安全（R79）；
+  ③ 未定位（✗）多的组说明 gold 的函数名/文件与全量源码对不上，先修定位再谈传播。
+

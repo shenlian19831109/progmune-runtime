@@ -1,0 +1,83 @@
+
+══ §49.1 入边摸底：verdaccio ══
+全量根目录：/tmp/full-verdaccio
+切片目录：blind-benchmark/fp-pool/verdaccio
+上溯深度：3
+[graph] 发现 555 个源文件，加载中…
+[graph] 已加载 555 文件，抽出 961 个 callable
+[graph] 调用边 905 条（v4：this/super 同类 + import 作用域裸名）
+
+── 全量 verdaccio ──
+   callable 961 个，入边为 0 的 434 个（45.2%）
+   入边分布 0:434  1:350  2:101  3:37  4:12  5+:27
+   入口输入痕迹：req.* 字面 19 个｜@Body() 类装饰器 0 个｜合计 19 个（2%）
+[graph] 发现 72 个源文件，加载中…
+[graph] 已加载 72 文件，抽出 249 个 callable
+[graph] 调用边 227 条（v4：this/super 同类 + import 作用域裸名）
+
+── 切片 verdaccio ──
+   callable 249 个，入边为 0 的 110 个（44.2%）
+   入边分布 0:110  1:94  2:24  3:12  4:3  5+:6
+
+── gold 样本（verdaccio）：112 条 ──
+
+  [FP] 89 条｜图上定位到 89｜有入边 36 (40%)
+      上溯 3 层可达节点中位数 0
+      撞到 req 入口  20 (22%)  ← 字面 20 / 装饰器 0
+      撞到 auth 痕迹 17 (19%)
+      撞到 route 痕迹 18 (20%)
+        Password Hashing                     runAdminCli                                in=0 up=0 ·   ·    ·
+        Password Hashing (Weak)              runAdminCli                                in=0 up=0 ·   ·    ·
+        Registration Without Email Verific   runAdminCli                                in=0 up=0 ·   ·    ·
+
+  [UNKNOWN] 23 条｜图上定位到 23｜有入边 13 (57%)
+      上溯 3 层可达节点中位数 1
+      撞到 req 入口  1 (4%)  ← 字面 1 / 装饰器 0
+      撞到 auth 痕迹 1 (4%)
+      撞到 route 痕迹 1 (4%)
+        No Token Rotation After Privilege    Auth.changePassword                        in=1 up=1 REQ AUTH ROUTE
+        Password Hashing                     TfaStore.registerFailure                   in=1 up=2 ·   ·    ·
+        Password Hashing (Weak)              TfaStore.registerFailure                   in=1 up=2 ·   ·    ·
+
+══ §49.6 前端/后端分层（verdaccio）══
+   文件 555 个 ⇒ 前端 321 / 后端 234
+   信号命中：目录 315｜.tsx 160｜前端包 import 173｜JSX/Hook 127
+   只被单一信号命中：目录 136｜.tsx 1｜包 0｜JSX 0  ← 只看这里能判断哪些信号是「凑数」的
+     检出前端样本：packages/middleware/src/middlewares/web/index.ts  [dir]
+     检出前端样本：packages/middleware/src/middlewares/web/render-web.ts  [dir]
+     检出前端样本：packages/middleware/src/middlewares/web/security.ts  [dir]
+     检出前端样本：packages/middleware/src/middlewares/web/utils/file-utils.ts  [dir]
+     检出前端样本：packages/middleware/src/middlewares/web/utils/manifest.ts  [dir]
+     检出前端样本：packages/middleware/src/middlewares/web/utils/renderHTML.ts  [dir]
+
+── 全量 verdaccio（不分层，对照） ──
+   callable 961 个，入边为 0 的 434 个（45.2%）
+   入边分布 0:434  1:350  2:101  3:37  4:12  5+:27
+
+── **后端层** verdaccio ──
+   callable 651 个，入边为 0 的 228 个（35.0%）
+   入边分布 0:228  1:280  2:80  3:34  4:9  5+:20
+
+── 前端层 verdaccio（分母稀释源） ──
+   callable 310 个，入边为 0 的 206 个（66.5%）
+   入边分布 0:206  1:70  2:21  3:3  4:3  5+:7
+   ⚠ gold 分层校验：全部落在后端层，分层没有切掉真值
+
+══ §49.7 后端层入边为 0 的 228 个 callable 里，有多少是真断链 ══
+   **有人调用它、但边没连上** 101 (44%)  ← 有证据的可修上界
+   断链原因分解：this.缺失 3｜依赖注入 this.svc.x() 79｜裸调用重名歧义 19｜本仓库无此定义 0
+     StorageBaseCommand.warnExperimental      断链类=thisMiss 调用点=6 来自 6 文件
+     StorageBaseCommand.confirm               断链类=thisMiss 调用点=4 来自 4 文件
+     AuthStorageCommand.resolveOperator       断链类=thisMiss 调用点=3 来自 3 文件
+     Auth.allow_stage                         断链类=inj 调用点=1 来自 1 文件
+     TfaStore.status                          断链类=inj 调用点=10 来自 9 文件
+     Config.getMatchedPackagesSpec            断链类=inj 调用点=7 来自 4 文件
+     buildToken                               断链类=inj 调用点=1 来自 1 文件
+     getMatchedPackagesSpec                   断链类=inj 调用点=7 来自 4 文件
+   真无调用参照 127 (56%)  ← 无任何调用点提及，是死代码或图外的动态入口
+
+读法提示：
+  ① 全量入边为 0 的比例若显著低于切片的 36%~42% ⇒ 入边缺失是切片损失，不是世界真相；
+  ② ② 的各组分布**只做对照不做判据**——分布可分不等于判据安全（R79）；
+  ③ 未定位（✗）多的组说明 gold 的函数名/文件与全量源码对不上，先修定位再谈传播。
+

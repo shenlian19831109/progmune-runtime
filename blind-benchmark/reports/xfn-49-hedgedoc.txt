@@ -1,0 +1,61 @@
+
+══ §49.1 入边摸底：hedgedoc ══
+全量根目录：/tmp/full-hedgedoc
+切片目录：blind-benchmark/fp-pool/hedgedoc
+上溯深度：3
+[graph] 发现 1132 个源文件，加载中…
+[graph] 已加载 1132 文件，抽出 3510 个 callable
+[graph] 调用边 1671 条（v4：this/super 同类 + import 作用域裸名）
+
+── 全量 hedgedoc ──
+   callable 3510 个，入边为 0 的 2825 个（80.5%）
+   入边分布 0:2825  1:464  2:109  3:35  4:22  5+:55
+   入口输入痕迹：req.* 字面 9 个｜@Body() 类装饰器 42 个｜合计 51 个（1%）
+[graph] 发现 97 个源文件，加载中…
+[graph] 已加载 97 文件，抽出 136 个 callable
+[graph] 调用边 84 条（v4：this/super 同类 + import 作用域裸名）
+
+── 切片 hedgedoc ──
+   callable 136 个，入边为 0 的 74 个（54.4%）
+   入边分布 0:74  1:52  2:6  3:2  4:1  5+:1
+
+── gold 样本（hedgedoc）：57 条 ──
+
+  [FP] 36 条｜图上定位到 36｜有入边 23 (64%)
+      上溯 3 层可达节点中位数 1
+      撞到 req 入口  3 (8%)  ← 字面 0 / 装饰器 3
+      撞到 auth 痕迹 3 (8%)
+      撞到 route 痕迹 3 (8%)
+        Data Mutation Without Audit Trail    AliasService.removeAlias                   in=1 up=1 REQ AUTH ROUTE
+        Data Mutation Without Audit Trail    ApiTokenService.removeToken                in=1 up=1 REQ AUTH ROUTE
+        Data Mutation Without Audit Trail    ApiTokenService.handleCron                 in=0 up=0 ·   ·    ·
+        Data Mutation Without Audit Trail    ApiTokenService.handleTimeout              in=0 up=0 ·   ·    ·
+        Data Mutation Without Audit Trail    ApiTokenService.removeInvalidTokens        in=2 up=2 ·   ·    ·
+
+  [UNKNOWN] 16 条｜图上定位到 16｜有入边 1 (6%)
+      上溯 3 层可达节点中位数 0
+      撞到 req 入口  0 (0%)  ← 字面 0 / 装饰器 0
+      撞到 auth 痕迹 0 (0%)
+      撞到 route 痕迹 0 (0%)
+        No Input Sanitization                renderAstToHtml                            in=1 up=1 ·   ·    ·
+        Data Integrity (Foreign Key)         ApiTokensController.postTokenRequest       in=0 up=0 ·   ·    ·
+        Input Validation                     ApiTokensController.postTokenRequest       in=0 up=0 ·   ·    ·
+        Session Fixation (Logout without I   AuthController.logout                      in=0 up=0 ·   ·    ·
+        Password Hashing                     GuestController.registerGuestUser          in=0 up=0 ·   ·    ·
+
+  [TP] 5 条｜图上定位到 5｜有入边 5 (100%)
+      上溯 3 层可达节点中位数 4
+      撞到 req 入口  5 (100%)  ← 字面 0 / 装饰器 5
+      撞到 auth 痕迹 5 (100%)
+      撞到 route 痕迹 5 (100%)
+        Data Integrity (Foreign Key)         AliasService.addAlias                      in=2 up=4 REQ AUTH ROUTE
+        Input Validation                     AliasService.addAlias                      in=2 up=4 REQ AUTH ROUTE
+        No Input Sanitization                AliasService.addAlias                      in=2 up=4 REQ AUTH ROUTE
+        Data Integrity (Foreign Key)         ApiTokenService.createToken                in=1 up=1 REQ AUTH ROUTE
+        Input Validation                     ApiTokenService.createToken                in=1 up=1 REQ AUTH ROUTE
+
+读法提示：
+  ① 全量入边为 0 的比例若显著低于切片的 36%~42% ⇒ 入边缺失是切片损失，不是世界真相；
+  ② ② 的各组分布**只做对照不做判据**——分布可分不等于判据安全（R79）；
+  ③ 未定位（✗）多的组说明 gold 的函数名/文件与全量源码对不上，先修定位再谈传播。
+

@@ -1,0 +1,93 @@
+
+══ §49.1 入边摸底：docmost ══
+全量根目录：/tmp/full-docmost
+切片目录：blind-benchmark/fp-pool/docmost
+上溯深度：3
+[graph] 发现 359 个源文件，加载中…
+[graph] 已加载 359 文件，抽出 1286 个 callable
+[graph] 调用边 1593 条（v4：this/super 同类 + import 作用域裸名）
+   §49.8 有接收者的边：DI 精确命中 845 条｜DI 已定性但目标类无此方法（不猜，宁漏勿假）500 条｜退回味类名旧规则 4 条
+
+── 全量 docmost ──
+   callable 1146 个，入边为 0 的 433 个（37.8%）
+   入边分布 0:433  1:485  2:109  3:41  4:28  5+:50
+   入口输入痕迹：req.* 字面 12 个｜@Body() 类装饰器 122 个｜合计 134 个（10%）
+[graph] 发现 118 个源文件，加载中…
+[graph] 已加载 118 文件，抽出 298 个 callable
+[graph] 调用边 194 条（v4：this/super 同类 + import 作用域裸名）
+
+── 切片 docmost ──
+   callable 260 个，入边为 0 的 134 个（51.5%）
+   入边分布 0:134  1:95  2:17  3:6  4:4  5+:4
+
+── gold 样本（docmost）：114 条 ──
+
+  [FP] 83 条｜图上定位到 83｜有入边 45 (54%)
+      上溯 3 层可达节点中位数 1
+      撞到 req 入口  35 (42%)  ← 字面 0 / 装饰器 35
+      撞到 auth 痕迹 35 (42%)
+      撞到 route 痕迹 36 (43%)
+        Data Mutation Without Audit Trail    removeYjsMarkByAttribute                   in=0 up=0 ·   ·    ·
+        Data Mutation Without Audit Trail    updateYjsMarkAttribute                     in=1 up=2 ·   ·    ·
+        Data Mutation Without Audit Trail    AuthenticationExtension.onAuthenticate     in=0 up=0 ·   ·    ·
+
+  [UNKNOWN] 18 条｜图上定位到 18｜有入边 8 (44%)
+      上溯 3 层可达节点中位数 0
+      撞到 req 入口  5 (28%)  ← 字面 0 / 装饰器 5
+      撞到 auth 痕迹 5 (28%)
+      撞到 route 痕迹 5 (28%)
+        No Input Sanitization                prosemirrorNodeToYElement                  in=0 up=0 ·   ·    ·
+        Session No Timeout                   AuthenticationExtension.onAuthenticate     in=0 up=0 ·   ·    ·
+        No Input Sanitization                normalizePostgresUrl                       in=0 up=0 ·   ·    ·
+
+  [TP] 13 条｜图上定位到 13｜有入边 12 (92%)
+      上溯 3 层可达节点中位数 1
+      撞到 req 入口  10 (77%)  ← 字面 0 / 装饰器 10
+      撞到 auth 痕迹 10 (77%)
+      撞到 route 痕迹 10 (77%)
+        Data Integrity (Foreign Key)         CollabHistoryService.addContributors       in=2 up=2 ·   ·    ·
+        Input Validation                     CollabHistoryService.addContributors       in=2 up=2 ·   ·    ·
+        Data Integrity (Foreign Key)         LabelService.addLabelsToPage               in=1 up=1 REQ AUTH ROUTE
+
+══ §49.6 前端/后端分层（docmost）══
+   文件 359 个 ⇒ 前端 19 / 后端 340
+   信号命中：目录 0｜.tsx 19｜前端包 import 19｜JSX/Hook 25
+   只被单一信号命中：目录 0｜.tsx 0｜包 0｜JSX 6  ← 只看这里能判断哪些信号是「凑数」的
+     检出前端样本：src/integrations/transactional/emails/approval-rejected-email.tsx  [ext+pkg+jsx]
+     检出前端样本：src/integrations/transactional/emails/approval-requested-email.tsx  [ext+pkg+jsx]
+     检出前端样本：src/integrations/transactional/emails/change-password-email.tsx  [ext+pkg+jsx]
+     检出前端样本：src/integrations/transactional/emails/comment-created-email.tsx  [ext+pkg+jsx]
+     检出前端样本：src/integrations/transactional/emails/comment-mention-email.tsx  [ext+pkg+jsx]
+     检出前端样本：src/integrations/transactional/emails/comment-resolved-email.tsx  [ext+pkg+jsx]
+
+── 全量 docmost（不分层，对照） ──
+   callable 1146 个，入边为 0 的 433 个（37.8%）
+   入边分布 0:433  1:485  2:109  3:41  4:28  5+:50
+
+── **后端层** docmost ──
+   callable 1123 个，入边为 0 的 426 个（37.9%）
+   入边分布 0:426  1:471  2:107  3:41  4:28  5+:50
+
+── 前端层 docmost（分母稀释源） ──
+   callable 23 个，入边为 0 的 7 个（30.4%）
+   入边分布 0:7  1:14  2:2
+   ⚠ gold 分层校验：全部落在后端层，分层没有切掉真值
+
+══ §49.7 后端层入边为 0 的 426 个 callable 里，有多少是真断链 ══
+   **有人调用它、但边没连上** 81 (19%)  ← 有证据的可修上界
+   断链原因分解：this.缺失 6｜依赖注入 this.svc.x() 70｜裸调用重名歧义 5｜本仓库无此定义 0
+     CollabWsAdapter.close                    断链类=inj 调用点=16 来自 15 文件
+     CollabWsAdapter.destroy                  断链类=inj 调用点=4 来自 3 文件
+     CollaborationGateway.openDirectConnect   断链类=inj 调用点=2 来自 2 文件
+     CollaborationGateway.lockDocument        断链类=inj 调用点=1 来自 1 文件
+     CollaborationGateway.releaseLock         断链类=inj 调用点=1 来自 1 文件
+     CollaborationGateway.destroy             断链类=inj 调用点=4 来自 3 文件
+     CollabProxySocket.markClosed             断链类=inj 调用点=1 来自 1 文件
+     CollabProxySocket.close                  断链类=inj 调用点=16 来自 15 文件
+   真无调用参照 345 (81%)  ← 无任何调用点提及，是死代码或图外的动态入口
+
+读法提示：
+  ① 全量入边为 0 的比例若显著低于切片的 36%~42% ⇒ 入边缺失是切片损失，不是世界真相；
+  ② ② 的各组分布**只做对照不做判据**——分布可分不等于判据安全（R79）；
+  ③ 未定位（✗）多的组说明 gold 的函数名/文件与全量源码对不上，先修定位再谈传播。
+

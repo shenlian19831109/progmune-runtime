@@ -7268,6 +7268,485 @@
   ]
  },
  {
+  "repo": "outline",
+  "files": 58,
+  "functions": 106,
+  "totalLines": 8226,
+  "protocol": 1,
+  "safeguard": 8,
+  "resource": 0,
+  "emptyCallFns": 24,
+  "emptyClassMethods": 13,
+  "perFunction": [
+   {
+    "repo": "outline",
+    "name": "createContext",
+    "file": "server/context.ts",
+    "calls": [],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Authorization (Unauthenticated Mutation)",
+      "category": "authorization",
+      "type": "missing_safeguard",
+      "detail": "Mutation function does not check authentication. Anyone can create or modify data without credentials.",
+      "conceptDetail": "Missing: AuthenticationCheck, AccessControl. Expected at least one of: token validation, session check, auth middleware",
+      "missingConcepts": [
+       "AuthenticationCheck",
+       "AccessControl"
+      ],
+      "expectedConcepts": [
+       "token validation",
+       "session check",
+       "auth middleware"
+      ]
+     }
+    ]
+   },
+   {
+    "repo": "outline",
+    "name": "APIUpdateExtension.onDisconnect",
+    "file": "server/collaboration/APIUpdateExtension.ts",
+    "calls": [
+     "split",
+     "delete",
+     "__progmune_input_effect__"
+    ],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Data Mutation Without Audit Trail",
+      "category": "data_integrity",
+      "type": "missing_safeguard",
+      "detail": "Data mutation without audit trail. Cannot track who changed what or recover from accidental data corruption.",
+      "conceptDetail": "Missing: AuditTrail, ChangeTracking, DataLineage. Expected at least one of: auditLog, changeHistory, write-ahead log",
+      "missingConcepts": [
+       "AuditTrail",
+       "ChangeTracking",
+       "DataLineage"
+      ],
+      "expectedConcepts": [
+       "auditLog",
+       "changeHistory",
+       "write-ahead log"
+      ]
+     }
+    ]
+   },
+   {
+    "repo": "outline",
+    "name": "APIUpdateExtension.notifyUpdate",
+    "file": "server/collaboration/APIUpdateExtension.ts",
+    "calls": [
+     "stringify",
+     "now",
+     "publish",
+     "debug",
+     "__progmune_input_effect__"
+    ],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Data Mutation Without Audit Trail",
+      "category": "data_integrity",
+      "type": "missing_safeguard",
+      "detail": "Data mutation without audit trail. Cannot track who changed what or recover from accidental data corruption.",
+      "conceptDetail": "Missing: AuditTrail, ChangeTracking, DataLineage. Expected at least one of: auditLog, changeHistory, write-ahead log",
+      "missingConcepts": [
+       "AuditTrail",
+       "ChangeTracking",
+       "DataLineage"
+      ],
+      "expectedConcepts": [
+       "auditLog",
+       "changeHistory",
+       "write-ahead log"
+      ]
+     }
+    ]
+   },
+   {
+    "repo": "outline",
+    "name": "ComponentView.update",
+    "file": "server/editor/ComponentView.tsx",
+    "calls": [
+     "__progmune_input_effect__"
+    ],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Data Mutation Without Audit Trail",
+      "category": "data_integrity",
+      "type": "missing_safeguard",
+      "detail": "Data mutation without audit trail. Cannot track who changed what or recover from accidental data corruption.",
+      "conceptDetail": "Missing: AuditTrail, ChangeTracking, DataLineage. Expected at least one of: auditLog, changeHistory, write-ahead log",
+      "missingConcepts": [
+       "AuditTrail",
+       "ChangeTracking",
+       "DataLineage"
+      ],
+      "expectedConcepts": [
+       "auditLog",
+       "changeHistory",
+       "write-ahead log"
+      ]
+     }
+    ]
+   },
+   {
+    "repo": "outline",
+    "name": "init",
+    "file": "server/services/admin.ts",
+    "calls": [
+     "createBullBoard",
+     "globalEventQueue",
+     "processorEventQueue",
+     "websocketQueue",
+     "taskQueue",
+     "setBasePath",
+     "use",
+     "registerPlugin"
+    ],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Password Hashing",
+      "category": "password_hashing",
+      "type": "missing_safeguard",
+      "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+      "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt",
+      "missingConcepts": [
+       "PasswordHash",
+       "KeyDerivation"
+      ],
+      "expectedConcepts": [
+       "bcrypt",
+       "argon2",
+       "scrypt"
+      ]
+     },
+     {
+      "rule": "Password Hashing (Weak)",
+      "category": "password_hashing",
+      "type": "missing_safeguard",
+      "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+      "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2",
+      "missingConcepts": [
+       "StrongHash",
+       "SaltGeneration"
+      ],
+      "expectedConcepts": [
+       "bcrypt",
+       "argon2"
+      ]
+     },
+     {
+      "rule": "Registration Without Email Verification",
+      "category": "registration",
+      "type": "missing_safeguard",
+      "detail": "User registration does not send email/SMS verification. Fake accounts can be created without email ownership check.",
+      "conceptDetail": "Missing: EmailVerification, OTPValidation, AccountOwnership. Expected at least one of: sendVerificationCode, verifyEmail, confirmAccount",
+      "missingConcepts": [
+       "EmailVerification",
+       "OTPValidation",
+       "AccountOwnership"
+      ],
+      "expectedConcepts": [
+       "sendVerificationCode",
+       "verifyEmail",
+       "confirmAccount"
+      ]
+     }
+    ]
+   },
+   {
+    "repo": "outline",
+    "name": "attachmentTools",
+    "file": "server/tools/attachments.ts",
+    "calls": [
+     "canAccess",
+     "registerTool",
+     "describe",
+     "string",
+     "finite",
+     "nonnegative",
+     "int",
+     "number",
+     "withTracing",
+     "__progmune_input_guard__",
+     "__progmune_input_effect__"
+    ],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Password Hashing",
+      "category": "password_hashing",
+      "type": "missing_safeguard",
+      "detail": "User registration function does not call a secure password hashing function (bcrypt/argon2/scrypt). Passwords may be stored in plaintext or with weak hashing.",
+      "conceptDetail": "Missing: PasswordHash, KeyDerivation. Expected at least one of: bcrypt, argon2, scrypt",
+      "missingConcepts": [
+       "PasswordHash",
+       "KeyDerivation"
+      ],
+      "expectedConcepts": [
+       "bcrypt",
+       "argon2",
+       "scrypt"
+      ]
+     },
+     {
+      "rule": "Password Hashing (Weak)",
+      "category": "password_hashing",
+      "type": "missing_safeguard",
+      "detail": "User registration uses weak or no password hashing. SHA256/MD5 detected — use bcrypt/argon2 instead.",
+      "conceptDetail": "Missing: StrongHash, SaltGeneration. Expected at least one of: bcrypt, argon2",
+      "missingConcepts": [
+       "StrongHash",
+       "SaltGeneration"
+      ],
+      "expectedConcepts": [
+       "bcrypt",
+       "argon2"
+      ]
+     },
+     {
+      "rule": "Registration Without Email Verification",
+      "category": "registration",
+      "type": "missing_safeguard",
+      "detail": "User registration does not send email/SMS verification. Fake accounts can be created without email ownership check.",
+      "conceptDetail": "Missing: EmailVerification, OTPValidation, AccountOwnership. Expected at least one of: sendVerificationCode, verifyEmail, confirmAccount",
+      "missingConcepts": [
+       "EmailVerification",
+       "OTPValidation",
+       "AccountOwnership"
+      ],
+      "expectedConcepts": [
+       "sendVerificationCode",
+       "verifyEmail",
+       "confirmAccount"
+      ]
+     }
+    ]
+   },
+   {
+    "repo": "outline",
+    "name": "BaseIssueProvider.handleWebhook",
+    "file": "server/utils/BaseIssueProvider.ts",
+    "calls": [],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Payment Webhook (No Signature Check)",
+      "category": "payment",
+      "type": "missing_safeguard",
+      "detail": "Payment webhook/callback handler does not verify the request signature. Accepts unauthenticated payment confirmations — trivial to forge.",
+      "conceptDetail": "Missing: WebhookSignatureVerification, HMACValidation. Expected at least one of: verifySignature, stripe.webhooks.constructEvent, hmac check",
+      "missingConcepts": [
+       "WebhookSignatureVerification",
+       "HMACValidation"
+      ],
+      "expectedConcepts": [
+       "verifySignature",
+       "stripe.webhooks.constructEvent",
+       "hmac check"
+      ]
+     }
+    ]
+   },
+   {
+    "repo": "outline",
+    "name": "PostgresSearchProvider.remove",
+    "file": "plugins/search-postgres/server/PostgresSearchProvider.ts",
+    "calls": [
+     "__progmune_input_effect__"
+    ],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Data Mutation Without Audit Trail",
+      "category": "data_integrity",
+      "type": "missing_safeguard",
+      "detail": "Data mutation without audit trail. Cannot track who changed what or recover from accidental data corruption.",
+      "conceptDetail": "Missing: AuditTrail, ChangeTracking, DataLineage. Expected at least one of: auditLog, changeHistory, write-ahead log",
+      "missingConcepts": [
+       "AuditTrail",
+       "ChangeTracking",
+       "DataLineage"
+      ],
+      "expectedConcepts": [
+       "auditLog",
+       "changeHistory",
+       "write-ahead log"
+      ]
+     }
+    ]
+   },
+   {
+    "repo": "outline",
+    "name": "PostgresSearchProvider.updateMetadata",
+    "file": "plugins/search-postgres/server/PostgresSearchProvider.ts",
+    "calls": [],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Data Mutation Without Audit Trail",
+      "category": "data_integrity",
+      "type": "missing_safeguard",
+      "detail": "Data mutation without audit trail. Cannot track who changed what or recover from accidental data corruption.",
+      "conceptDetail": "Missing: AuditTrail, ChangeTracking, DataLineage. Expected at least one of: auditLog, changeHistory, write-ahead log",
+      "missingConcepts": [
+       "AuditTrail",
+       "ChangeTracking",
+       "DataLineage"
+      ],
+      "expectedConcepts": [
+       "auditLog",
+       "changeHistory",
+       "write-ahead log"
+      ]
+     }
+    ]
+   },
+   {
+    "repo": "outline",
+    "name": "PostgresSearchProvider.buildResultContext",
+    "file": "plugins/search-postgres/server/PostgresSearchProvider.ts",
+    "calls": [
+     "from",
+     "matchAll",
+     "toPlainText",
+     "escapeRegExp",
+     "join",
+     "map",
+     "split",
+     "trim",
+     "removeStopWords",
+     "search",
+     "max",
+     "regexIndexOf",
+     "min",
+     "regexLastIndexOf",
+     "replace",
+     "slice",
+     "__progmune_input_effect__"
+    ],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Data Mutation Without Audit Trail",
+      "category": "data_integrity",
+      "type": "missing_safeguard",
+      "detail": "Data mutation without audit trail. Cannot track who changed what or recover from accidental data corruption.",
+      "conceptDetail": "Missing: AuditTrail, ChangeTracking, DataLineage. Expected at least one of: auditLog, changeHistory, write-ahead log",
+      "missingConcepts": [
+       "AuditTrail",
+       "ChangeTracking",
+       "DataLineage"
+      ],
+      "expectedConcepts": [
+       "auditLog",
+       "changeHistory",
+       "write-ahead log"
+      ]
+     }
+    ]
+   },
+   {
+    "repo": "outline",
+    "name": "PostgresSearchProvider.removeStopWords",
+    "file": "plugins/search-postgres/server/PostgresSearchProvider.ts",
+    "calls": [
+     "join",
+     "filter",
+     "split"
+    ],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Data Mutation Without Audit Trail",
+      "category": "data_integrity",
+      "type": "missing_safeguard",
+      "detail": "Data mutation without audit trail. Cannot track who changed what or recover from accidental data corruption.",
+      "conceptDetail": "Missing: AuditTrail, ChangeTracking, DataLineage. Expected at least one of: auditLog, changeHistory, write-ahead log",
+      "missingConcepts": [
+       "AuditTrail",
+       "ChangeTracking",
+       "DataLineage"
+      ],
+      "expectedConcepts": [
+       "auditLog",
+       "changeHistory",
+       "write-ahead log"
+      ]
+     }
+    ]
+   },
+   {
+    "repo": "outline",
+    "name": "ChangesetHelper.getChangeset",
+    "file": "shared/editor/lib/ChangesetHelper.ts",
+    "calls": [
+     "withComments",
+     "fromJSON",
+     "removeIgnoredMarks",
+     "recreateTransform",
+     "addSteps",
+     "create",
+     "map",
+     "mergeInterleavedChanges",
+     "simplifyChanges"
+    ],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Data Mutation Without Audit Trail",
+      "category": "data_integrity",
+      "type": "missing_safeguard",
+      "detail": "Data mutation without audit trail. Cannot track who changed what or recover from accidental data corruption.",
+      "conceptDetail": "Missing: AuditTrail, ChangeTracking, DataLineage. Expected at least one of: auditLog, changeHistory, write-ahead log",
+      "missingConcepts": [
+       "AuditTrail",
+       "ChangeTracking",
+       "DataLineage"
+      ],
+      "expectedConcepts": [
+       "auditLog",
+       "changeHistory",
+       "write-ahead log"
+      ]
+     }
+    ]
+   },
+   {
+    "repo": "outline",
+    "name": "OIDCStrategy.authenticate",
+    "file": "plugins/oidc/server/auth/OIDCStrategy.ts",
+    "calls": [
+     "authenticate"
+    ],
+    "protocolViolations": [],
+    "safeguardViolations": [
+     {
+      "rule": "Session No Timeout",
+      "category": "session",
+      "type": "missing_safeguard",
+      "detail": "Session created without setting an expiry/TTL. Session tokens could be valid indefinitely.",
+      "conceptDetail": "Missing: SessionTimeout, TTLConfiguration. Expected at least one of: expiresIn, maxAge, session TTL",
+      "missingConcepts": [
+       "SessionTimeout",
+       "TTLConfiguration"
+      ],
+      "expectedConcepts": [
+       "expiresIn",
+       "maxAge",
+       "session TTL"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
   "repo": "verdaccio",
   "files": 72,
   "functions": 249,
