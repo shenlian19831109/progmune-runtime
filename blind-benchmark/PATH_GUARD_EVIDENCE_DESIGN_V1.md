@@ -5121,3 +5121,180 @@ gold 未加权精确率      13.5%   (13/96)
 - **R93（宣称覆盖 ≠ 实际召回）**：规则名字、CWE 映射、能力矩阵都只说明**我们声称能查**；
   要落到「在某个已知漏洞的代码位置上真的报出来没有」。两者差异最大的族
   （本次是 XSS：映射说能查，实例 0/6）必须单独标出来，并且要在产品说明里如实宣示。
+
+---
+
+## §49.18 「看着有、其实没接线」—— 能力矩阵必须按语言口径重算（2026-09-29）
+
+### 触发
+
+§49.17 的 L1 矩阵说「84 条里 45 条（54%）规则集确实针对该类型」，但 L3 的实例对照里
+**XSS 是 0/6**。这两个数字对不上，所以去查了根因 —— 结果不是「碰不到」，是**根本没接线**。
+
+### 事实：`SAFEGUARD_RULES` 有 `languages` 字段，15 条规则不含 TypeScript
+
+```
+规则总数                                    48
+  声明 languages 且不含 typescript/javascript   15   ← 在 TS 项目上永远不会触发
+    ├─ python-only  13 条：XSS / SSTI / XXE / CSRF×2 / Command Injection /
+    │   Hardcoded Secrets / Dynamic Code Execution / SQL Injection (Python) /
+    │   Unsafe Deserialization (Pickle) / Context Manager Usage /
+    │   Authorization (Cross-User Resource Write) / Authorization via Client Cookie
+    └─ c-only        2 条：Key Derivation Safety / Certificate Pinning Validation
+  未声明 languages（默认全语言）              24
+  显式含 typescript/javascript                 9
+```
+
+**实证印证**：docmost（TypeScript）全量 1202 条告警只覆盖 **21 个规则族**，
+XSS / CSRF / XXE / 命令注入 / SQL 注入 / 硬编码密钥 / 反序列化 **一次都没触发过**。
+
+### 按语言口径重算能力矩阵（`capability-matrix-ts.py`）
+
+| 档位 | 条数 | 占比 | 含义 |
+|---|---:|---:|---|
+| WIRED（实证） | 38 | 45% | 映射到的规则在 docmost 上真触发过 |
+| WIRED（静态） | 1 | 1% | 静态看可用，本次没实例 |
+| **NOT_WIRED** | **17** | **20%** | **规则存在、CWE 也映射上了，但那条规则是 python-only ⇒ TS 上 never fires** |
+| NONE | 28 | 33% | 规则集根本没有（能力外） |
+
+⇒ **TS 实际可触发 46%，另有 20% 是「看着有、其实没接线」。**
+
+NOT_WIRED 的 17 条构成：**XSS 11 条（docmost 6 条全在此列）、CSRF 4 条、命令注入 1 条、其它 1 条**。
+这就把 §49.17 的「XSS 0/6」解释清楚了 —— 不是规则粒度不够，是**那条规则在 TS 上根本不执行**。
+
+### 根因：这些规则是 **marker-driven**，TS 提取器不注入标记
+
+看这四条规则的 trigger（全部是 Python 提取器注入的合成标记）：
+
+| 规则 | trigger | 谁产生这个标记 |
+|---|---|---|
+| XSS (Unsafe Template Rendering) | `__progmune_xss_unsafe_render__` | Python 提取器扫模板 |
+| CSRF Protection Disabled | `__progmune_csrf_disabled__` | Python 提取器扫 `@csrf_exempt` |
+| Command Injection | `__progmune_command_dynamic__` / `__progmune_command_taint_flow__` | Python 提取器 |
+| Hardcoded Secrets | 正则 + `__progmune_hardcoded_secret__` | Python 提取器 |
+
+而 `detectSafeguardViolations` 在 TS 侧拿到的输入是 **`calls`（被调用标识符列表）+ 函数名 + 参数名**，
+**不是函数体文本**。所以任何依赖「字符串内容 / 赋值 / 装饰器 / JSX」的判据，在 TS 侧无从落地。
+
+**实验确证**（`/tmp/ts-cap-probe`，一段含 `exec(cmd拼接)`、`conn.query(SQL拼接)`、模块级
+`API_KEY = "sk-live-…"`、`{__html: bio}` 的 TS）：
+
+```
+runBackup   calls: ["exec"]                 → 告警 (无)
+findUser    calls: ["query"]                → 告警 (无)
+renderBio   calls: []                       → 告警 No Input Sanitization
+```
+
+⇒ TS 的 IR **只有被调用的标识符**，看不到字符串拼接、看不到模块级常量、看不到 JSX。
+
+### 分级：补 TS 支持的成本完全不同（且不都划算）
+
+| 规则 | TS 上补的可能性 | 成本 | 备注 |
+|---|---|---|---|
+| Command Injection | 可粗补（`calls` 里有 `exec`/`execSync`） | 低 | 但无法区分静态/拼接 ⇒ **高误报** |
+| SQL Injection | 可粗补（`query`/`raw`/`execute`） | 低 | 同上，无法区分参数化 ⇒ 高误报 |
+| Hardcoded Secrets | **补不了**（IR 无常量/赋值） | 高（要扩提取器） | 需 TS 提取器注入标记 |
+| XSS / SSTI / CSRF / XXE | **补不了**（要模板/装饰器/JSX 语义） | 很高 | 需 TS 提取器跨文件分析 |
+
+⇒ **「补规则」这个说法本身是错的**：这 15 条要补的是**提取器**，不是规则。
+按 R66（造不出反例的判据不落地）与本项目纪律，**src 一行未动**，此处只给结论与成本。
+
+### 对产品的直接含义（要如实宣示）
+
+如果产品对 TypeScript 用户宣称「能查 XSS / CSRF / 硬编码密钥」，那是**虚假宣称** ——
+规则存在、能力矩阵上显示覆盖、但在这类项目上零产出，且**失败是静默的**（没有告警 ≠ 没有告警能力）。
+建议二选一：① 明确「XSS/CSRF/XXE/命令注入/硬编码密钥 目前仅支持 Python（Django/Jinja 形态）」；
+② 投入扩 TS 提取器（成本见上表）。
+
+规则新增 **R94**：**能力矩阵必须按语言/平台口径重算 —— 规则存在 ≠ 规则会在目标语言上执行。**
+做能力评估（或对外宣称覆盖面）时，不能只看「有没有这条规则 / CWE 映射上没」，
+必须再查一遍该规则的 `languages` 字段（或等价的平台约束），并**用一次真实全量扫描实证它到底触发过没有**。
+「声明了但永不触发」比「没有这条规则」更危险：前者在矩阵上显示为覆盖，后者显示为缺口。
+
+---
+
+## §49.19 标注投入的预期收益：补到每族 30 条是拐点（2026-09-29）
+
+§49.17 L2.5 说「全量 86% 的告警命中率我们连 10 个点的精度都没有」。那么补多少标注才够？
+`precision-gain-sim.py` 做保守模拟（**只算样本量效应**，假设补齐后命中率不变 ⇒ 收益下界）：
+
+| 补到每族 | 新增标注 | 加权精确率中位数 | 90% CI | 区间宽度 |
+|---|---:|---:|---|---:|
+| 现状（6~39 条） | — | 5.9% | [3.2%, 8.0%] | **4.8pt** |
+| 30 条 | 171 | 5.7% | [4.8%, 6.6%] | **1.8pt** |
+| 40 条 | 212 | 5.8% | [4.9%, 6.5%] | 1.6pt |
+| 60 条 | 312 | 5.7% | [5.0%, 6.4%] | 1.4pt |
+| 100 条 | 476 | 5.7% | [5.1%, 6.4%] | 1.3pt |
+
+⇒ **30 条是拐点**：171 条标注换 62% 的区间收缩；再往上边际收益急剧递减。
+
+另一半收益是「证伪」而不是「精确」：主导族现在 0/7、0/6、0/9，Wilson 95% 上界 35% / 39% / 30%；
+补到 40 条若仍是 0，上界降到 **8.8%**。也就是说，**只有标够 40 条一条真漏洞都没有，
+才有底气说「这个族真的没价值」**——现在说「授权族 TP=0」是没有效力的论断。
+
+清单已生成：`annotation-queue.py`（`TARGET=30` ⇒ **83 条**，`TARGET=40` ⇒ 174 条）。
+抽样原则：① 只抽未标注的；② 同一函数最多贡献 2 条（R91：别让一个函数占满配额，
+但**不**做「同函数只留一条」——那会把跨族的告警一起削掉、重新引入族偏差）；
+③ 族内**无筛选随机**（不加"看起来可疑"的条件 ⇒ 否则样本又有偏，R92 第二次咬人）；④ 带 seed 可复现。
+
+⚠ 一个坑（本轮踩到）：第一版按 `(fn, file)` 全局去重 ⇒ 同一函数被多个规则命中时只保留第一条，
+**把小族的可抽池子几乎清空**（No Input Sanitization 全量 64 条只剩 4 条可抽）。
+修正为按 `(fn, file, rule)` 去重 + 同一函数配额 2 条。这是 R91（第一屏去重）**不能**直接
+套用到标注抽样的原因：两处去重的目的不同——一个是展示、一个是保持分布。
+
+---
+
+## §49.20 跨仓确证 + 源码口径核实（2026-09-29）
+
+### ① §49.18 的结论在两个独立 TS 仓库上都成立
+
+| 仓库 | 全量告警 | 覆盖族数 | **python-only 规则的触发数** |
+|---|---:|---:|---:|
+| docmost | 1202 | 21 | **0** |
+| hedgedoc（backend） | 522 | 21 | **0** |
+| 合计 | **1724** | 21（同构） | **0** |
+
+两个完全独立的 TypeScript 仓库、1724 条告警，15 条 python-only 规则（XSS / SSTI / XXE /
+CSRF×2 / 命令注入 / 硬编码密钥 / 动态执行 / SQL 注入 / 反序列化 / Context Manager /
+跨用户写 / Cookie 授权 / Key Derivation / 证书锁定）**一条都没触发过**。
+⇒ §49.18 的「NOT_WIRED」不是 docmost 的个案，是**系统性的**。
+
+hedgedoc 侧的实例对照也出现同样的形状：XSS / SVG 净化类的公告（GHSA-6c2w 邮件 HTML 注入、
+GHSA-672m SVG 上传未净化）在告警池里**候选为空**；而权限类（GHSA-93w7 permission change）
+精确命中 `PermissionService.changeOwner / changePermission`。
+
+### ② 一个虚惊：以为扫的是子集，其实不是
+
+跑 hedgedoc 时发现 `/tmp/full-docmost`、`/tmp/full-hedgedoc`、`/tmp/full-verdaccio` **已被系统清理**
+（项目记忆里早有「⚠ 在 /tmp，有清理风险」的警告，这次真的发生了）。
+于是重新下载了完整 monorepo，用 `apps/server`（完整源码）重扫一遍，结果与旧结果**逐条一致**：
+
+```
+旧（/tmp 快照）   1202 条
+新（完整 apps/server）1202 条    差集：0 / 0
+```
+
+⇒ **§49.17 的 L2/L3 数字（1202 条告警、47% 位置覆盖率）没有偏差，不需要修正。**
+但过程值得记一笔：**「以为全量、其实是子集」是一种静默失效**，发现它只能靠重跑一遍对表。
+
+### ③ 源码资产已搬出 /tmp（`benchmarks/ts-apps/`，已被 .gitignore 忽略）
+
+```
+benchmarks/ts-apps/docmost    11M   （codeload tarball，main 分支）
+benchmarks/ts-apps/hedgedoc   15M   （develop 分支，扫 backend/ —— 根没有 tsconfig）
+benchmarks/ts-apps/verdaccio  18M   （master 分支，monorepo，暂未扫）
+```
+
+复现命令（若本地再丢）：
+
+```bash
+mkdir -p benchmarks/ts-apps/<name> && \
+curl -sL "https://codeload.github.com/<owner>/<repo>/tar.gz/refs/heads/<branch>" \
+  | tar -xz -C benchmarks/ts-apps/<name> --strip-components=1
+# 注意：extractIRWithTypes 需要目录里有 tsconfig.json；monorepo 要指到子包
+# （docmost → apps/server，hedgedoc → backend）
+```
+
+⚠ verdaccio 只有 2 条 GHSA、且是 monorepo 没有根 tsconfig，性价比低，**暂未扫**。
+⇒ **「位置覆盖率 47%」目前仍是单仓数字（docmost 18 条公告），跨仓置信区间仍然很宽**，
+   把 hedgedoc 的 22 条也人工判一遍是下一步里性价比最高的一项。
