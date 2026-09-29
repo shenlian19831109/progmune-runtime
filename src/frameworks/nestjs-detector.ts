@@ -24,6 +24,7 @@ import {
   Expression,
 } from "ts-morph";
 import { collectRegisterRoots, isRegisterRoot } from "./route-window";
+import { validatedDtoClassNames } from "../extract-ir";
 
 // ── Types ──
 
@@ -34,6 +35,8 @@ export interface NestJSRoute {
   handler: string;
   hasAuthGuard: boolean;
   hasValidationPipe: boolean;
+  /** 入参类型 ∈ 已校验 DTO 集合（class-validator 装饰器在别的文件——跨文件校验证据） */
+  hasValidatedDto: boolean;
   guards: string[];
   pipes: string[];
   /** @Public()/@SkipAuth() 标记（配合全局守卫的公开路由豁免） */
@@ -100,6 +103,64 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
     }
   }
   const hasGlobalAuthGuard = analysis.globalAuthGuards.length > 0;
+
+  // ── 全局校验管道（2026-09-29：docmost 123 条 NO_VALIDATION 失明误报的根因）──
+  // NestJS 标准做法是 bootstrap 里 app.useGlobalPipes(new ValidationPipe(...))，
+  // 路由本身不带 @UsePipes 装饰器 ⇒ 此前全部报 NO_VALIDATION。
+  // 检测方式：任意非 node_modules 源文件出现 .useGlobalPipes( 调用（参数不限——
+  // hedgedoc 形态是 useGlobalPipes(setupValidationPipe(logger))，管道经辅助函数
+  // 创建，字面 ValidationPipe 不在调用处）。
+  // 保守判定：全局管道只豁免「入参是已校验 DTO」的路由（见下），裸类型入参仍报。
+  let hasGlobalValidationPipe = false;
+  for (const file of project.getSourceFiles()) {
+    if (file.getFilePath().includes("node_modules")) continue;
+    if (/\.(test|spec)\.ts$/.test(file.getFilePath())) continue;
+    if (/\.useGlobalPipes\s*\(/.test(file.getText())) {
+      hasGlobalValidationPipe = true;
+      break;
+    }
+  }
+
+  // ── 已校验 DTO 类名集合（E3 通道同款实现，import 落地代码而非重写）──
+  const validatedDtos = hasGlobalValidationPipe
+    ? validatedDtoClassNames(project)
+    : new Set<string>();
+
+  // ── 继承闭包（2026-09-29 docmost 实测：RemoveFavoriteDto extends AddFavoriteDto）──
+  // E3 集合只收「类自身带校验装饰器」的类，继承来的装饰器看不到。
+  // 只扩 detector 侧集合，不动 E3 函数（后者影响 safeguard 盲测基线）。
+  for (const file of project.getSourceFiles()) {
+    if (file.getFilePath().includes("node_modules")) continue;
+    for (const cls of file.getClasses()) {
+      let base = cls.getBaseClass();
+      while (base) {
+        const baseName = base.getName();
+        if (baseName && validatedDtos.has(baseName)) {
+          const clsName = cls.getName();
+          if (clsName) validatedDtos.add(clsName);
+          break;
+        }
+        base = base.getBaseClass();
+      }
+    }
+  }
+
+  // ── Zod 形态扩展（2026-09-29 hedgedoc 实测）──
+  // class LoginDto extends createZodDto(LoginSchema) {} —— nestjs-zod 的校验
+  // 体系不产 class-validator 装饰器，E3 通道看不见。extends 表达式文本
+  // 含 createZodDto( 即视为已校验 DTO。同样只扩 detector 侧集合。
+  for (const file of project.getSourceFiles()) {
+    if (file.getFilePath().includes("node_modules")) continue;
+    for (const cls of file.getClasses()) {
+      const ext = cls.getExtends();
+      if (!ext) continue;
+      if (/createZodDto\s*\(/.test(ext.getText())) {
+        const clsName = cls.getName();
+        if (clsName) validatedDtos.add(clsName);
+      }
+    }
+  }
+
 
   // ── 第二遍：模块级中间件保护（Nest 5 时代惯用法）──
   // class XxxModule implements NestModule { configure(consumer) {
@@ -197,6 +258,30 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
         // 认证守卫 = 认证名分类后的守卫（ThrottlerGuard 等限流守卫不算认证）
         const authGuards = guards.filter(isAuthGuardName);
 
+        // 入参是否指向已校验 DTO：@Body()/@Query()/@Param() 参数的
+        // 类型名 ∈ class-validator 装饰类集合（E3 通道语义）。
+        // ts-morph 的类型文本会带 import 前缀：import(".../page.dto").PageInfoDto
+        // 或泛型 Selectable<import("...").Users> —— 取全部标识符，
+        // 任一命中已校验 DTO 集合即豁免（联合类型/裸类型/数组皆可对上；
+        // db 类型 Users 等不在集合，不会误豁免）。
+        const hasValidatedDto = method.getParameters().some((param) => {
+          const decNames = param.getDecorators().map((d) => d.getName());
+          if (!decNames.some((n) => ["Body", "Query", "Param"].includes(n))) return false;
+          const typeText = param.getType().getText();
+          const ids = typeText.match(/[A-Za-z_$][\w$]*/g) || [];
+          return ids.some((id) => validatedDtos.has(id));
+        });
+
+        // 无结构化输入：入参没有 @Body/@Query/@Param——只有 AuthUser/Req/Res/
+        // UploadedFile 等上下文注入或文件对象（2026-09-29 docmost 实测：
+        // auth/collab-token、auth/logout 等无 body 路由被误报 NO_VALIDATION）。
+        // 没有可校验的 DTO 输入，规则判定面不覆盖，不报。
+        const hasStructuredInput = method.getParameters().some((param) =>
+          param.getDecorators().some((d) =>
+            ["Body", "Query", "Param"].includes(d.getName())
+          )
+        );
+
         const route: NestJSRoute = {
           method: httpMethod,
           path: fullPath,
@@ -204,6 +289,7 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
           handler: method.getName() || "unknown",
           hasAuthGuard: authGuards.length > 0,
           hasValidationPipe: pipes.length > 0,
+          hasValidatedDto,
           guards,
           pipes,
           isPublicDecorated,
@@ -235,7 +321,12 @@ export function analyzeNestJSProject(projectRoot: string): NestJSAnalysis {
               fix: `Add @UseGuards(AuthGuard) to the method or controller class, or remove the @Public marker.`,
             });
           }
-          if (!route.hasValidationPipe) {
+          // 豁免：@UsePipes 装饰器，或「全局 ValidationPipe + 入参是已校验 DTO」
+          // （docmost 实测 123 条失明误报的修复——路由 DTO 在别的文件带
+          // class-validator 装饰器，只看 @UsePipes 永远看不到），
+          // 或路由无结构化输入（没有可校验的东西）
+          const validatedByGlobalPipe = hasGlobalValidationPipe && route.hasValidatedDto;
+          if (!route.hasValidationPipe && !validatedByGlobalPipe && hasStructuredInput) {
             analysis.issues.push({
               type: "NESTJS_NO_VALIDATION",
               severity: "medium",
@@ -413,6 +504,12 @@ function isPublicRoute(path: string): boolean {
     /\/auth\/register$/i,  /\/register$/i,  /\/signup$/i,
     /\/auth\/signup$/i,    /\/auth\/signin$/i, /\/signin$/i,
     /\/auth\/refresh$/i,   /\/auth\/forgot/i,  /\/auth\/reset/i,
+    // auth 流程自身端点（2026-09-29 docmost 实测：auth/setup、
+    // auth/password-reset、auth/verify-token 被误报 NO_AUTH——
+    // 用户尚未登录，这些端点天生无认证；原 /auth/reset 匹配不了 password-reset）
+    /\/auth\/password-reset$/i, /\/auth\/reset-password$/i,
+    /\/auth\/verify-token$/i,   /\/auth\/verify$/i,
+    /\/auth\/setup$/i,          /\/auth\/init$/i,
     /\/health$/i,          /\/healthcheck$/i,  /\/ping$/i, /\/status$/i,
     /\/public\//i,         /\/static\//i,
   ];
@@ -520,6 +617,7 @@ export function analyzeNestJSFile(filePath: string): NestJSAnalysis | null {
           handler: method.getName() || "unknown",
           hasAuthGuard: guards.filter(isAuthGuardName).length > 0,
           hasValidationPipe: pipes.length > 0,
+          hasValidatedDto: false, // 单文件分析无跨文件 DTO 上下文（项目级用 analyzeNestJSProject）
           guards,
           pipes,
           isPublicDecorated: false, // 单文件分析不解析 @Public（项目级用 analyzeNestJSProject）

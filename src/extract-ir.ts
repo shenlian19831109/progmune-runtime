@@ -514,8 +514,10 @@ function decoratorIsValidator(text: string): boolean {
 /**
  * 全项目扫描：类自身或其属性上带校验装饰器的类名集合。
  * 只看类名（不做类型解析）—— 与污点管线口径一致，跨文件引用靠名字对上。
+ * 导出供框架适配器复用（2026-09-29：NestJS 检测器的 NO_VALIDATION
+ * 失明误报——路由 DTO 在别的文件带 class-validator 装饰器，检测器看不到）。
  */
-function validatedDtoClassNames(project: any): Set<string> {
+export function validatedDtoClassNames(project: any): Set<string> {
   const out = new Set<string>();
   for (const sf of project.getSourceFiles()) {
     if (sf.getFilePath().includes("node_modules")) continue;

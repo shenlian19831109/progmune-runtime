@@ -173,7 +173,17 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   //  PHASE 3: SCORE
   // ═══════════════════════════════════════
 
-  const policyResult = scorePolicyCompliance(allViolations);
+  // 企业策略维度只吃策略类违规——框架适配器（framework.*）与协议检测
+  // （protocol-safety.*）的违规在 protocolSafety 维度已计分，同池双计
+  // 会把失明误报放大成双倍扣分（2026-09-29 docmost 实测：132 条
+  // NestJS 违规双计，auth 0 分 + score 48 + BLOCKED，逐条核实 126 条为 FP）。
+  const policyViolations = allViolations.filter(
+    (v) =>
+      !v.policy_ref.startsWith("framework") &&
+      !v.policy_ref.startsWith("protocol-safety") &&
+      v.policy_ref !== "protocol"
+  );
+  const policyResult = scorePolicyCompliance(policyViolations);
   const protocolResult = scoreProtocolSafety(allViolations);
   const coverageResult = scoreVerificationCoverage(coverageData);
   const governanceResult = scoreGovernanceIntegrity(governanceDefects);
@@ -402,7 +412,7 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
         score: policyResult.score,
         weight: DEFAULT_DIMENSION_WEIGHTS.policyCompliance,
         confidence: policyResult.hasCritical ? "LOW" : "HIGH",
-        violations: allViolations.filter((v) => v.severity !== "low" || v.policy_ref !== "protocol"),
+        violations: policyViolations,
       },
       protocolSafety: protocolResult,
       verificationCoverage: coverageResult,

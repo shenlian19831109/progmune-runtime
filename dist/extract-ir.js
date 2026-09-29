@@ -33,6 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.validatedDtoClassNames = validatedDtoClassNames;
 exports.extractIR = extractIR;
 exports.extractIRWithTypes = extractIRWithTypes;
 const ts_morph_1 = require("ts-morph");
@@ -493,6 +494,8 @@ function decoratorIsValidator(text) {
 /**
  * 全项目扫描：类自身或其属性上带校验装饰器的类名集合。
  * 只看类名（不做类型解析）—— 与污点管线口径一致，跨文件引用靠名字对上。
+ * 导出供框架适配器复用（2026-09-29：NestJS 检测器的 NO_VALIDATION
+ * 失明误报——路由 DTO 在别的文件带 class-validator 装饰器，检测器看不到）。
  */
 function validatedDtoClassNames(project) {
     const out = new Set();

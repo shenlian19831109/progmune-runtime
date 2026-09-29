@@ -1,5 +1,40 @@
 # Changelog
 
+## [3.7.55] — 2026-09-29
+
+### 主路径（trust 判定）真实项目首测 + NestJS 失明误报修复（§50）
+
+**首次对产品判定路径做真实项目全量测量**（`blind-benchmark/REALWORLD_MAIN_PATH_V1.md`）：
+docmost（NestJS 5k★）修复前被主路径判 **BLOCKED（score 48，auth 0 分）**——132 条违规里
+126 条逐条核实为失明/语义误报，且同一批违规在 policyCompliance 与 protocolSafety
+**双维度重复扣分**。主路径与旁路（safeguard，§49 加权精确率 5.8%）同病：
+真实公告位置命中 0/18（fr-corpus 17 条交叉证实协议状态机 0 检出），
+但主路径把噪声直接变成产品级判定——**虚假 BLOCKED 比虚假告警伤害大**。
+
+**四刀修复（全部 src 接线层，判定核心不动）**：
+
+1. **E3 DTO 通道接入 NestJS 适配器**：`app.useGlobalPipes(...)` 全局管道识别 +
+   路由入参类型 ∈ 已校验 DTO 集合（复用 `validatedDtoClassNames`，加继承闭包与
+   `createZodDto` Zod 形态）⇒ 不报 NO_VALIDATION。`extract-ir.ts` 导出 E3 集合函数。
+2. **无结构化输入豁免**：入参无 @Body/@Query/@Param（仅 AuthUser/Req/Res/
+   UploadedFile）的路由不报 NO_VALIDATION——没有可校验的输入。
+3. **auth 端点豁免扩展**：+ password-reset / reset-password / verify-token /
+   verify / setup / init（docmost 实测 3 条 NO_AUTH 误报）。
+4. **双维度去重**：policyCompliance 只吃策略类违规（policy_ref 以
+   framework/protocol-safety 开头的已在 protocolSafety 计分）。
+
+**效果**：docmost **BLOCKED(48) → APPROVED(87)**，违规 132 → 6（NESTJS 误报
+126 → 0；残留 6 条含 1 条撞 CVE-2026-33193 攻击面的真实语义告警）；
+hedgedoc（Zod 校验体系 + public/private 双 API 面）47 → 32，剩余 19 条逐条定性
+为规则粒度边界（@Param 裸类型 / @Body('field') 单字段，真无校验，如实保留）。
+
+**踩坑**：`param.getType().getText()` 返回 `import("...").DtoName` 形态——取
+首个标识符会取到 `import` 关键字，改取全部标识符任一命中；测试断言 route
+格式无前导斜杠（`POST pages/create`），3 个测试曾因此"假通过"。
+
+**测试**：nestjs-detector 17/17（新增全局管道+DTO / Zod / 继承 / 无输入 7 条
+正反向）；trust 全家 95/95。
+
 ## [3.7.54] — 2026-09-27
 
 ### §47 签名级会话证据 + §48 输入校验族摸底（含两条判据被数据否决）

@@ -239,3 +239,189 @@ export class AdminController {
     expect(a.issues.some((i) => i.type === "NESTJS_NO_AUTH" && i.route === "POST /users")).toBe(true);
   });
 });
+
+// ═══════════════════════════════════════════════════════════
+// 全局 ValidationPipe + DTO 校验识别（2026-09-29 docmost 实测：
+// 123 条 NO_VALIDATION 失明误报的修复——路由 DTO 在别的文件带
+// class-validator 装饰器，只看 @UsePipes 永远看不到）
+// ═══════════════════════════════════════════════════════════
+
+describe("nestjs-detector 全局管道 + DTO 校验通道", () => {
+  function writeValidatedApp() {
+    write("tsconfig.json", TSCONFIG);
+    write("src/main.ts", `
+import { ValidationPipe } from "@nestjs/common";
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, transform: true }),
+  );
+  await app.listen(3000);
+}
+`);
+    write("src/app.module.ts", `
+import { Module } from "@nestjs/common";
+import { PageController } from "./page.controller";
+@Module({ controllers: [PageController] })
+export class AppModule {}
+`);
+    write("src/create-page.dto.ts", `
+import { IsString, IsUUID, IsOptional } from "class-validator";
+export class CreatePageDto {
+  @IsOptional() @IsString() title?: string;
+  @IsUUID() spaceId: string;
+}
+`);
+    write("src/page.controller.ts", `
+import { Controller, Post, Body } from "@nestjs/common";
+import { CreatePageDto } from "./create-page.dto";
+@Controller("pages")
+export class PageController {
+  @Post("create")
+  create(@Body() dto: CreatePageDto) { return {}; }
+}
+`);
+  }
+
+  it("全局 ValidationPipe + 入参是已校验 DTO → 不报 NO_VALIDATION", () => {
+    writeValidatedApp();
+    const a = analyzeNestJSProject(dir);
+    const nv = a.issues.filter((i) => i.type === "NESTJS_NO_VALIDATION");
+    expect(nv).toEqual([]);
+  });
+
+  it("反向：DTO 摘掉 class-validator 装饰器 → 精确转红", () => {
+    writeValidatedApp();
+    write("src/create-page.dto.ts", `
+export class CreatePageDto {
+  title?: string;
+  spaceId: string;
+}
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST pages/create")).toBe(true);
+  });
+
+  it("反向：摘掉全局管道 → 精确转红（无 @UsePipes 的路由失去豁免源）", () => {
+    writeValidatedApp();
+    write("src/main.ts", `
+async function bootstrap() { await (await import("@nestjs/core").then(m => m.NestFactory.create(Object))).listen(3000); }
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST pages/create")).toBe(true);
+  });
+
+  it("继承 DTO：子类 extends 已校验父类 → 不报（RemoveFavoriteDto 形态）", () => {
+    writeValidatedApp();
+    write("src/create-page.dto.ts", `
+import { IsString, IsUUID, IsOptional } from "class-validator";
+export class CreatePageDto {
+  @IsOptional() @IsString() title?: string;
+  @IsUUID() spaceId: string;
+}
+export class UpdatePageDto extends CreatePageDto {}
+`);
+    write("src/page.controller.ts", `
+import { Controller, Post, Body } from "@nestjs/common";
+import { UpdatePageDto } from "./create-page.dto";
+@Controller("pages")
+export class PageController {
+  @Post("update")
+  update(@Body() dto: UpdatePageDto) { return {}; }
+}
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST pages/update")).toBe(false);
+  });
+
+  it("无结构化输入（仅 AuthUser/Req）→ 不报 NO_VALIDATION（collab-token/logout 形态）", () => {
+    write("tsconfig.json", TSCONFIG);
+    write("src/main.ts", `
+import { ValidationPipe } from "@nestjs/common";
+async function bootstrap() { (globalThis as any).app.useGlobalPipes(new ValidationPipe()); }
+`);
+    write("src/app.module.ts", `
+import { Module } from "@nestjs/common";
+import { AuthController } from "./auth.controller";
+@Module({ controllers: [AuthController] })
+export class AppModule {}
+`);
+    write("src/auth.controller.ts", `
+import { Controller, Post, Req } from "@nestjs/common";
+@Controller("auth")
+export class AuthController {
+  @Post("logout")
+  logout(@Req() req: any) { return {}; }
+}
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST auth/logout")).toBe(false);
+  });
+
+  it("Zod 形态：class XDto extends createZodDto(schema) + 辅助函数全局管道 → 不报（hedgedoc 形态）", () => {
+    write("tsconfig.json", TSCONFIG);
+    write("src/main.ts", `
+import { setupValidationPipe } from "./setup-pipes";
+async function bootstrap() { (globalThis as any).app.useGlobalPipes(setupValidationPipe()); }
+`);
+    write("src/setup-pipes.ts", `
+import { createZodValidationPipe } from "nestjs-zod";
+export function setupValidationPipe(): any { return new (createZodValidationPipe({}))(); }
+`);
+    write("src/app.module.ts", `
+import { Module } from "@nestjs/common";
+import { NotesController } from "./notes.controller";
+@Module({ controllers: [NotesController] })
+export class AppModule {}
+`);
+    write("src/login.dto.ts", `
+import { createZodDto } from "nestjs-zod";
+export class LoginDto extends createZodDto({}) {}
+`);
+    write("src/notes.controller.ts", `
+import { Controller, Post, Body } from "@nestjs/common";
+import { LoginDto } from "./login.dto";
+@Controller("notes")
+export class NotesController {
+  @Post("create")
+  create(@Body() dto: LoginDto) { return {}; }
+}
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST notes/create")).toBe(false);
+  });
+
+  it("反向：Zod DTO 摘掉 createZodDto 继承 → 精确转红", () => {
+    write("tsconfig.json", TSCONFIG);
+    write("src/main.ts", `
+import { setupValidationPipe } from "./setup-pipes";
+async function bootstrap() { (globalThis as any).app.useGlobalPipes(setupValidationPipe()); }
+`);
+    write("src/setup-pipes.ts", `
+import { createZodValidationPipe } from "nestjs-zod";
+export function setupValidationPipe(): any { return new (createZodValidationPipe({}))(); }
+`);
+    write("src/app.module.ts", `
+import { Module } from "@nestjs/common";
+import { NotesController } from "./notes.controller";
+@Module({ controllers: [NotesController] })
+export class AppModule {}
+`);
+    write("src/login.dto.ts", `
+export class LoginDto {}
+`);
+    write("src/notes.controller.ts", `
+import { Controller, Post, Body } from "@nestjs/common";
+import { LoginDto } from "./login.dto";
+@Controller("notes")
+export class NotesController {
+  @Post("create")
+  create(@Body() dto: LoginDto) { return {}; }
+}
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST notes/create")).toBe(true);
+  });
+});
