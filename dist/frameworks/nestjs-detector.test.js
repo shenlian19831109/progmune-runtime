@@ -354,4 +354,67 @@ export class AuthController {
         const a = (0, nestjs_detector_1.analyzeNestJSProject)(dir);
         (0, vitest_1.expect)(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST auth/logout")).toBe(false);
     });
+    (0, vitest_1.it)("Zod 形态：class XDto extends createZodDto(schema) + 辅助函数全局管道 → 不报（hedgedoc 形态）", () => {
+        write("tsconfig.json", TSCONFIG);
+        write("src/main.ts", `
+import { setupValidationPipe } from "./setup-pipes";
+async function bootstrap() { (globalThis as any).app.useGlobalPipes(setupValidationPipe()); }
+`);
+        write("src/setup-pipes.ts", `
+import { createZodValidationPipe } from "nestjs-zod";
+export function setupValidationPipe(): any { return new (createZodValidationPipe({}))(); }
+`);
+        write("src/app.module.ts", `
+import { Module } from "@nestjs/common";
+import { NotesController } from "./notes.controller";
+@Module({ controllers: [NotesController] })
+export class AppModule {}
+`);
+        write("src/login.dto.ts", `
+import { createZodDto } from "nestjs-zod";
+export class LoginDto extends createZodDto({}) {}
+`);
+        write("src/notes.controller.ts", `
+import { Controller, Post, Body } from "@nestjs/common";
+import { LoginDto } from "./login.dto";
+@Controller("notes")
+export class NotesController {
+  @Post("create")
+  create(@Body() dto: LoginDto) { return {}; }
+}
+`);
+        const a = (0, nestjs_detector_1.analyzeNestJSProject)(dir);
+        (0, vitest_1.expect)(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST notes/create")).toBe(false);
+    });
+    (0, vitest_1.it)("反向：Zod DTO 摘掉 createZodDto 继承 → 精确转红", () => {
+        write("tsconfig.json", TSCONFIG);
+        write("src/main.ts", `
+import { setupValidationPipe } from "./setup-pipes";
+async function bootstrap() { (globalThis as any).app.useGlobalPipes(setupValidationPipe()); }
+`);
+        write("src/setup-pipes.ts", `
+import { createZodValidationPipe } from "nestjs-zod";
+export function setupValidationPipe(): any { return new (createZodValidationPipe({}))(); }
+`);
+        write("src/app.module.ts", `
+import { Module } from "@nestjs/common";
+import { NotesController } from "./notes.controller";
+@Module({ controllers: [NotesController] })
+export class AppModule {}
+`);
+        write("src/login.dto.ts", `
+export class LoginDto {}
+`);
+        write("src/notes.controller.ts", `
+import { Controller, Post, Body } from "@nestjs/common";
+import { LoginDto } from "./login.dto";
+@Controller("notes")
+export class NotesController {
+  @Post("create")
+  create(@Body() dto: LoginDto) { return {}; }
+}
+`);
+        const a = (0, nestjs_detector_1.analyzeNestJSProject)(dir);
+        (0, vitest_1.expect)(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST notes/create")).toBe(true);
+    });
 });
