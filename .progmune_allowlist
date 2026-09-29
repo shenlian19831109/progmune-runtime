@@ -380,3 +380,17 @@ src/extract-ir-taint-structural.test.ts
 src/extract-ir-taint-guard.test.ts
 src/ir-staleness.test.ts
 src/ir-staleness.ts
+
+# §49.17 召回对照工具（手写探针/评估脚本，非 progmune 生成，2026-09-28 入册）
+blind-benchmark/recall-probe.ts
+blind-benchmark/rank-robustness.ts
+blind-benchmark/rank-alerts-cli.ts
+blind-benchmark/alert-ranker.ts
+blind-benchmark/alert-ranker-check.ts
+blind-benchmark/xfn-signal-probe.ts
+blind-benchmark/rank-signals.py
+blind-benchmark/advisory-match.py
+blind-benchmark/advisory-verdict.py
+blind-benchmark/gold-bias-check.py
+blind-benchmark/precision-reweight.py
+blind-benchmark/precision-bootstrap-ci.py
