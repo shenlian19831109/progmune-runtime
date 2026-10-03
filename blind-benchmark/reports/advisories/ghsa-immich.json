@@ -1,0 +1,134 @@
+[
+ {
+  "ghsa": "GHSA-q89f-h332-8q2h",
+  "repo": "immich",
+  "severity": "high",
+  "cwes": [],
+  "summary": "Authenticated SVG upload reaches ImageMagick coders and enables RCE",
+  "published": "2026-09-28"
+ },
+ {
+  "ghsa": "GHSA-h5w4-vjv4-9r5q",
+  "repo": "immich",
+  "severity": "low",
+  "cwes": [
+   "CWE-116",
+   "CWE-79"
+  ],
+  "summary": "Incorrect sanitization of continue URL on the /maintenance endpoint",
+  "published": "2026-08-23"
+ },
+ {
+  "ghsa": "GHSA-qp2h-w794-2vhf",
+  "repo": "immich",
+  "severity": "medium",
+  "cwes": [
+   "CWE-601"
+  ],
+  "summary": "Incomplete fix for login continue redirect allows slash-backslash open redirect",
+  "published": "2026-07-06"
+ },
+ {
+  "ghsa": "GHSA-8244-8vpr-vp9c",
+  "repo": "immich",
+  "severity": "critical",
+  "cwes": [
+   "CWE-601",
+   "CWE-79"
+  ],
+  "summary": "One-click account takeover via XSS in login page continue redirect",
+  "published": "2026-06-01"
+ },
+ {
+  "ghsa": "GHSA-hfvf-5c8x-8rc4",
+  "repo": "immich",
+  "severity": "medium",
+  "cwes": [
+   "CWE-295"
+  ],
+  "summary": "OIDC discovery/token/userinfo/JWKS fetches run with TLS certificate verification unconditionally disabled via allowInsecureRequests (CWE-295)",
+  "published": "2026-07-06"
+ },
+ {
+  "ghsa": "GHSA-24fq-72x8-v7hm",
+  "repo": "immich",
+  "severity": "medium",
+  "cwes": [
+   "CWE-601",
+   "CWE-79"
+  ],
+  "summary": "Open Redirect via Shared Album name",
+  "published": "2026-04-13"
+ },
+ {
+  "ghsa": "GHSA-jrp5-g662-hq92",
+  "repo": "immich",
+  "severity": "low",
+  "cwes": [
+   "CWE-22",
+   "CWE-73"
+  ],
+  "summary": "Unsafe ZIP Entry Names (Zip Slip Class) in Archive Download Endpoint",
+  "published": "2026-07-06"
+ },
+ {
+  "ghsa": "GHSA-9qx4-67jm-cc66",
+  "repo": "immich",
+  "severity": "high",
+  "cwes": [
+   "CWE-79"
+  ],
+  "summary": "Stored XSS via OCR Text in 360° Panorama Viewer",
+  "published": "2026-04-08"
+ },
+ {
+  "ghsa": "GHSA-hq46-gw2v-q86p",
+  "repo": "immich",
+  "severity": "medium",
+  "cwes": [
+   "CWE-918"
+  ],
+  "summary": "SSRF via OAuth Profile Picture URL (CWE-918)",
+  "published": "2026-07-06"
+ },
+ {
+  "ghsa": "GHSA-237r-x578-h5mv",
+  "repo": "immich",
+  "severity": "high",
+  "cwes": [
+   "CWE-269"
+  ],
+  "summary": "API Key Privilege Escalation",
+  "published": "2026-01-29"
+ },
+ {
+  "ghsa": "GHSA-hvq7-hq9r-8gjr",
+  "repo": "immich",
+  "severity": "medium",
+  "cwes": [
+   "CWE-284"
+  ],
+  "summary": "[DCODX-AI] Shared-link authentication allows adding owner's assets to shared links (AssetShare authorization bypass)",
+  "published": "2026-07-06"
+ },
+ {
+  "ghsa": "GHSA-78x4-6x83-jx75",
+  "repo": "immich",
+  "severity": "medium",
+  "cwes": [
+   "CWE-598"
+  ],
+  "summary": "Insecure transmission of shared link password",
+  "published": "2026-04-02"
+ },
+ {
+  "ghsa": "GHSA-3832-6r8h-9cfm",
+  "repo": "immich",
+  "severity": "high",
+  "cwes": [
+   "CWE-303"
+  ],
+  "summary": "Account hijacking through oauth2",
+  "published": "2025-07-11"
+ }
+]
