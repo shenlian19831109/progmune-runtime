@@ -153,6 +153,31 @@ export function formatTrustTerminal(decision: TrustDecision): string {
     }
   }
 
+  // Ranked Safeguard Alerts — 证据流（2026-10-02，§49.15 方案 b）：
+  // 排序后的 safeguard 告警，不进判定（decision/score 不受影响）。
+  // 展示分组形态的头部：组间按族先验、组内按语义分；每组最多 3 条。
+  const sa = overall.safeguardAlerts;
+  if (sa && sa.total > 0) {
+    lines.push(`${BOX_ML}${BOX_H.repeat(w - 2)}${BOX_MR}`);
+    lines.push(`${BOX_V}  ${BOLD}Ranked Safeguard Alerts${RESET} (evidence stream — does not affect the decision)${BOX_V}`.slice(0, w + 1));
+    lines.push(`${BOX_V}${" ".repeat(w - 2)}${BOX_V}`);
+    lines.push(`${BOX_V}  ${DIM}${sa.total} alert(s), ${sa.groups.length} rule group(s). Groups ordered by rule prior; within each group by semantic signals.${RESET}`.slice(0, w + 1));
+    lines.push(`${BOX_V}${" ".repeat(w - 2)}${BOX_V}`);
+
+    for (const g of sa.groups.slice(0, 8)) {
+      lines.push(`${BOX_V}  ${CYAN}◆ ${g.rule}${RESET} ${DIM}(prior ${(g.prior * 100).toFixed(1)}%, ${g.count} alerts)${RESET}`.slice(0, w + 1));
+      for (const r of g.alerts.slice(0, 3)) {
+        const a = r.alert as any;
+        const fn = `${a.function || "?"} @ ${a.file || "?"}`;
+        lines.push(`${BOX_V}    ${DIM}${fn.slice(0, w - 8)}${RESET}`);
+        if (r.reasons.length > 0) {
+          lines.push(`${BOX_V}    ${DIM}↳ ${r.reasons.join(" · ").slice(0, w - 9)}${RESET}`);
+        }
+      }
+      lines.push(`${BOX_V}${" ".repeat(w - 2)}${BOX_V}`);
+    }
+  }
+
   // Audit Trail
   lines.push(`${BOX_ML}${BOX_H.repeat(w - 2)}${BOX_MR}`);
   lines.push(`${BOX_V}  ${BOLD}Audit Trail${RESET}${" ".repeat(w - 16)}${BOX_V}`);

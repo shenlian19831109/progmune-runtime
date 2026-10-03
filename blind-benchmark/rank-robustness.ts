@@ -21,7 +21,7 @@
  */
 import * as fs from "fs";
 import * as path from "path";
-import { scoreOne, RankableAlert, learnPrior, W_PRIOR } from "./alert-ranker";
+import { scoreOne, RankableAlert, learnPrior, W_PRIOR } from "../src/trust/alert-ranker";
 
 const SIG = path.resolve(__dirname, "reports/xfn-49-signals.jsonl");
 const GOLD = path.resolve(__dirname, "fp-gold.jsonl");

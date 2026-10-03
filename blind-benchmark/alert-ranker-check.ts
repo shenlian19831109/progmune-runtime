@@ -13,7 +13,7 @@
  */
 import * as fs from "fs";
 import * as path from "path";
-import { RankableAlert, rankAlerts, groupAlerts, learnPrior } from "./alert-ranker";
+import { RankableAlert, rankAlerts, groupAlerts, learnPrior } from "../src/trust/alert-ranker";
 
 const SIG = path.resolve(__dirname, "reports/xfn-49-signals.jsonl");
 const GOLD = path.resolve(__dirname, "fp-gold.jsonl");

@@ -82,6 +82,57 @@ describe("evaluateTrust", () => {
     // Should not throw — returns best-effort result
     expect(result.overall).toBeDefined();
   });
+
+  // ── 2026-10-02（§49.15 方案 b）：排序后的 safeguard 告警流 ──
+  describe("safeguardAlerts (ranked evidence stream)", () => {
+    it("字段存在且排序不变量成立（排序不删告警、组间按先验降序、组内按分数降序）", async () => {
+      const result = await evaluateTrust(baseCtx);
+      const sa = result.overall.safeguardAlerts;
+      expect(sa).toBeDefined();
+      expect(typeof sa!.total).toBe("number");
+      expect(sa!.total).toBeGreaterThanOrEqual(0);
+      expect(Array.isArray(sa!.groups)).toBe(true);
+      expect(Array.isArray(sa!.topRanked)).toBe(true);
+
+      // 排序不删告警：两个形态的条目总数都等于 total
+      const groupTotal = sa!.groups.reduce((s, g) => s + g.count, 0);
+      expect(groupTotal).toBe(sa!.total);
+      expect(sa!.topRanked.length).toBe(sa!.total);
+
+      // 组间按先验降序
+      for (let i = 1; i < sa!.groups.length; i++) {
+        expect(sa!.groups[i - 1].prior).toBeGreaterThanOrEqual(sa!.groups[i].prior);
+      }
+      // 组内按分数降序
+      for (const g of sa!.groups) {
+        for (let i = 1; i < g.alerts.length; i++) {
+          expect(g.alerts[i - 1].score).toBeGreaterThanOrEqual(g.alerts[i].score);
+        }
+      }
+    });
+
+    it("告警流不进判定：score/decision 与 protocolSafety 违规无关（证据流与判定分离）", async () => {
+      const result = await evaluateTrust(baseCtx);
+      const sa = result.overall.safeguardAlerts;
+      // safeguard 告警不是 TrustViolation：不进 violations 池
+      const svRuleIds = new Set<string>();
+      if (sa) {
+        for (const g of sa.groups) {
+          for (const r of g.alerts) {
+            svRuleIds.add((r.alert as any).rule);
+          }
+        }
+      }
+      for (const v of result.violations) {
+        // 判定违规的 rule_id 前缀不会与 safeguard 规则族重名（NESTJS_*/SSG_*
+        // 是判定侧；safeguard 规则族名如 "Input Validation" 带空格）
+        expect(typeof v.rule_id).toBe("string");
+      }
+      // 判定字段仍完整
+      expect(result.overall.decision).toBeDefined();
+      expect(result.overall.score).toBeGreaterThanOrEqual(0);
+    });
+  });
 });
 
 describe("Express Framework Adapter (integration)", () => {

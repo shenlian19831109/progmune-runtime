@@ -1,5 +1,30 @@
 # Changelog
 
+## [3.7.56] — 2026-10-02
+
+### 排序告警流进产品（§49.15 方案 b 落地，未发布）
+
+**告警排序器产品化**：`alert-ranker.ts` 自 blind-benchmark 迁入 `src/trust/`（评估脚本
+改 import，对表测试差 0.000 确认同一实现）。`evaluateTrust` 在 IR 提取的同一批
+`functions` 上跑 `detectSafeguardViolations`（batch-scan 同款口径：language 必传、
+params 名/类型、exported 近似 exposed），产出**排序后的 safeguard 告警流**：
+
+- `TrustDecision.overall.safeguardAlerts`：`total` + `groups`（推荐形态：按族分组，
+  组间按先验、组内按语义分，防整族沉底）+ `topRanked`（全局平铺，minPerRule=1
+  保底）。族先验来自 fp-gold 标注（DEFAULT_RULE_PRIOR，贝叶斯平滑 α=8），
+  `learnPrior` 可重估；排序不删告警（§49.16），输出条数 == 输入条数。
+- **证据流与判定分离**：告警不进 violations、不扣分、不改 decision/score。
+- 终端报告新增 "Ranked Safeguard Alerts" 区块（每族前 3 条 + 先验 + 语义理由）。
+
+**实测**：docmost decision APPROVED(87) 不变（分离成立）；告警流 1320 条 / 21 族，
+头部 = Input Validation / Data Integrity(FK) 族，语义理由可解释。
+⚠ 口径注记：1320 与 §49.17 的 1202 差 +9.8%——recall-probe 用 extractIRWithTypes、
+产品路径用 extractIR（两个提取器函数集略异）；排序器的族先验基于 withTypes 口径
+的 fp-gold，迁移到产品口径的偏差未量化，如实记录待补核。
+
+**测试**：engine 23/23（新增 safeguardAlerts 排序不变量 + 判定分离 2 条）、
+trust 全家 67/67、alert-ranker-check 对表 0.000。
+
 ## [3.7.55] — 2026-09-29
 
 ### 主路径（trust 判定）真实项目首测 + NestJS 失明误报修复（§50）

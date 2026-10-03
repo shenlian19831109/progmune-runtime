@@ -19,7 +19,7 @@
  */
 import * as fs from "fs";
 import * as path from "path";
-import { rankAlerts, groupAlerts, scoreOne, RankableAlert, RankOptions, DEFAULT_RULE_PRIOR, learnPrior } from "./alert-ranker";
+import { rankAlerts, groupAlerts, scoreOne, RankableAlert, RankOptions, DEFAULT_RULE_PRIOR, learnPrior } from "../src/trust/alert-ranker";
 
 const argv = process.argv.slice(2);
 const flag = (n: string, d?: string) => {

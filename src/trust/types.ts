@@ -114,6 +114,33 @@ export interface TrustDecision {
       ssgViolations: number;
       summary: string;
     };
+    /** 2026-10-02（§49.15 方案 b）：排序后的 safeguard 告警流——证据流，
+     *  不进判定（decision/score 不受影响）。groups=按族分组（推荐形态，
+     *  组间按先验、组内按语义分），topRanked=全局平铺（minPerRule=1 保底）。
+     *  每族先验来自 fp-gold 标注（DEFAULT_RULE_PRIOR），换项目可用 learnPrior
+     *  重估；排序不删告警（§49.16），输出条数 == 输入条数。 */
+    safeguardAlerts?: {
+      total: number;
+      groups: Array<{
+        rule: string;
+        prior: number;
+        count: number;
+        alerts: Array<{
+          alert: Record<string, unknown>;
+          score: number;
+          prior: number;
+          semantic: number;
+          reasons: string[];
+        }>;
+      }>;
+      topRanked: Array<{
+        alert: Record<string, unknown>;
+        score: number;
+        prior: number;
+        semantic: number;
+        reasons: string[];
+      }>;
+    };
     /** Express framework adapter coverage */
     expressCoverage?: {
       appsDetected: number;

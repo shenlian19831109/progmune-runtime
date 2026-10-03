@@ -36,6 +36,10 @@
  * 用法：
  *   import { rankAlerts, groupAlerts, learnPrior } from "./alert-ranker";
  *   const ranked = rankAlerts(alerts, { minPerRule: 1 });
+ *
+ * 2026-10-02：自 blind-benchmark/alert-ranker.ts 迁入产品代码（§49.15 方案 b
+ * 落地——产品新增 safeguard 告警流）。评估脚本（alert-ranker-check /
+ * rank-robustness / rank-alerts-cli）改为 import 本文件，对表测试保证同一实现。
  */
 
 export interface RankableAlert {

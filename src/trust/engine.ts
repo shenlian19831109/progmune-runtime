@@ -82,6 +82,10 @@ import {
 import type { SSGValidationResult } from "./ssg-bridge";
 import { buildCallSequences, collectProjectFunctionNames } from "../call-sequence";
 import type { CallSequence } from "../call-sequence";
+import { detectSafeguardViolations } from "../protocol-detector";
+import type { SafeguardViolation } from "../protocol-detector";
+import { rankAlerts, groupAlerts } from "./alert-ranker";
+import type { RankableAlert, Ranked } from "./alert-ranker";
 import { extractIR } from "../extract-ir";
 import { extractIRPython } from "../extract-ir-python";
 import { extractIRC } from "../extract-ir-c";
@@ -118,7 +122,7 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
   );
 
   const enterpriseViolations = collectEnterpriseViolations(ctx);
-  const { violations: protocolViolations, coverage: mappingCoverageData, ssgCoverage: ssgCov, annotationSuggestions: cAnnotationSuggestions, extractionWarning } =
+  const { violations: protocolViolations, coverage: mappingCoverageData, ssgCoverage: ssgCov, annotationSuggestions: cAnnotationSuggestions, extractionWarning, safeguardAlerts } =
     await collectProtocolViolations(ctx, callGraph);
   const expressResult = collectExpressViolations(ctx);
   const nestjsResult = collectNestJSViolations(ctx);
@@ -307,6 +311,10 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
         : undefined,
       /** SSG State Machine coverage — how many calls were matched to protocol rules */
       ssgCoverage: ssgCov,
+      /** 2026-10-02（§49.15 方案 b）：排序后的 safeguard 告警流——证据流，
+       *  不进判定。groups 为推荐形态（按族分组防整族沉底），topRanked
+       *  为全局平铺（minPerRule=1 保底）。total=0 时字段仍在（0 必须自证）。 */
+      safeguardAlerts,
       /** Express framework adapter coverage — routes & middleware analyzed */
       expressCoverage: expressResult.coverage.expressApps > 0
         ? {
@@ -1358,6 +1366,15 @@ interface ProtocolViolationResult {
   violations: TrustViolation[];
   /** 2026-09-22：提取失败（异常/产物为空）时非空——结果不可信标记 */
   extractionWarning?: string;
+  /** 2026-10-02（§49.15 方案 b）：排序后的 safeguard 告警流——证据流，
+   *  不进 violations、不扣分、不改判定。给人工审查的入口。 */
+  safeguardAlerts?: {
+    total: number;
+    /** 推荐形态：按族分组，组间按先验、组内按语义分（每族一块，不整族沉底） */
+    groups: Array<{ rule: string; prior: number; count: number; alerts: Ranked<RankableAlert>[] }>;
+    /** 全局平铺（minPerRule=1 保底——每族至少一条进头部） */
+    topRanked: Ranked<RankableAlert>[];
+  };
   coverage: {
     totalApis: number;
     lookupHits: number;
@@ -1412,6 +1429,9 @@ async function collectProtocolViolations(
   let annotationSuggestions: AnnotationSuggestion[] | undefined;
   // 2026-09-22：提取失败标记（跨 try 作用域，随结果返回）
   let extractionWarning: string | undefined;
+  // 2026-10-02：排序后的 safeguard 告警流（§49.15 方案 b）——同一批 IR 上
+  // 收集，try 内赋值、try 外返回
+  let safeguardAlerts: ProtocolViolationResult["safeguardAlerts"] | undefined;
 
   try {
     // ── P4.5 校准：TS/JS 项目在 ir.json 缺失时先提取 IR ──
@@ -1668,6 +1688,48 @@ async function collectProtocolViolations(
             protocolRulesData ? new Set(protocolRulesData.rules.keys()) : undefined
           );
         }
+
+        // ── safeguard 告警流（2026-10-02，§49.15 方案 b 落地）──
+        // 同一批 IR 上跑 detectSafeguardViolations（batch-scan 同款口径：
+        // language 必传，params 名/类型、exported 近似 exposed），产出
+        // **排序后的告警流**。证据流与判定分离：不进 violations、不扣分、
+        // 不改 decision/score——排序告警是给人工审查的入口（§49.16：
+        // 排序不删告警，一条不少；groupAlerts 分组防整族沉底）。
+        const safeguardAlertsRaw: RankableAlert[] = [];
+        const svLang = ctx.language || "typescript";
+        for (const f of functions) {
+          const fCalls = f.calls || [];
+          let svs: SafeguardViolation[];
+          try {
+            svs = detectSafeguardViolations(
+              fCalls,
+              f.name,
+              svLang,
+              (f.params || []).map((p: any) => p.name),
+              !!f.exported,
+              (f.params || []).map((p: any) => p.type || "")
+            );
+          } catch {
+            continue; // 单函数失败不阻断整批（与 batch-scan 容错一致）
+          }
+          if (svs.length === 0) continue;
+          const params = (f.params || []).map((p: any) => ({ n: p.name, t: p.type || "" }));
+          for (const v of svs) {
+            safeguardAlertsRaw.push({
+              rule: v.rule,
+              file: f.file,
+              function: f.name,
+              calls: fCalls,
+              nRules: svs.length,
+              params,
+            });
+          }
+        }
+        safeguardAlerts = {
+          total: safeguardAlertsRaw.length,
+          groups: groupAlerts(safeguardAlertsRaw),
+          topRanked: rankAlerts(safeguardAlertsRaw, { minPerRule: 1 }),
+        };
       }
     } catch { /* best-effort */ }
 
@@ -1824,6 +1886,7 @@ async function collectProtocolViolations(
 
   return {
     violations,
+    safeguardAlerts,
     coverage: {
       totalApis,
       lookupHits,

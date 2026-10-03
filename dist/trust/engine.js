@@ -74,6 +74,8 @@ const gin_detector_1 = require("../frameworks/gin-detector");
 const fiber_detector_1 = require("../frameworks/fiber-detector");
 const ssg_bridge_1 = require("./ssg-bridge");
 const call_sequence_1 = require("../call-sequence");
+const protocol_detector_1 = require("../protocol-detector");
+const alert_ranker_1 = require("./alert-ranker");
 const extract_ir_1 = require("../extract-ir");
 const extract_ir_python_1 = require("../extract-ir-python");
 const extract_ir_c_1 = require("../extract-ir-c");
@@ -103,7 +105,7 @@ async function evaluateTrust(ctx) {
     // ── Phase 5: Build call graph for cross-function propagation ──
     const callGraph = (0, call_graph_propagator_1.buildCallGraphFromIR)(path.join(ctx.projectPath, "ir.json"));
     const enterpriseViolations = collectEnterpriseViolations(ctx);
-    const { violations: protocolViolations, coverage: mappingCoverageData, ssgCoverage: ssgCov, annotationSuggestions: cAnnotationSuggestions, extractionWarning } = await collectProtocolViolations(ctx, callGraph);
+    const { violations: protocolViolations, coverage: mappingCoverageData, ssgCoverage: ssgCov, annotationSuggestions: cAnnotationSuggestions, extractionWarning, safeguardAlerts } = await collectProtocolViolations(ctx, callGraph);
     const expressResult = collectExpressViolations(ctx);
     const nestjsResult = collectNestJSViolations(ctx);
     const trpcResult = collectTRPCViolations(ctx);
@@ -263,6 +265,10 @@ async function evaluateTrust(ctx) {
                 : undefined,
             /** SSG State Machine coverage — how many calls were matched to protocol rules */
             ssgCoverage: ssgCov,
+            /** 2026-10-02（§49.15 方案 b）：排序后的 safeguard 告警流——证据流，
+             *  不进判定。groups 为推荐形态（按族分组防整族沉底），topRanked
+             *  为全局平铺（minPerRule=1 保底）。total=0 时字段仍在（0 必须自证）。 */
+            safeguardAlerts,
             /** Express framework adapter coverage — routes & middleware analyzed */
             expressCoverage: expressResult.coverage.expressApps > 0
                 ? {
@@ -1225,6 +1231,9 @@ async function collectProtocolViolations(ctx, callGraph) {
     let annotationSuggestions;
     // 2026-09-22：提取失败标记（跨 try 作用域，随结果返回）
     let extractionWarning;
+    // 2026-10-02：排序后的 safeguard 告警流（§49.15 方案 b）——同一批 IR 上
+    // 收集，try 内赋值、try 外返回
+    let safeguardAlerts;
     try {
         // ── P4.5 校准：TS/JS 项目在 ir.json 缺失时先提取 IR ──
         // 序列必须来自「函数体内真实调用」而非「文件内函数声明名单」——
@@ -1462,6 +1471,42 @@ async function collectProtocolViolations(ctx, callGraph) {
                 if ((ctx.language || "typescript") === "c") {
                     annotationSuggestions = (0, annotation_suggest_1.suggestAnnotations)(functions, protocolRulesData ? new Set(protocolRulesData.rules.keys()) : undefined);
                 }
+                // ── safeguard 告警流（2026-10-02，§49.15 方案 b 落地）──
+                // 同一批 IR 上跑 detectSafeguardViolations（batch-scan 同款口径：
+                // language 必传，params 名/类型、exported 近似 exposed），产出
+                // **排序后的告警流**。证据流与判定分离：不进 violations、不扣分、
+                // 不改 decision/score——排序告警是给人工审查的入口（§49.16：
+                // 排序不删告警，一条不少；groupAlerts 分组防整族沉底）。
+                const safeguardAlertsRaw = [];
+                const svLang = ctx.language || "typescript";
+                for (const f of functions) {
+                    const fCalls = f.calls || [];
+                    let svs;
+                    try {
+                        svs = (0, protocol_detector_1.detectSafeguardViolations)(fCalls, f.name, svLang, (f.params || []).map((p) => p.name), !!f.exported, (f.params || []).map((p) => p.type || ""));
+                    }
+                    catch {
+                        continue; // 单函数失败不阻断整批（与 batch-scan 容错一致）
+                    }
+                    if (svs.length === 0)
+                        continue;
+                    const params = (f.params || []).map((p) => ({ n: p.name, t: p.type || "" }));
+                    for (const v of svs) {
+                        safeguardAlertsRaw.push({
+                            rule: v.rule,
+                            file: f.file,
+                            function: f.name,
+                            calls: fCalls,
+                            nRules: svs.length,
+                            params,
+                        });
+                    }
+                }
+                safeguardAlerts = {
+                    total: safeguardAlertsRaw.length,
+                    groups: (0, alert_ranker_1.groupAlerts)(safeguardAlertsRaw),
+                    topRanked: (0, alert_ranker_1.rankAlerts)(safeguardAlertsRaw, { minPerRule: 1 }),
+                };
             }
         }
         catch { /* best-effort */ }
@@ -1602,6 +1647,7 @@ async function collectProtocolViolations(ctx, callGraph) {
     catch { /* best-effort */ }
     return {
         violations,
+        safeguardAlerts,
         coverage: {
             totalApis,
             lookupHits,
