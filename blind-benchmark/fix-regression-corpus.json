@@ -741,6 +741,12 @@
       "source": "§53 定位「auth 0 分却仍 APPROVED/HIGH」时发现两处：`engine.ts` 给 coverageConfidence 写的分支注释是「本次扫描是废票，不得据此得出『干净』结论」——**没有任何一行代码读它**；`scoreProtocolSafety` 算 confidence 的分子是 `d.score <= 100`，这是**字面恒真**的条件，于是 5/5 协议永远算「已检查」⇒ confidence 永远 HIGH。上游其实知道自己不可信，下游拿到的却是「可信」。",
       "rule": "**代码里写下的结论必须有消费者。** 当注释、字段名、枚举或日志中出现「不得/不可信/废票/待补/未完成」这类断言时，必须存在对应的**消费点**：decision 上限、confidence 降级、或至少进入输出供人复核。新增这类断言时同步写消费点；评审时把「只有声明、没有消费」判为缺陷而不是文档。\n**自检方法（很便宜）**：把该断言取反，看有没有任何输出发生变化 —— 没有变化 ⇒ 它只是装饰。同理，任何 `filter(...)` / `if (...)` 里出现**恒真或恒零**的条件（如 `score <= 100`）一律视为未接线的测量。",
       "why": "与 R93（宣称覆盖 ≠ 实际召回）、R94（规则存在 ≠ 会执行）是同一族：**系统自己知道的事，没有被系统自己用上**。这类缺陷不会报错、不会漂移、测试也不会挂，唯一的表现是在最需要它的时候给出一个方向相反的保证（对一个鉴权彻底失明的产物说「可信」）。它们的危险程度高于误报，因为误报只是吵，而这个是在**替错误结论背书**。"
+    },
+    {
+      "id": "r103-capability-requires-three-proofs-poc-generalization-precision",
+      "added": "2026-10-04",
+      "source": "用户战略对话：fr-corpus 方法论本质是 PoC（用真实案例证明存在性）。PoC 证明「至少一个案例会抓」，不证明「这一类都会抓」——被咬过两次：docmost 四刀 PoC 通过后 immich 153 条误报（§51）；数据挑信号前 10% 76.9%→held-out 25.3%（§49.12）。",
+      "rule": "一项能力算「成立」须凑齐三要件，缺一只能说「这个案例会了」：① PoC——真实修复命中（fr-corpus DETECTED：修复前报出+修复后不误报）；② 泛化——held-out 项目盲考（未参与诊断的项目，§51 immich 模式）；③ 精度——真实项目全量误报率测量（docmost/hedgedoc 全量对照）。三样缺一不可，任何对外宣称（README/能力矩阵/发版说明）按此口径分级。"
     }
   ],
   "entries": [
@@ -759,7 +765,7 @@
       "ground_truth_files": [
         "backend/open_webui/models/users.py"
       ],
-      "result": "MISS (2026-09-11)"
+      "result": "DETECTED（2026-10-04，提取器标记 __progmune_identity_substring_match__ + 规则 Identity Lookup with Substring Match：修复前 users.py 命中 2/2 真值函数（get_user_by_oauth_sub / get_user_by_scim_external_id），修复后 0；Python 盲测 90 项目零触发；定向测试 4/4（2 正 2 反））"
     },
     {
       "id": "fr-002",

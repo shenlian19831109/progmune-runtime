@@ -846,6 +846,23 @@ const SAFEGUARD_RULES = [
         conceptExpected: ["folder write-access check", "get_*_by_id_and_user_id query"],
     },
     {
+        name: "Identity Lookup with Substring Match",
+        category: "auth",
+        // 2026-10-04（REALWORLD_FIX_REGRESSION_V1 fr-001）：Python 提取器在
+        // 「身份映射查找函数（oauth_sub/scim_external_id 词形）对 oauth/scim
+        // JSON 列调用 .contains()」时注入标记——JSON 列的 contains() 退化为
+        // 子串 LIKE（open-webui CVE-2026-87016 修复注释原话），subject 含
+        // %/_ 通配符可绑定任意账户（含管理员）。证据语义在提取器侧
+        // （has_identity_substring_match，三条件：函数名身份查找形态 +
+        // 体内有 .contains( 调用 + 对象链含 oauth/scim 字段）。
+        languages: ["python"],
+        trigger: /\b(__progmune_identity_substring_match__)\b/,
+        safeguards: [],
+        violationMessage: "Identity mapping lookup (OAuth subject / SCIM external-id) matches with JSON contains() — on a JSON column contains() degrades to a substring LIKE, so a subject containing %/_ wildcards can bind to an arbitrary account (incl. admin). Use subscript extraction + equality (e.g. User.oauth[provider]['sub'].as_string() == sub).",
+        conceptMissing: ["ExactIdentityMatch", "SubscriptExtraction"],
+        conceptExpected: ["oauth[provider]['sub'] == sub", "scim[provider]['external_id'] == external_id"],
+    },
+    {
         name: "XSS (Unsafe Template Rendering)",
         category: "xss",
         languages: ["python"],

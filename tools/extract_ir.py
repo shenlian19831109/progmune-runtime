@@ -745,6 +745,42 @@ def has_template_tag_decorator(node):
 
 CROSS_USER_WRITE_MARKER = "__progmune_cross_user_write__"
 
+IDENTITY_SUBSTRING_MARKER = "__progmune_identity_substring_match__"
+
+
+def has_identity_substring_match(node):
+    """身份映射查找用 JSON.contains 子串匹配（REALWORLD_FIX_REGRESSION_V1
+    fr-001 open-webui CVE-2026-87016）：get_user_by_oauth_sub /
+    get_user_by_scim_external_id 在 SQLite 分支用
+    User.oauth.contains({provider: {'sub': sub}}) 做身份映射——JSON 列的
+    contains() 退化为子串 LIKE（修复注释原话：Subscript, never contains()），
+    subject 含 %/_ 通配符可绑定任意账户（含管理员）。
+    判据（保守，语义定义，三条件同时成立）：
+    ① 函数名是身份查找形态：含 (oauth|scim|sso|saml) 且含
+       (sub|subject|external_id|identity)；
+    ② 函数体内有 <对象>.contains( 调用；
+    ③ contains 的对象名链含 oauth/scim 字段（排除泛型 JSON 配置检查）。"""
+    try:
+        name = getattr(node, "name", "")
+        if not re.search(r"(oauth|scim|sso|saml)", name, re.I):
+            return False
+        if not re.search(r"(sub|subject|external_id|identity)", name, re.I):
+            return False
+        text = ast.unparse(node)
+    except Exception:
+        return False
+    for child in ast.walk(node):
+        if not isinstance(child, ast.Call):
+            continue
+        fn = child.func
+        if not isinstance(fn, ast.Attribute) or fn.attr != "contains":
+            continue
+        # contains 的对象链：User.oauth.contains(...) → value 是 User.oauth
+        obj_text = ast.unparse(fn.value)
+        if re.search(r"\.(oauth|scim)\b", obj_text, re.I):
+            return True
+    return False
+
 
 def has_cross_user_resource_write(node):
     """跨用户资源写入（REALWORLD_FIX_REGRESSION_V1 fr-005 open-webui）：
@@ -957,6 +993,8 @@ def extract_calls(node, unsafe_vars=None, imports=None, module_constants=None, g
         calls.append(OWNERSHIP_CHECKED_MARKER)
     if has_cross_user_resource_write(node) and CROSS_USER_WRITE_MARKER not in calls:
         calls.append(CROSS_USER_WRITE_MARKER)
+    if has_identity_substring_match(node) and IDENTITY_SUBSTRING_MARKER not in calls:
+        calls.append(IDENTITY_SUBSTRING_MARKER)
     if has_command_taint_flow(node) and CMD_FLOW_MARKER not in calls:
         calls.append(CMD_FLOW_MARKER)
     if has_csrf_exempt(node) and CSRF_MARKER not in calls:

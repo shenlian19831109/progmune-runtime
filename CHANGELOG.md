@@ -1,5 +1,27 @@
 # Changelog
 
+## [3.7.58] — 2026-10-04（未发布）
+
+### fr-001 点亮：身份映射子串匹配（修复回归 6/17）
+
+**新能力（查询语义漏报根因第一刀）**：身份映射查找（OAuth subject / SCIM
+external-ID）用 JSON 列 `.contains()` 做匹配——contains() 在 JSON 列上退化为
+子串 LIKE（open-webui CVE-2026-87016 修复注释原话），subject 含 `%`/`_`
+通配符可绑定任意账户（含管理员）。
+
+- 提取器 `tools/extract_ir.py`：`has_identity_substring_match`（三条件：
+  函数名身份查找词形 + 体内 `.contains(` 调用 + 对象链含 oauth/scim 字段）
+  ⇒ 注入 `__progmune_identity_substring_match__`
+- 引擎规则 "Identity Lookup with Substring Match"（python-only marker-driven）
+- **复测**：修复前 users.py 命中 2/2 真值函数（get_user_by_oauth_sub /
+  get_user_by_scim_external_id），修复后 0；Python 盲测 90 项目零触发
+  （合成语料无此形态，零漂移）；定向测试 4/4（2 正 2 反）
+- **fr-corpus 战绩 5/17 → 6/17**
+
+**另：ZipSlip 候选关闭（如实记录）**——immich GHSA-jrp5 按 R20 三问判定
+不可点亮：污点根是 DB 字段（跨请求存储污点），现有管线结构性够不着，
+归入漏报根因新子类（详见 CAPABILITY_THREE_PROOFS_V1.md）。
+
 ## [3.7.57] — 2026-10-04（未发布）
 
 ### §51 held-out 验证 + §52-53 决策门禁 + 修冤枉第一刀（Data Mutation 族移除）
