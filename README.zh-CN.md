@@ -4,12 +4,12 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
-[![TS Benchmark](https://img.shields.io/badge/TS%20R98.5%25%20P100%25-22c55e)]()
-[![Python Benchmark](https://img.shields.io/badge/Python%20R100%25%20P100%25-22c55e)]()
+[![TS Benchmark (synthetic)](https://img.shields.io/badge/TS%20R98.5%25%20P100%25%20(synthetic)-22c55e)]()
+[![Python Benchmark (synthetic)](https://img.shields.io/badge/Python%20R100%25%20P100%25%20(synthetic)-22c55e)]()
 
 > [English Version](https://github.com/shenlian19831109/progmune-runtime/blob/main/README.md) · 中文版
 
-**在 AI 生成的代码进入生产前验证它。** Progmune 检查你的 AI 生成代码是否遵循正确的协议生命周期——TLS 握手、认证流程、支付完整性、资源管理——这些违规横跨**函数调用序列**而非单条语句，SAST 和 SCA 工具都看不见。
+**在 AI 生成的代码进入生产前验证它。** Progmune 检查协议生命周期（TLS 握手、认证流程、支付完整性、资源管理——注解驱动）、框架路由认证（生产）、真实修复验证过的污点检测（路径穿越、SSRF）——外加一条排序后的防护告警证据流供人工审查。每项能力声明都按证据分级：[能力审计](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/CAPABILITY_THREE_PROOFS_V1.md)。
 
 Progmune 不信任模型说的话，它验证程序实际做的事。
 
@@ -46,11 +46,10 @@ AI 代码生成器产出语法合法的代码，却常常违反**协议生命周
 
 | 类别 | 检测到的违规示例 |
 |------|----------------|
-| **TLS / SSL** | 握手未校验证书、缺少主机名校验 |
-| **认证** | 令牌无过期时间、会话无超时、缺少限流 |
-| **支付** | 订单未验证、退款未授权、Webhook 无签名校验 |
-| **资源** | 文件打开未关闭、连接未清理、malloc 未 free |
-| **数据完整性** | 变更无审计轨迹、缺少输入校验 |
+| **协议生命周期（注解驱动）** | TLS 握手、认证流程、支付完整性、资源管理——你声明协议原语（每协议 ~2-3 个注解），状态机验证执行顺序。已验证：C 真实模块金标 5/5、应用级 P=91.7%/R=100%。**未注解代码的自动检测为研究级**——17 条真实安全修复命中 0（实测，见 [修复回归语料](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/fix-regression-corpus.json)） |
+| **框架路由认证（TS/Python，生产）** | 写操作路由缺认证守卫/校验——NestJS/Express/tRPC/FastAPI/Django/Flask/Fastify/Next.js/Koa/Hapi/Gin/Fiber/Spring：真实语料验证 + 摘保护反证；docmost + immich 真实项目盲测（修复轮后） |
+| **污点标记检测（真实修复验证）** | 路径穿越（TS+Python）与 SSRF（TS+Python）：提取器污点流 → sink，以真实安全修复的真值位置验证（fr-007、fr-016、fr-010、fr-011）+ held-out 命中：immich 上 SSRF = GHSA-hq46。见 [能力审计](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/CAPABILITY_THREE_PROOFS_V1.md) |
+| **输入校验 / 数据完整性防护** | 持久化前缺输入校验、缺外键检查——证据流（已排序）而非判定：真实世界加权精确率 ≈6%，排序头部 ≈46% |
 | **注入类（Python，源码级）** | 用 f-string/`%`/`.format`/拼接构造 SQL、动态 subprocess 参数导致命令注入、用户可控 URL 抓取导致 SSRF、模板字符串 sink 导致 SSTI、外部实体解析器配置导致 XXE、对用户输入 eval/exec |
 | **Web 类（Python，源码级）** | `{{ var\|safe }}`/autoescape off 模板导致 XSS、用户可控文件路径导致路径穿越、`@csrf_exempt` 或 GET 状态变更导致 CSRF、客户端 cookie 授权、硬编码 JWT 密钥（含跨模块常量） |
 
@@ -101,8 +100,8 @@ Progmune 对能验证什么、不能验证什么保持诚实。
 
 | 语言 | 状态 | 证据 |
 |------|------|------|
-| **TypeScript / JavaScript** | ✅ 生产 | 盲测基准：**召回 98.5% / 精确率 100%**（795 条 gold finding，100 个项目） |
-| **Python** | ✅ 生产 | 盲测基准：**召回 100% / 精确率 100%**（729 条 gold finding，90 个项目）；真实应用验证：PyGoat（OWASP 故意脆弱 Django 应用）**67 TP / 0 FP，标记精确率 100%**；三个良构应用（django/fastapi realworld、django-unicorn）0 误报真阳性 |
+| **TypeScript / JavaScript** | ✅ 生产 | 合成盲测基准：**召回 98.5% / 精确率 100%**（795 条 gold finding，100 个生成项目）。真实项目数字单列并如实发布——见 [能力审计（三要件）](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/CAPABILITY_THREE_PROOFS_V1.md)：告警流加权精确率 ≈6%（排序后头部 ≈46%）、84 条真实公告位置召回 47%（下界）、主路径真实公告命中 1 次 |
+| **Python** | ✅ 生产 | 合成盲测基准：**召回 100% / 精确率 100%**（729 条 gold finding，90 个生成项目）；真实应用验证：PyGoat（OWASP 故意脆弱 Django 应用）**67 TP / 0 FP，标记精确率 100%**；三个良构应用（django/fastapi realworld、django-unicorn）0 误报真阳性 |
 | **C** | ✅ 注解驱动（Beta） | IR 提取接入注册表 + SSG 状态机；**每协议标注 ~2-3 个原语即获得可信验证**（真实模块金标 5/5：redis ACL / libssh 客户端 / libssh 服务端 / libssh 回调分发 / uftpd 传送授权——全部 0 误报 + 违规精确定位；应用级金标 v2：**P=91.7% / R=100% / F1=95.7%**）。未注解自动检测不在范围（真实语料 0 TP——定位决议见 C 语言状态文档）；TLS 级覆盖仍无。见 [C 语言状态](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md)。 |
 | **Go** | ✅ 注解驱动（Beta） | IR 提取接入注册表 + SSG 状态机；合成金标 v1：**P=100% / R=100%**（3 干净 × 3 植入违规）；零外部工具链（纯 TS 词法提取，npm 安装态可用） |
 | **Java** | ❌ 无 | 规划中 |
@@ -137,6 +136,8 @@ npx progmune-init-policy --tier 3   # 观察：工具/demo——只报告不拦�
 
 公开、可复现的精确率数据。所有数字均对 gold 标注基准测量。
 
+> ⚠ **口径**：以下数字是**合成基准**（模板生成项目 + 人工金标）——它证明"规则在这些形态上工作"，**不证明**"在真实项目上同样准确"。真实项目数字单列在 [能力审计（三要件）](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/CAPABILITY_THREE_PROOFS_V1.md)：真实告警流加权精确率 ≈6%（排序后头部 ≈46%）、84 条真实公告位置召回 47%（下界）、主路径真实公告命中 1 次（SSRF = GHSA-hq46）。合成 P100% 与真实项目大量误报可以同时为真——两者测的是不同的事。
+
 ### TypeScript（盲测基准 v6——100 个项目）
 
 | 指标 | 值 |
@@ -158,7 +159,7 @@ npx progmune-init-policy --tier 3   # 观察：工具/demo——只报告不拦�
 | 指标 | 值 |
 |------|-----|
 | 标记精确率 | **100%**（67 真阳性 / 0 误报，逐条人工核实） |
-| 覆盖类别 | 14 个漏洞类别，含 SQLi、SSRF、路径穿越、XSS、SSTI、XXE、命令注入、反序列化、CSRF（双形态）、cookie 授权、硬编码密钥 |
+| 覆盖类别 | 14 个漏洞类别，**Python 口径**（Django lab 应用）——SQLi、SSRF、路径穿越、XSS、SSTI、XXE、命令注入、反序列化、CSRF（双形态）、cookie 授权、硬编码密钥。⚠ 这些类别在 TypeScript 上**并未全部接线**：48 条规则中 15 条 python-only，在 TS 项目上永不触发（含 XSS/CSRF/XXE/硬编码密钥）——实测数据见 [PATH_GUARD_EVIDENCE_DESIGN §49.18](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/PATH_GUARD_EVIDENCE_DESIGN_V1.md) |
 | 良构应用 | django-realworld、fastapi-realworld、django-unicorn——0 误报真阳性 |
 
 → [真实验证报告](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/REALWORLD_APP_V1.md) · [基准基线](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_v6.md)

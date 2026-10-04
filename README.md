@@ -4,8 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
-[![TS Benchmark](https://img.shields.io/badge/TS%20R98.5%25%20P100%25-22c55e)]()
-[![Python Benchmark](https://img.shields.io/badge/Python%20R100%25%20P100%25-22c55e)]()
+[![TS Benchmark (synthetic)](https://img.shields.io/badge/TS%20R98.5%25%20P100%25%20(synthetic)-22c55e)]()
+[![Python Benchmark (synthetic)](https://img.shields.io/badge/Python%20R100%25%20P100%25%20(synthetic)-22c55e)]()
 [![npm version](https://img.shields.io/npm/v/progmune-runtime?color=cb3837)](https://www.npmjs.com/package/progmune-runtime)
 [![npm weekly downloads](https://img.shields.io/npm/dw/progmune-runtime?color=cb3837)](https://www.npmjs.com/package/progmune-runtime)
 [![GitHub stars](https://img.shields.io/github/stars/shenlian19831109/progmune-runtime?color=gold)](https://github.com/shenlian19831109/progmune-runtime)
@@ -13,7 +13,7 @@
 
 > [中文版](https://github.com/shenlian19831109/progmune-runtime/blob/main/README.zh-CN.md) · English Version
 
-**Verify AI-generated code before it reaches production.** Progmune checks whether your AI-generated code follows correct protocol lifecycles — TLS handshakes, auth flows, payment integrity, resource management — violations that SAST and SCA tools cannot see because they span sequences of function calls, not single statements.
+**Verify AI-generated code before it reaches production.** Progmune checks protocol lifecycles (TLS handshakes, auth flows, payment integrity, resource management — annotation-driven), framework route auth (production), and real-fix-validated taint detections (path traversal, SSRF) — plus a ranked evidence stream of safeguard alerts for human review. Every capability claim is tiered by evidence: [Capability Audit](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/CAPABILITY_THREE_PROOFS_V1.md).
 
 Progmune doesn't trust what the model says. It verifies what the program actually does.
 
@@ -50,11 +50,10 @@ AI code generators produce syntactically valid code that often violates **protoc
 
 | Category | Example violations detected |
 |----------|---------------------------|
-| **TLS / SSL** | Handshake without certificate verification, missing hostname validation |
-| **Auth** | Token without expiry, session without timeout, missing rate limiting |
-| **Payment** | Order without verification, refund without authorization, webhook without signature check |
-| **Resource** | File opened but not closed, connection without cleanup, malloc without free |
-| **Data Integrity** | Mutation without audit trail, missing input validation |
+| **Protocol lifecycles (annotation-driven)** | TLS handshake, auth flows, payment integrity, resource management — you declare the protocol primitives (~2–3 annotations per protocol), the state machine verifies execution order. Validated: C real modules 5/5 gold, app-level P=91.7%/R=100%. **Automatic detection of these classes on unannotated code is research-grade** — 0 hits on 17 real-world security fixes (measured, see [fix-regression corpus](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/fix-regression-corpus.json)) |
+| **Framework route auth (TypeScript/Python, production)** | Missing auth guard / validation on mutation routes — NestJS/Express/tRPC/FastAPI/Django/Flask/Fastify/Next.js/Koa/Hapi/Gin/Fiber/Spring: validated on real corpora with guard-removal counter-proofs; real-world blind tests on docmost + immich after fix rounds |
+| **Taint-marker detections (real-fix validated)** | Path traversal (TS+Python) and SSRF (TS+Python): extractor taint flow → sink, validated against real security fixes at their ground-truth sites (fr-007, fr-016, fr-010, fr-011) — plus a held-out hit: SSRF = GHSA-hq46 on immich. See [Capability Audit](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/CAPABILITY_THREE_PROOFS_V1.md) |
+| **Input validation / data integrity safeguards** | Missing input validation before persistence, missing FK checks — evidence stream (ranked), not a verdict: real-world weighted precision ≈6%, ranked head ≈46% |
 | **Injection (Python, source-level)** | SQL built with f-string/`%`/`.format`/concatenation, command injection via dynamic subprocess args, SSRF via user-controlled URL fetches, SSTI via template-string sinks, XXE via external-entity parser config, eval/exec on user input |
 | **Web (Python, source-level)** | XSS via `{{ var\|safe }}`/autoescape-off templates, path traversal via user-controlled file paths, CSRF via `@csrf_exempt` or GET state changes, authorization by client cookies, hardcoded JWT secrets (incl. cross-module constants) |
 
@@ -105,8 +104,8 @@ Progmune is honest about what it can and cannot verify.
 
 | Language | Status | Evidence |
 |----------|--------|----------|
-| **TypeScript / JavaScript** | ✅ Production | Blind benchmark: **recall 98.5% / precision 100%** (795 gold findings, 100 projects) |
-| **Python** | ✅ Production | Blind benchmark: **recall 100% / precision 100%** (729 gold findings, 90 projects); real-world validation: PyGoat (OWASP vulnerable-by-design Django app) **67 TP / 0 FP, 100% labeled precision**; three well-written apps (django/fastapi realworld, django-unicorn) with 0 false-positive true findings |
+| **TypeScript / JavaScript** | ✅ Production | Synthetic blind benchmark: **recall 98.5% / precision 100%** (795 gold findings, 100 generated projects). Real-world numbers are measured separately and published honestly — see [Capability Audit](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/CAPABILITY_THREE_PROOFS_V1.md): safeguard alert stream ≈6% weighted precision (ranked head ≈46%), 47% location recall on 84 real advisories, 1 real-advisory hit on the main decision path |
+| **Python** | ✅ Production | Synthetic blind benchmark: **recall 100% / precision 100%** (729 gold findings, 90 generated projects); real-world validation: PyGoat (OWASP vulnerable-by-design Django app) **67 TP / 0 FP, 100% labeled precision**; three well-written apps (django/fastapi realworld, django-unicorn) with 0 false-positive true findings |
 | **C** | ✅ Annotation-driven (Beta) | IR extraction via the registry + SSG state machine; **annotate ~2-3 protocol primitives per protocol to get trusted verification** (gold 5/5 on real modules: redis ACL / libssh client / libssh server / libssh callback-dispatch / uftpd transfer-auth — all 0 FP with precise violation localization; app-level gold v2: **P=91.7% / R=100% / F1=95.7%**). Unannotated auto-detection stays out of scope (0 TP on real corpus — positioning decision recorded in the C Language Status doc); TLS-level coverage still absent. See [C Language Status](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/c-language-status.md). |
 | **Go** | ✅ Annotation-driven (Beta) | IR extraction via registry + SSG state machine; synthetic gold v1: **P=100% / R=100%** (clean×3 + violations×3); zero external toolchain (pure-TS lexical extractor — works from npm installs) |
 | **Java** | 🔶 Annotation-driven (Beta) | Two layers, verified on real corpora. **Framework layer ✅**: Spring adapter (`spring-detector.ts` — security rule ordering + ant patterns + controller annotation routes) on gothinkster/spring-boot-realworld (1581★): 19 routes / 12 mutations fully parsed, 0 issues, catch-all flip counter-proof ×10; Spring Boot 3 modern dialect re-verified (SecurityFilterChain bean + String[] allowlist expansion): 15 routes, 0 issues. **Core layer**: pure-TS lexical extractor (zero toolchain deps) at **100%/100% recovery vs a tree-sitter AST baseline (1216/1216)**; SSG annotation-driven protocol rows (token / auth-register / resource) engine-locked with a real-corpus closed loop (**1 real TP / 0 FP**). Unannotated auto-detection stays out of scope (same decision as C/Go). Production label pending enterprise PoC. See [Java Language Status](https://github.com/shenlian19831109/progmune-runtime/blob/main/docs/java-language-status.md). |
@@ -144,6 +143,8 @@ npx progmune-init-policy --tier 3   # Observe: tools/demos — report only
 
 Public, reproducible precision data. All numbers measured against gold-annotated benchmarks.
 
+> ⚠ **口径（Scope）**：以下数字是**合成基准**（模板生成的项目 + 人工金标）——它证明"规则在这些形态上工作"，**不证明**"在真实项目上同样准确"。真实项目的数字单列在 [Capability Audit（三要件）](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/CAPABILITY_THREE_PROOFS_V1.md)：真实告警流加权精确率 ≈6%（排序后头部 ≈46%）、84 条真实公告位置召回 47%（下界）、主路径真实公告命中 1 次（SSRF = GHSA-hq46）。合成 P100% 与真实项目大量误报可以同时为真——两者测的是不同的事。
+
 ### TypeScript (Blind Benchmark v6 — 100 projects)
 
 | Metric | Value |
@@ -165,7 +166,7 @@ Public, reproducible precision data. All numbers measured against gold-annotated
 | Metric | Value |
 |--------|-------|
 | Labeled precision | **100%** (67 true positives / 0 false positives, per-detection human review) |
-| Classes covered | 14 vulnerability classes incl. SQLi, SSRF, path traversal, XSS, SSTI, XXE, command injection, deserialization, CSRF (both shapes), cookie authorization, hardcoded secrets |
+| Classes covered | 14 vulnerability classes on **Python** (Django lab app) — SQLi, SSRF, path traversal, XSS, SSTI, XXE, command injection, deserialization, CSRF (both shapes), cookie authorization, hardcoded secrets. ⚠ These classes are **not** all wired on TypeScript: 15 of 48 rules are Python-only and never fire on TS projects (XSS/CSRF/XXE/hardcoded secrets included) — measured, see §49.18 in [PATH_GUARD_EVIDENCE_DESIGN](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/PATH_GUARD_EVIDENCE_DESIGN_V1.md) |
 | Well-written apps | django-realworld, fastapi-realworld, django-unicorn — 0 false-positive true findings; 3 documented framework-internal boundary FPs |
 
 → [Real-world validation report](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/REALWORLD_APP_V1.md) · [Benchmark baseline](https://github.com/shenlian19831109/progmune-runtime/blob/main/blind-benchmark/BASELINE_v6.md)
