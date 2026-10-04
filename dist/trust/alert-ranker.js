@@ -79,7 +79,9 @@ exports.DEFAULT_RULE_PRIOR = {
     "Password Hashing": 0.0525,
     "Password Hashing (Weak)": 0.0525,
     "Registration Without Email Verification": 0.0525,
-    "Data Mutation Without Audit Trail": 0.0057,
+    // 2026-10-04：Data Mutation Without Audit Trail 规则已移除（fp-gold
+    // 131/131 全 FP、全口径 TP=0，概念性失明——见 protocol-detector.ts 注记），
+    // 先验条目随之删除。
 };
 /** 未知族的兜底先验 = 全局基线 */
 exports.DEFAULT_BASE = 0.0984;

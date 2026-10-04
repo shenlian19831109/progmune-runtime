@@ -1,5 +1,42 @@
 # Changelog
 
+## [3.7.57] — 2026-10-04（未发布）
+
+### §51 held-out 验证 + §52-53 决策门禁 + 修冤枉第一刀（Data Mutation 族移除）
+
+**§51 held-out 主路径验证**（`REALWORLD_HELD_OUT_V2.md`，commit `71339ca3`）：
+immich（115k★ NestJS，此前从未参与诊断）暴露 3.7.55 四刀**未泛化**——153 条
+NESTJS_NO_VALIDATION（immich 用 APP_PIPE 注入形态注册全局校验，刀 1 只学了两种形态）；
+**聚合吞掉维度彻底失败**：authentication 0 分 + 174 条违规仍 APPROVED(83)/HIGH——
+假 BLOCKED 会被人立刻反对，「auth 0 分 + 通过」是静默放行。召回侧首次教科书级
+位置命中：SSRF 打在 OAuthRepository.getProfilePicture = GHSA-hq46（§50 的
+「主路径 0 命中」修正为「有 1 次」）。R95/R96/R97 入册。
+
+**§52 NestJS 注册事件解析**：APP_PIPE/APP_GUARD 注册事件收集（@Module providers
+含 spread 多跳回溯 + 数组常量 + 文本兜底）、数组路径别名展开、@Module(configVar)
+回溯——immich 153 条 → 0，逐条归因到「全局管道 + 入参是已校验 DTO」。
+
+**§53 决策门禁**（`DECISION_GATES_V1.md`，首次改动 src 判定逻辑）：已观察的安全
+协议（authentication/authorization/data_integrity）任一低于 50 分 ⇒ decision 封顶
+NEEDS_REVIEW；coverage LOW 且可测 ⇒ 同上；观察度不足 ⇒ confidence 封顶 MEDIUM。
+修两处「声明与实现分离」（R102）：废票注释无人消费、confidence 分子恒真。
+第一版门禁被自己数据否决后收窄（coverage 缺 protocols.json 恒不可测 ⇒ 仅可测时
+生效）。实测 9 真实项目：门禁触发 3/9、6 个不触发（有反例，R101）。R101/R102 入册。
+
+**修冤枉第一刀：移除 "Data Mutation Without Audit Trail" 规则**。数据依据：
+fp-gold 131/131 全 FP（七仓九片）；TS 盲测 gold 795 条 0 条此族；PyGoat 8 条全
+unlabeled 且样本全 FP 形态；84 条 GHSA 无审计轨迹类。根因是**概念性失明**：
+真实架构里审计在框架/中间件层（ORM 拦截器/触发器/日志系统），函数名判据永远
+不可能满足。与授权族保留对照（R92）：授权族真实世界有 TP（fr 语料 8/9 命中），
+此族全口径 TP=0。若未来有函数级审计判据（decorator 通道），按「先语料后规则」重提。
+
+**效果**：盲测 LOST 423 条**全部**是本族（非本族 LOST=0、ADDED=0，逐条归因）；
+fp-gold 131 条 FP 随之消失；docmost 产品告警流 1320 → 992（-328 条全为本族噪声，
+头部族构成不变、判定 APPROVED(87) 不变）；排序器 DEFAULT_RULE_PRIOR 同步删条目。
+
+**门**：taintpath 160/0 / webshape 72/0 / fr-007 pre5·post0 + fr-016 pre7·post0 /
+反向验证：典型样本本族 0 条转红 / batch-scan 119 项目逐条归因如上 / tsc 0 错
+
 ## [3.7.56] — 2026-10-02
 
 ### 排序告警流进产品（§49.15 方案 b 落地，未发布）

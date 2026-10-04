@@ -1121,17 +1121,17 @@ const SAFEGUARD_RULES = [
         conceptExpected: ["checkExpiry", "autoRenew", "certificate watch"],
     },
     // ── Data Integrity: Mutation without audit ──
-    {
-        name: "Data Mutation Without Audit Trail",
-        category: "data_integrity",
-        trigger: /\b(update|delete|modify|change|mutate|set\w*field|edit|remove|drop)\b/i,
-        safeguards: [
-            { pattern: /\b(audit|log\w*change|change\w*log|track\w*change|record\w*mutation|mutation\w*log|history|version|revision|snapshot|write\w*ahead|wal\b)/i, label: "audit_trail" },
-        ],
-        violationMessage: "Data mutation without audit trail. Cannot track who changed what or recover from accidental data corruption.",
-        conceptMissing: ["AuditTrail", "ChangeTracking", "DataLineage"],
-        conceptExpected: ["auditLog", "changeHistory", "write-ahead log"],
-    },
+    // 2026-10-04（修冤枉第一刀）：移除 "Data Mutation Without Audit Trail"。
+    // 数据依据：fp-gold 131/131 全 FP（docmost/hedgedoc/hoppscotch/verdaccio/
+    // 3×realworld 七仓九片）；TS 盲测 gold 795 条 0 条此族；PyGoat 232 条里
+    // 此族 8 条全 unlabeled 且样本全 FP 形态；84 条 GHSA 无一条审计轨迹类。
+    // 根因是概念性失明（非词表问题）：真实架构里审计在框架/中间件层
+    // （ORM 拦截器/数据库触发器/日志系统），函数名里永远不会出现 audit
+    // 字样 ⇒ 判据「mutation 函数名附近有审计词汇」在真实代码形态上永远
+    // 不可能满足。与授权族保留的理由对照（R92）：授权族在真实世界有 TP
+    // （fr 语料 8/9 位置命中是授权类），此族在所有口径 TP=0。
+    // 若未来有函数级审计判据（如 decorator/@Audited 标记通道），按
+    // 「先语料后规则」重新提案。
     // ═══════════════════════════════════════════════════════════════
     // Governance meta-rule: Framework Version Convention Check
     // Lesson from proxy.ts incident (2026-08-03)
