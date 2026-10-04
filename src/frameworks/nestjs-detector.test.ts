@@ -425,3 +425,237 @@ export class NotesController {
     expect(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST notes/create")).toBe(true);
   });
 });
+
+// ═══════════════════════════════════════════════════════════
+// §52（2026-10-03）：app-level provider 注册事件
+//
+// immich held-out 实测倒在了第三种注册途径上：
+//   const commonMiddleware = [{ provide: APP_PIPE, useClass: ZodValidationPipe }, ...];
+//   const apiMiddleware = [FileUploadInterceptor, ...commonMiddleware, {...}];
+//   @Module({ providers: [...common, ...apiMiddleware, ...] })
+// `APP_PIPE` 与 `@Module` 之间隔了**两跳数组 spread**，只看装饰器那一层永远
+// 看不到 ⇒ 153 条 NO_VALIDATION 误报。修复原则是「注册事件」而非「写法」：
+// 哪里有注册意图，哪里就是证据，不再要求它必须直连某个 @Module。
+//
+// 同组反向测试是硬要求（R75）：压制放宽后必须证明「该报的还在报」。
+// ═══════════════════════════════════════════════════════════
+
+describe("nestjs-detector app-level provider 注册事件（§52）", () => {
+  const ZOD_STUB = `
+export function createZodDto(schema: any): any { return class {} as any; }
+export const CreateAlbumSchema = { albumName: "string" };
+export class CreateAlbumDto extends createZodDto(CreateAlbumSchema) {}
+export class PlainAlbumDto { albumName: string = ""; }
+`;
+
+  const ALBUM_CONTROLLER = `
+import { Body, Controller, Post } from "@nestjs/common";
+import { CreateAlbumDto } from "./album.dto";
+@Controller("albums")
+export class AlbumController {
+  @Post()
+  create(@Body() dto: CreateAlbumDto) { return {}; }
+}
+`;
+
+  const APP_MODULE_SPREAD = `
+import { Module } from "@nestjs/common";
+import { APP_PIPE } from "@nestjs/core";
+import { ZodValidationPipe } from "nestjs-zod";
+import { FileUploadInterceptor } from "./middleware";
+
+const commonMiddleware = [
+  { provide: APP_PIPE, useClass: ZodValidationPipe },
+];
+const apiMiddleware = [FileUploadInterceptor, ...commonMiddleware];
+
+@Module({ providers: [...apiMiddleware] })
+export class AppModule {}
+`;
+
+  function writeImmishApp() {
+    write("tsconfig.json", TSCONFIG);
+    write("src/album.dto.ts", ZOD_STUB);
+    write("src/album.controller.ts", ALBUM_CONTROLLER);
+    write("src/middleware.ts", `
+export class FileUploadInterceptor {}
+`);
+  }
+
+  it("APP_PIPE 经两跳 spread 进 @Module ⇒ 已校验 DTO 的 mutation 不报 NO_VALIDATION（immich 形态）", () => {
+    writeImmishApp();
+    write("src/app.module.ts", APP_MODULE_SPREAD);
+    const a = analyzeNestJSProject(dir);
+    expect(a.globalValidationPipes).toContain("ZodValidationPipe");
+    const nv = a.issues.filter((i) => i.type === "NESTJS_NO_VALIDATION");
+    expect(nv.map((i) => i.route)).not.toContain("POST albums");
+  });
+
+  it("反向：同一形态但摘掉 APP_PIPE 注册 ⇒ 精确转红（不是无差别压制）", () => {
+    writeImmishApp();
+    write("src/app.module.ts", `
+import { Module } from "@nestjs/common";
+import { FileUploadInterceptor } from "./middleware";
+const apiMiddleware = [FileUploadInterceptor];
+@Module({ providers: [...apiMiddleware] })
+export class AppModule {}
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.globalValidationPipes).toEqual([]);
+    expect(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST albums")).toBe(true);
+  });
+
+  it("反向：有全局管道但入参不是已校验 DTO ⇒ 仍报（保守豁免不扩散到裸类型）", () => {
+    writeImmishApp();
+    write("src/app.module.ts", APP_MODULE_SPREAD);
+    write("src/album.controller.ts", `
+import { Body, Controller, Post } from "@nestjs/common";
+import { PlainAlbumDto } from "./album.dto";
+@Controller("albums")
+export class AlbumController {
+  @Post()
+  create(@Body() dto: PlainAlbumDto) { return {}; }
+}
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST albums")).toBe(true);
+  });
+
+  it("反向：注释里的 APP_PIPE 不算注册事件 ⇒ 仍报（text-fallback 抗噪）", () => {
+    writeImmishApp();
+    write("src/app.module.ts", `
+import { Module } from "@nestjs/common";
+// 计划中：providers: [{ provide: APP_PIPE, useClass: ZodValidationPipe }]
+// * 文档注释形态同样不应被当作注册证据
+@Module({ providers: [] })
+export class AppModule {}
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.globalValidationPipes).toEqual([]);
+    expect(a.issues.some((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST albums")).toBe(true);
+  });
+
+  it("@UsePipes 自定义管道名（不带 Pipe 后缀）⇒ 识别为已注册管道", () => {
+    writeImmishApp();
+    write("src/album.controller.ts", `
+import { Body, Controller, Post, UsePipes } from "@nestjs/common";
+import { CreateAlbumDto } from "./album.dto";
+@Controller("albums")
+export class AlbumController {
+  @Post()
+  @UsePipes(bodyTrimSanitizer)
+  create(@Body() dto: CreateAlbumDto) { return {}; }
+}
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.issues.filter((i) => i.type === "NESTJS_NO_VALIDATION" && i.route === "POST albums")).toEqual([]);
+  });
+
+  it("@UseGuards(AuthGuard('JWT')) 的参数字符串不产生假认证证据（反向 Sophie）", () => {
+    write("tsconfig.json", TSCONFIG);
+    write("src/auth.guard.ts", GUARD);
+    write("src/api.controller.ts", `
+import { Controller, Post, UseGuards } from "@nestjs/common";
+import { JWTStrategy } from "./jwt";
+@Controller("api")
+export class ApiController {
+  @Post("transfer")
+  @UseGuards(JWTStrategy)
+  transfer() { return {}; }
+}
+`);
+    write("src/jwt.ts", `
+export const JWT = "Bearer";
+export class JWTStrategy { canActivate(): boolean { return false; } }
+`);
+    write("src/app.module.ts", MODULE_EMPTY);
+    const a = analyzeNestJSProject(dir);
+    // JWTStrategy 名字里带 jwt ⇒ 认证守卫（EXPECT 有保护）
+    expect(a.issues.filter((i) => i.type === "NESTJS_NO_AUTH")).toEqual([]);
+    // 但若写成字符串参数，不得凭 'JWT' 这个 token 冒充守卫名
+    write("src/api.controller.ts", `
+import { Controller, Post, UseGuards } from "@nestjs/common";
+import { AnonymousGate } from "./gate";
+@Controller("api")
+export class ApiController {
+  @Post("transfer")
+  @UseGuards(AnonymousGate("JWT"))
+  transfer() { return {}; }
+}
+`);
+    write("src/gate.ts", `
+export function AnonymousGate(scheme: string): any { return class { canActivate() { return true; } }; }
+`);
+    const b = analyzeNestJSProject(dir);
+    expect(b.issues.some((i) => i.type === "NESTJS_NO_AUTH" && i.route === "POST api/transfer")).toBe(true);
+  });
+
+  it("registrations 带可复核的 (file, line) 与发现途径", () => {
+    writeImmishApp();
+    write("src/app.module.ts", APP_MODULE_SPREAD);
+    const a = analyzeNestJSProject(dir);
+    const pipeReg = a.registrations.filter((r) => r.token === "APP_PIPE");
+    expect(pipeReg.length).toBeGreaterThan(0);
+    for (const r of pipeReg) {
+      // 可复核：每条注册都必须能指回某个文件的某一行
+      expect(r.file).toMatch(/app\.module\.ts$/);
+      expect(r.line).toBeGreaterThan(0);
+      expect(r.impl).toBe("ZodValidationPipe");
+      expect(["module-decorator", "module-property", "array-literal", "text-fallback"]).toContain(r.source);
+    }
+  });
+
+  it("数组路径别名：展开成多条 route，公开豁免重新生效（nocodb 形态，普查 72%）", () => {
+    write("tsconfig.json", TSCONFIG);
+    write("src/app.module.ts", MODULE_EMPTY);
+    write("src/token.controller.ts", `
+import { Controller, Post } from "@nestjs/common";
+@Controller(["meta/bases/:id", "api/v1/db/meta/projects/:id"])
+export class TokenController {
+  @Post(["login", "signin"])
+  login() { return {}; }
+  @Post(["api-tokens"])
+  createToken() { return {}; }
+}
+`);
+    const a = analyzeNestJSProject(dir);
+    const paths = a.routes.map((r) => `${r.method} ${r.path}`).sort();
+    // 2 个 controller 别名 × 3 个方法别名 = 6 条
+    expect(paths).toEqual([
+      "POST api/v1/db/meta/projects/:id/api-tokens",
+      "POST api/v1/db/meta/projects/:id/login",
+      "POST api/v1/db/meta/projects/:id/signin",
+      "POST meta/bases/:id/api-tokens",
+      "POST meta/bases/:id/login",
+      "POST meta/bases/:id/signin",
+    ]);
+    // 旧实现下 path 是整段数组文本 ⇒ /login 豁免匹配不到 ⇒ 4 条 login/signin 全被误报
+    const noAuth = a.issues.filter((i) => i.type === "NESTJS_NO_AUTH").map((i) => i.route);
+    expect(noAuth.sort()).toEqual([
+      "POST api/v1/db/meta/projects/:id/api-tokens",
+      "POST meta/bases/:id/api-tokens",
+    ]);
+  });
+
+  it("@Module(configVar)：装饰器参数是变量时仍能读到 providers（nocodb 形态，普查 71%）", () => {
+    writeImmishApp();
+    write("src/app.module.ts", `
+import { Module } from "@nestjs/common";
+import { APP_PIPE } from "@nestjs/core";
+import { ZodValidationPipe } from "nestjs-zod";
+
+const moduleMetadata = {
+  imports: [],
+  controllers: [],
+  providers: [{ provide: APP_PIPE, useClass: ZodValidationPipe }],
+};
+
+@Module(moduleMetadata)
+export class AppModule {}
+`);
+    const a = analyzeNestJSProject(dir);
+    expect(a.globalValidationPipes).toContain("ZodValidationPipe");
+    const nv = a.issues.filter((i) => i.type === "NESTJS_NO_VALIDATION");
+    expect(nv.map((i) => i.route)).not.toContain("POST albums");
+  });
+});

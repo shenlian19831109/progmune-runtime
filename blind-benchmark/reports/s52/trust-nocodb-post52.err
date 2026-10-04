@@ -1,0 +1,54 @@
+🔧 检测到路径别名: src/*, ~/*, @/*, @noco-local-integrations/*, @noco-local-integrations/core
+[perf-file] src/db/BaseModelSqlv2.ts: 4629ms
+[perf-file] src/services/columns.service.ts: 3002ms
+[perf-file] src/modules/jobs/jobs/at-import/at-import.processor.ts: 8440ms
+📦 外部函数: 2040 (动态=4 回退=19 未签名=2017, from 2812 total calls)
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537301_600
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537323_601
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537353_602
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537356_603
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537386_604
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537389_605
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537397_606
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537405_607
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537407_608
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537419_609
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537422_610
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537430_611
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537435_612
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537439_613
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537453_614
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537456_615
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537459_616
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537462_617
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537465_618
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537467_619
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537471_620
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537483_621
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537485_622
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537487_623
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537488_624
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537496_625
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537498_626
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537500_627
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537505_628
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537511_629
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537521_630
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537528_631
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537538_632
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537551_633
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537553_634
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537554_635
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537562_636
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537564_637
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537566_638
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537569_639
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537571_640
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537587_641
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537649_642
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537651_643
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537652_644
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537655_645
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537662_646
+[FailureCorpus] SVL-2 | 尝试 undefined/undefined | fail_1791044537673_647
+[FailureCorpus] SVL-4 | 尝试 undefined/undefined | fail_1791044537702_648

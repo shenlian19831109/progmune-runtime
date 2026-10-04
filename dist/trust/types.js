@@ -8,7 +8,7 @@
  * these types during evaluation.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DECISION_THRESHOLDS = exports.DEFAULT_GOVERNANCE_DEDUCTIONS = exports.DEFAULT_COVERAGE_MAX_SCORES = exports.DEFAULT_PROTOCOL_WEIGHTS = exports.DEFAULT_SEVERITY_DEDUCTIONS = exports.DEFAULT_DIMENSION_WEIGHTS = exports.TRUST_VIOLATION_REQUIRED_FIELDS = void 0;
+exports.DECISION_THRESHOLDS = exports.DEFAULT_GOVERNANCE_DEDUCTIONS = exports.DEFAULT_COVERAGE_MAX_SCORES = exports.DEFAULT_PROTOCOL_WEIGHTS = exports.DEFAULT_SEVERITY_DEDUCTIONS = exports.DEFAULT_DIMENSION_WEIGHTS = exports.OBSERVATION_RATE_FLOOR = exports.SECURITY_PROTOCOL_FLOOR = exports.SECURITY_PROTOCOLS = exports.TRUST_VIOLATION_REQUIRED_FIELDS = void 0;
 /** The 7 required fields for explainability completeness */
 exports.TRUST_VIOLATION_REQUIRED_FIELDS = [
     "severity",
@@ -20,6 +20,22 @@ exports.TRUST_VIOLATION_REQUIRED_FIELDS = [
     "fix",
     "policy_ref",
 ];
+// ── Decision Gates（§53 / R97） ──
+//
+// 背景（immich + nocodb 实测）：authentication 子协议 0 分（21 条 / 586 条违规）、
+// coverageConfidence 0% LOW、mappingCoverage 4%~8% LOW —— 三项独立的
+// 「我们其实没看到什么」指标全部触底，输出却仍是 83 / APPROVED / HIGH。
+// 根因是聚合层只有「分数 → 档位」一条路径，没有任何**下限**与**观察度门槛**。
+/** 安全相关协议：这些维度出现塌方时，不得给出「通过」结论 */
+exports.SECURITY_PROTOCOLS = [
+    "authentication",
+    "authorization",
+    "data_integrity",
+];
+/** 安全协议分数下限：任一条已观察的安全协议低于此分 ⇒ decision 不得为 APPROVED */
+exports.SECURITY_PROTOCOL_FLOOR = 50;
+/** 观察度门槛：coverage / mapping 命中率低于此值 ⇒ 视为「没看清楚」 */
+exports.OBSERVATION_RATE_FLOOR = 0.3;
 // ── Default Dimension Weights (from design doc) ──
 exports.DEFAULT_DIMENSION_WEIGHTS = {
     policyCompliance: 0.35,

@@ -25,6 +25,7 @@ import type {
   ViolationSeverity,
   SeveritySummary,
   AuditTrail,
+  DecisionGates,
 } from "./types";
 import {
   DEFAULT_DIMENSION_WEIGHTS,
@@ -40,6 +41,7 @@ import {
   determineDecision,
   determineConfidence,
   countViolationsBySeverity,
+  evaluateDecisionGates,
 } from "./score-calculator";
 import type { GovernanceDefect } from "./score-calculator";
 import { computeCoverageConfidence } from "./confidence-calculator";
@@ -209,14 +211,30 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
     ? Math.min(overallScore, DECISION_THRESHOLDS.criticalLock)
     : overallScore;
 
+  // ── Phase 1: Coverage-based confidence (replaces qualitative labels) ──
+  const coverageConfidence: CoverageConfidence = computeCoverageConfidence(ctx.projectPath);
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  §53 / R97：决策门禁
+  //
+  //  实测触发场景（immich / nocodb）：authentication 子协议 0 分（21 / 586 条违规），
+  //  coverageConfidence 0% LOW，mappingCoverage 4%~8% LOW —— 三项独立的
+  //  「其实没看到什么」的指标全部触底，聚合结果却仍是 83 / APPROVED / HIGH。
+  //
+  //  门禁只做**封顶**（不许说通过），不做扣分：没有观察就没有扣分依据。
+  // ═══════════════════════════════════════════════════════════════════
+  const decisionGates: DecisionGates = evaluateDecisionGates({
+    protocolSafety: protocolResult,
+    coverageLevel: coverageConfidence.level,
+    coverageApplicable: coverageConfidence.applicable,
+  });
+
   const decision = determineDecision(
     effectiveScore,
     policyResult.hasCritical,
-    explainResult.status
+    explainResult.status,
+    decisionGates
   );
-
-  // ── Phase 1: Coverage-based confidence (replaces qualitative labels) ──
-  const coverageConfidence: CoverageConfidence = computeCoverageConfidence(ctx.projectPath);
 
   const dimConfidences = [
     policyResult.hasCritical ? "LOW" as const : coverageResult.confidence,
@@ -225,7 +243,11 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
     governanceResult.confidence,
   ];
 
-  const confidence = determineConfidence(dimConfidences, explainResult.status);
+  const confidence = determineConfidence(
+    dimConfidences,
+    explainResult.status,
+    decisionGates.observationIncomplete
+  );
 
   // ═══════════════════════════════════════
   //  PHASE 5: ASSEMBLE
@@ -270,17 +292,21 @@ export async function evaluateTrust(ctx: TrustEvaluationContext): Promise<TrustD
       score: effectiveScore,
       decision,
       confidence,
+      decisionGates,
       coverageConfidence: extractionWarning
         ? {
             score: 0,
             margin: 25,
-            level: "LOW",
+            level: "LOW" as const,
+            // §53：IR 提取失败同样是「没得测」，不是「测得低」
+            applicable: false,
             summary: `${extractionWarning}——本次扫描是废票，不得据此得出「干净」结论`,
           }
         : {
             score: coverageConfidence.score,
             margin: coverageConfidence.margin,
             level: coverageConfidence.level,
+            applicable: coverageConfidence.applicable,
             summary: coverageConfidence.summary,
           },
       extractionWarning,

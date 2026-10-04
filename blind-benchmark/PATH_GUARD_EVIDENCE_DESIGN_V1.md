@@ -5298,3 +5298,207 @@ curl -sL "https://codeload.github.com/<owner>/<repo>/tar.gz/refs/heads/<branch>"
 ⚠ verdaccio 只有 2 条 GHSA、且是 monorepo 没有根 tsconfig，性价比低，**暂未扫**。
 ⇒ **「位置覆盖率 47%」目前仍是单仓数字（docmost 18 条公告），跨仓置信区间仍然很宽**，
    把 hedgedoc 的 22 条也人工判一遍是下一步里性价比最高的一项。
+
+
+---
+
+## §52（2026-10-03）：NestJS 注册事件解析 + 形态普查 —— held-out 第二轮
+
+对外报告：`blind-benchmark/REALWORLD_HELD_OUT_V2.md`（同一轮，可读版）
+产出：`src/frameworks/nestjs-detector.ts`（接线层）、`blind-benchmark/nestjs-pipe-probe.ts`、
+`blind-benchmark/nestjs-shape-census.ts`、`blind-benchmark/heldout-diff52.py`、
+数据 `blind-benchmark/reports/s52/`
+
+### ① 起点：§51 的结论
+
+§51 在 immich 上发现 3.7.55 的刀 1 学到的是**两种写法**，`APP_PIPE provider + 两跳 spread` 是第三种
+⇒ 153 条 `NESTJS_NO_VALIDATION` 误报。本报告做第二轮：把判定改成**注册事件**，再用**第四个仓 nocodb** 验。
+
+### ② 改了什么（三处，原则统一：**看有没有注册事件，不看名字与位置**）
+
+1. `collectAppLevelProviders()`（新增导出）—— @Module providers（含 **spread 多跳回溯**）
+   + 顶层/模块级数组常量 + 逐行文本兜底，三条途径**取并集**，每条留
+   `(token, impl, source, via, file, line)` 可复核。
+   * test 目录过滤：`/test/`、`/tests/`、`__tests__/`、`__mocks__/`、`.test|.spec.ts`
+     —— immich `test/utils.ts` 里有一整套给**测试 app** 用的 APP_PIPE/APP_GUARD，
+     采信它等于拿测试环境的配置豁免生产代码（静默，差一点漏进实现）。
+2. `@UsePipes/@UseGuards` 参数**不再要求** `(Guard|Pipe|Interceptor)` 后缀，
+   只取每个参数的**首个**标识符（`AuthGuard('JWT')` 的 `JWT` 不得冒充第二个守卫名 ⇒ 反向测试）。
+   「是不是认证守卫」仍由 `isAuthGuardName` 单独判断 —— 两个关注点此前混在一起，
+   导致「名字不像 ⇒ 连存在都看不见」。
+3. `getRoutePaths()` / `joinRoutePaths()`：HTTP 装饰器支持**数组路径别名**并逐条展开；
+   `@Module(configVar)` 回溯到变量定义处的对象字面量。附带修正：无参路由不再多一个尾斜杠
+   （`albums` ⇒ `albums/`，会让以 `$` 结尾的公开端点正则匹配失败）。
+
+### ③ 四仓 pre / post 对照（同 binaries，`reports/s52/probe-*.json`）
+
+| 项目 | 角色 | routes | pre | post①（注册事件） | post②（全部三处） |
+|---|---|---:|---:|---:|---:|
+| docmost | §50 回归 | 136→138 | 0 | 0 | 0 |
+| hedgedoc | §50 旁证 | 85 | 23 | 23 | 23 |
+| immich | §51 held-out→本轮学习对象 | 306 | **153** | **0** | **0** |
+| nocodb | §52 held-out | 348→556 | 371 | 371 | **579** |
+
+### ④ immich 153 → 0：逐条有据
+
+```
+[APP_PIPE] ZodValidationPipe  source=array-literal via=apiMiddleware<commonMiddleware  app.module.ts:47
+[APP_GUARD] AuthGuard         source=array-literal via=apiMiddleware                  app.module.ts:53
+[APP_GUARD] MaintenanceAuthGuard source=module-decorator                              app.module.ts:129
+```
+- 157/173 条 mutation：`全局 APP_PIPE + 入参 extends createZodDto(...)` ⇒ 豁免
+- 16/173 条：无 `@Body/@Query/@Param`（只有 `@Auth()` `/@UploadedFile()`/无参）⇒ 走「无结构化输入」豁免，
+  源码逐条核对属实
+- 0 条无法归因
+⚠ immich 是本轮**学习对象**（刀从它那 153 条读出来）⇒ 只能算 in-sample，不能算成绩。
+
+### ⑤ nocodb：0 收益 → 普查纠正 → 371→579 是**计数恢复**不是「变差」
+
+普查（`reports/s52/census-nocodb.json`）：无 `useGlobalPipes`、无 `APP_PIPE`、`@UsePipes` 0 处、
+package.json 无 class-validator、DTO class 全仓 1 个且无校验、mutation 结构化入参 317 条 primitive。
+⇒ **该项目没有输入校验设施** ⇒ 第一次 post 无收益属于「不适用」（R98），不是「没泛化」。
+
+第二轮修好 `@Module(configVar)` 后，nocodb 终于读到了 `APP_GUARD ExtractIdsMiddleware`，
+但 `isAuthGuardName("ExtractIdsMiddleware")=false` ⇒ `globalAuthGuards` 仍空 ⇒ 300 条 NO_AUTH 未被豁免。
+**线接上了、事件拿到了、语义分类正确地拒绝放宽** —— 这是本轮唯一一处「可能放宽过度而实际没有」的证据。
+
+579 vs 371 的差 = 路径展开（348→556 routes），且**按 controller 计较：下降 0 个**
+⇒ 没有任何一条是因为 path 修好后 `isPublicRoute` 生效而被豁免掉的
+（nocodb 公开路由本来就有 `@UseGuards`，全仓 110 处，不依赖 path 匹配）。
+
+### ⑥ 形态普查：把「还剩几扇门」一次数清楚
+
+| 语法位置 | nocodb 分布 | 修复前支持率 |
+|---|---|---|
+| `@Module` 装饰器参数 | 变量 5/7 = **71%**（`ceModuleConfig`…），对象字面量 2/7 | 29% |
+| HTTP 装饰器路径 | 数组 250/348 = **72%**，字符串 79，模板 17 | 0% |
+
+⇒ 「下一个 held-out 会不会失败」**事先可以测量**（支持率 29% / 0% ⇒ 必然失败），
+而我们是靠失败才发现的。普查在前、held-out 在后（R99）。
+
+### ⑦ 闸门
+
+| 门 | 结果 |
+|---|---|
+| `check-taintpath.ts`（160 条） | 失败 **0** ✅ |
+| `check-webshape.ts`（72 条） | 失败 **0** ✅ |
+| `check-fr-corpus.ts fr-007` | pre 5 / post **0** ✅ |
+| `check-fr-corpus.ts fr-016` | pre 7 / post **0** ✅ |
+| `batch-scan.ts` 盲测逐条比对 | 119 项目 / 1627 函数 / protocolFindings 55 / safeguardFindings 627，**逐项目零差异** ✅ |
+| ⚠ 上述 batch-scan **不是本次改动的有效验证** | 它扫 `blind-benchmark/generated/`、走 `detectSafeguardViolations`，而本次改动在 `nestjs-detector`（trust 主路径）⇒ 零漂移是「未触发」不是「未改变」（R56） |
+| 主路径 smoke：`dist/trust/cli.js` | immich 顶层违规 174→**21**；nocodb（held-out）**586** |
+| `vitest src/frameworks/nestjs-detector.test.ts` | **26 passed**（含 7 条反向用例）✅ |
+
+### ⑧ 入库规则
+
+97 → **100**：R98（0 收益要拆「不适用 / 没泛化」）、R99（形态普查替代打地鼠式 held-out）、
+R100（接线缺陷与判据缺陷分开记账，允许前者让告警数变多）。顺带修掉 R97 正文一处历史 token 污染。
+
+### ⑨ 决策层：**两个仓都撞上 R97**，且修好误报不改善分数
+
+| 指标 | immich（§51 → §52） | nocodb（§52 held-out） |
+|---|---:|---:|
+| 顶层违规 | 174 → **21** | **586** |
+| `protocolSafety.authentication` | 0 分（174→21 条） | **0 分（586 条）** |
+| `policyCompliance` | 100 / 0 条 | 100 / **0 条**（framework.* 排除） |
+| `decision` / `score` / `confidence` | APPROVED / 83 / HIGH → **完全不变** | **APPROVED / 83 / HIGH** |
+
+两条独立结论：
+1. **「0 分 + APPROVED + HIGH」被第二个仓完整复现**（违规条数是 immich 的 3.4 倍）⇒ R97 不是单仓偶然。
+2. **immich 修掉 153 条误报后 score 一分未动** —— 因为 authentication 已触底（0 是地板，
+   只要还剩违规就是 0），子分权重仅 0.075。⇒ **框架层误报治理在决策层可能零收益**，
+   衡量「误报治理」要看它改变了哪个**用户可见的量**，不是看消掉多少条。
+
+
+---
+
+## §53（2026-10-04）：决策门禁 —— 「83 分」不等于「可以说通过」
+
+对外报告：`blind-benchmark/DECISION_GATES_V1.md`（同一轮，可读版）
+产出：`src/trust/types.ts`、`src/trust/score-calculator.ts`、`src/trust/engine.ts`、
+`src/trust/confidence-calculator.ts`、`src/trust/score-calculator.test.ts`（新增）、
+数据 `blind-benchmark/reports/s53/`
+
+⚠ **本轮是该项目第一次改动 `src` 判定逻辑。** §49–§52 只动探针与基准工具；
+§53 动的是 `determineDecision` / `determineConfidence` / `scoreProtocolSafety`。
+
+### ① 起因：修掉 153 条误报，分数一分没动
+
+| | immich §51 | immich §52 | nocodb §52 |
+|---|---|---|---|
+| violations | 174 | **21** | 586 |
+| authentication 子协议 | 0 | **0** | **0** |
+| score / decision / conf | 83 / APPROVED / HIGH | **83 / APPROVED / HIGH** | **83 / APPROVED / HIGH** |
+
+算式：`100×0.35 + 75×0.30 + 73×0.20 + 70×0.15 = 82.6 → 83`；
+而 `protocolSafety = 75` 来自 `(0×0.25 + 100×0.20 + 100×0.20 + 100×0.20 + 100×0.15)/1.0`
+—— **四个零观察的协议族各拿 100 分，把 auth 的 0 分稀释掉了。**
+
+### ② 三个结构性缺陷
+
+- **A｜0 条违规 = 100 分**：authorization / payment / ledger 在 TS 上根本没有接线规则
+  （R94），0 条违规是「没看」不是「查过且干净」，却计满分。
+- **B｜聚合无下限**：`determineDecision` 只有「分数 ≥ 80 ⇒ APPROVED」一条路径，
+  auth 塌到 0 分对决策零影响。
+- **C｜声明与实现分离**（→ R102）：
+  ① `engine.ts` 注释写着「本次扫描是废票，不得据此得出『干净』结论」，**无人消费**；
+  ② `scoreProtocolSafety` 的 confidence 分子是 `d.score <= 100`（**字面恒真**）⇒ 永远 HIGH。
+
+### ③ 第一版被自己的数据否决（→ R101）
+
+第一版加了「coverage LOW」与「mapping < 30%」两条封顶 ⇒ **6/6 全变 NEEDS_REVIEW**，
+其中 3 个是「0 违规、auth=100」。查因：coverage **9/9 = 0%**（9 个项目全都没有
+`protocols.json` ⇒ 恒不可测）；mapping 分布 **1%~21%**，门槛 30% 无人可达。
+⇒ 两条都是常数。改法：coverage **仅在可测时生效**（R98）；mapping **撤出门禁只汇报**
+（阈值不得从分布里挑，R86）。
+
+### ④ 最终形态
+
+```
+① 安全维度下限：已观察的 authentication/authorization/data_integrity 任一 < 50 ⇒ 上限 NEEDS_REVIEW
+② 覆盖率门槛：coverage LOW 且 applicable=true ⇒ 上限 NEEDS_REVIEW；不可测 ⇒ 记「不适用」
+determineConfidence(..., observationIncomplete) ⇒ 观察度不足时置信度封顶 MEDIUM
+```
+
+纪律：**只封顶不降级**（critical 硬门优先级不变，NEEDS_REVIEW 不会被打成 BLOCKED）；
+**不动分数**（没有观察就没有扣分依据，扣分也是臆造）；**盲区不参与下限判定**。
+
+### ⑤ 实测
+
+| 项目 | 分 | decision | 违规 | auth | floor |
+|---|---:|---|---:|---:|:---:|
+| docmost / express / fastify / hapi / koa / netflx | 87–90 | APPROVED | 0–6 | 52–100 | – |
+| immich / nestjs-realworld / nocodb | 83 | **NEEDS_REVIEW** | 16 / 21 / 586 | **0** | ✅ |
+
+floor 触发 **3/9**，6 个未触发 ⇒ 有真实反例（R101 准入成立）。
+
+**覆盖率门禁的对照实验**（九个项目都没有 protocols.json ⇒ ②一次没触发，不能留着不验证）：
+netflx-web 复制一份、只加 `protocols.json`（规则已定义、trajectories 为空）
+⇒ `APPROVED` → `NEEDS_REVIEW`，唯一变量是「能不能测」。
+
+**confidence 9/9 = LOW 不是「变差」**：原值恒 HIGH（恒真条件）。
+⚠ 但读数要小心：所有违规都被 `extractProtocol` 的默认桶塞进 authentication，
+observed 上限就是 1/5 ⇒ **LOW 是真的，0.2 这个数值被默认桶缺陷夸大**。
+
+### ⑥ 闸门
+
+taintpath 160/0 ✅ ｜ webshape 72/0 ✅ ｜ fr-007 5→0 ✅ ｜ fr-016 7→0 ✅
+｜ batch-scan 119 项目 1627 函数**逐条零差异** ✅ ｜ score-calculator 11 passed ✅
+｜ nestjs-detector 26 passed ✅
+
+⚠ 盲测零漂移要诚实读：batch-scan 走 `detectSafeguardViolations`，**不经过本次改动**。
+本次触发语料是 **9 个真实项目 + `_covfix` 对照实验**（R56）。
+⚠ `learning-ranker` / `logistic-reward` 并发时报 8 条失败（worker timeout，单条 36–146s）：
+stash 到 HEAD 单跑通过、恢复后单跑也通过，且模块依赖无交集 ⇒ **并发假失败，非回归**。
+
+### ⑦ 入库规则
+
+100 → **102**：**R101**（门禁必须有反例，否则是常数不是判据）、
+**R102**（代码里的结论必须有消费者；恒真/恒零条件 = 未接线的测量）。
+
+### ⑧ 下一步（未做）
+
+1. 修 `extractProtocol` 默认桶（`NESTJS_*` 不该进 authentication）—— 它污染 confidence 数值口径。
+2. 协议族能力表：authorization / payment / ledger 在 TS 上到底接没接线（R94 延伸）。
+3. `policyCompliance` 在这三个项目上**恒为 100**（§50 的双计过滤把所有违规滤掉了），
+   0.35 权重被常数维度占着 —— 需单独评估。

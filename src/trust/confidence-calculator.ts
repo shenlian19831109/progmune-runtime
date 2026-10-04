@@ -32,6 +32,18 @@ export interface CoverageConfidence {
   level: "HIGH" | "MEDIUM" | "LOW";
   breakdown: NamespaceCoverage[];
   summary: string;             // human-readable summary line
+  /**
+   * §53：本指标**是否可测**。
+   *
+   * ⚠ 覆盖率数据来自项目根的 `protocols.json`；该文件不存在时转换空间为空
+   * ⇒ score 恒为 0 ⇒ level 恒为 LOW。**这是「没得测」，不是「测得低」**。
+   *
+   * 实测：9 个真实 TS 项目（docmost / immich / nocodb / express / fastify /
+   * hapi / koa / nestjs-realworld / netflx-web）**全部没有 protocols.json**，
+   * 9/9 coverage = 0%。若不看这个标记就把 LOW 当门禁 ⇒ 门禁 100% 触发
+   * ⇒ 连「0 违规、auth=100」的项目也被封顶。**判据必须区分「不适用」与「真的低」**（R98）。
+   */
+  applicable: boolean;
 }
 
 // ── Constants (from Phase 1 empirical data) ──
@@ -248,6 +260,8 @@ export function computeCoverageConfidence(projectPath: string): CoverageConfiden
   // 1. Load protocol transition space
   const space = loadTransitionSpace(projectPath);
   const namespaces = [...space.perNamespace.keys()];
+  // §53：协议定义不存在 ⇒ 本指标不可测（0 分是「没得测」，不是「测得低」）
+  const applicable = fs.existsSync(path.join(projectPath, "protocols.json"));
 
   // 2. Load trajectory coverage
   const coverage = loadTrajectoryCoverage(projectPath);
@@ -300,7 +314,7 @@ export function computeCoverageConfidence(projectPath: string): CoverageConfiden
     `${saturated} namespaces saturated, ${partial} partial, ${noVocab} no vocabulary. ` +
     (noVocab > 0 ? `Top gap: add trajectories for ${noVocab} uncovered namespaces.` : "");
 
-  return { score, margin, level, breakdown, summary };
+  return { score, margin, level, breakdown, summary, applicable };
 }
 
 /**

@@ -1,0 +1,320 @@
+{
+  "note": "§53 决策门禁实测汇总。原始产物 reports/s53/v2-*.json（含 nocodb 11MB）未入库，可按下述命令重跑。",
+  "generated": "2026-10-04",
+  "rows": [
+    {
+      "project": "server",
+      "score": 87,
+      "decision": "APPROVED",
+      "confidence": "LOW",
+      "violations": 6,
+      "auth": 52,
+      "observedProtocols": [
+        "authentication"
+      ],
+      "blindProtocols": [
+        "authorization",
+        "payment",
+        "data_integrity",
+        "ledger"
+      ],
+      "protocolSafetyScore": 88,
+      "protocolSafetyConfidence": "LOW",
+      "coverage": 0,
+      "coverageApplicable": null,
+      "mappingRate": 12,
+      "gates": {
+        "securityFloorBreach": false,
+        "breachedProtocols": [],
+        "observationIncomplete": false,
+        "reasons": [
+          "覆盖率不可测（项目无 protocols.json）——按「不适用」处理，不作门禁（R98）"
+        ]
+      }
+    },
+    {
+      "project": "express-realworld",
+      "score": 90,
+      "decision": "APPROVED",
+      "confidence": "LOW",
+      "violations": 0,
+      "auth": 100,
+      "observedProtocols": [],
+      "blindProtocols": [
+        "authentication",
+        "authorization",
+        "payment",
+        "data_integrity",
+        "ledger"
+      ],
+      "protocolSafetyScore": 100,
+      "protocolSafetyConfidence": "LOW",
+      "coverage": 0,
+      "coverageApplicable": null,
+      "mappingRate": 21,
+      "gates": {
+        "securityFloorBreach": false,
+        "breachedProtocols": [],
+        "observationIncomplete": false,
+        "reasons": [
+          "覆盖率不可测（项目无 protocols.json）——按「不适用」处理，不作门禁（R98）"
+        ]
+      }
+    },
+    {
+      "project": "fastify-realworld",
+      "score": 90,
+      "decision": "APPROVED",
+      "confidence": "LOW",
+      "violations": 1,
+      "auth": 92,
+      "observedProtocols": [
+        "authentication"
+      ],
+      "blindProtocols": [
+        "authorization",
+        "payment",
+        "data_integrity",
+        "ledger"
+      ],
+      "protocolSafetyScore": 98,
+      "protocolSafetyConfidence": "LOW",
+      "coverage": 0,
+      "coverageApplicable": null,
+      "mappingRate": 8,
+      "gates": {
+        "securityFloorBreach": false,
+        "breachedProtocols": [],
+        "observationIncomplete": false,
+        "reasons": [
+          "覆盖率不可测（项目无 protocols.json）——按「不适用」处理，不作门禁（R98）"
+        ]
+      }
+    },
+    {
+      "project": "hapi-realworld",
+      "score": 90,
+      "decision": "APPROVED",
+      "confidence": "LOW",
+      "violations": 1,
+      "auth": 92,
+      "observedProtocols": [
+        "authentication"
+      ],
+      "blindProtocols": [
+        "authorization",
+        "payment",
+        "data_integrity",
+        "ledger"
+      ],
+      "protocolSafetyScore": 98,
+      "protocolSafetyConfidence": "LOW",
+      "coverage": 0,
+      "coverageApplicable": null,
+      "mappingRate": 1,
+      "gates": {
+        "securityFloorBreach": false,
+        "breachedProtocols": [],
+        "observationIncomplete": false,
+        "reasons": [
+          "覆盖率不可测（项目无 protocols.json）——按「不适用」处理，不作门禁（R98）"
+        ]
+      }
+    },
+    {
+      "project": "server",
+      "score": 83,
+      "decision": "NEEDS_REVIEW",
+      "confidence": "LOW",
+      "violations": 21,
+      "auth": 0,
+      "observedProtocols": [
+        "authentication"
+      ],
+      "blindProtocols": [
+        "authorization",
+        "payment",
+        "data_integrity",
+        "ledger"
+      ],
+      "protocolSafetyScore": 75,
+      "protocolSafetyConfidence": "LOW",
+      "coverage": 0,
+      "coverageApplicable": null,
+      "mappingRate": 8,
+      "gates": {
+        "securityFloorBreach": true,
+        "breachedProtocols": [
+          {
+            "protocol": "authentication",
+            "score": 0
+          }
+        ],
+        "observationIncomplete": false,
+        "reasons": [
+          "安全维度 authentication 得分 0 < 50（已观察，非盲区）——不得输出 APPROVED",
+          "覆盖率不可测（项目无 protocols.json）——按「不适用」处理，不作门禁（R98）"
+        ]
+      }
+    },
+    {
+      "project": "koa-realworld",
+      "score": 90,
+      "decision": "APPROVED",
+      "confidence": "LOW",
+      "violations": 0,
+      "auth": 100,
+      "observedProtocols": [],
+      "blindProtocols": [
+        "authentication",
+        "authorization",
+        "payment",
+        "data_integrity",
+        "ledger"
+      ],
+      "protocolSafetyScore": 100,
+      "protocolSafetyConfidence": "LOW",
+      "coverage": 0,
+      "coverageApplicable": null,
+      "mappingRate": 9,
+      "gates": {
+        "securityFloorBreach": false,
+        "breachedProtocols": [],
+        "observationIncomplete": false,
+        "reasons": [
+          "覆盖率不可测（项目无 protocols.json）——按「不适用」处理，不作门禁（R98）"
+        ]
+      }
+    },
+    {
+      "project": "nestjs-realworld",
+      "score": 83,
+      "decision": "NEEDS_REVIEW",
+      "confidence": "LOW",
+      "violations": 16,
+      "auth": 0,
+      "observedProtocols": [
+        "authentication"
+      ],
+      "blindProtocols": [
+        "authorization",
+        "payment",
+        "data_integrity",
+        "ledger"
+      ],
+      "protocolSafetyScore": 75,
+      "protocolSafetyConfidence": "LOW",
+      "coverage": 0,
+      "coverageApplicable": null,
+      "mappingRate": 12,
+      "gates": {
+        "securityFloorBreach": true,
+        "breachedProtocols": [
+          {
+            "protocol": "authentication",
+            "score": 0
+          }
+        ],
+        "observationIncomplete": false,
+        "reasons": [
+          "安全维度 authentication 得分 0 < 50（已观察，非盲区）——不得输出 APPROVED",
+          "覆盖率不可测（项目无 protocols.json）——按「不适用」处理，不作门禁（R98）"
+        ]
+      }
+    },
+    {
+      "project": "netflx-web",
+      "score": 90,
+      "decision": "APPROVED",
+      "confidence": "LOW",
+      "violations": 0,
+      "auth": 100,
+      "observedProtocols": [],
+      "blindProtocols": [
+        "authentication",
+        "authorization",
+        "payment",
+        "data_integrity",
+        "ledger"
+      ],
+      "protocolSafetyScore": 100,
+      "protocolSafetyConfidence": "LOW",
+      "coverage": 0,
+      "coverageApplicable": null,
+      "mappingRate": 14,
+      "gates": {
+        "securityFloorBreach": false,
+        "breachedProtocols": [],
+        "observationIncomplete": false,
+        "reasons": [
+          "覆盖率不可测（项目无 protocols.json）——按「不适用」处理，不作门禁（R98）"
+        ]
+      }
+    },
+    {
+      "project": "nocodb",
+      "score": 83,
+      "decision": "NEEDS_REVIEW",
+      "confidence": "LOW",
+      "violations": 586,
+      "auth": 0,
+      "observedProtocols": [
+        "authentication"
+      ],
+      "blindProtocols": [
+        "authorization",
+        "payment",
+        "data_integrity",
+        "ledger"
+      ],
+      "protocolSafetyScore": 75,
+      "protocolSafetyConfidence": "LOW",
+      "coverage": 0,
+      "coverageApplicable": null,
+      "mappingRate": 4,
+      "gates": {
+        "securityFloorBreach": true,
+        "breachedProtocols": [
+          {
+            "protocol": "authentication",
+            "score": 0
+          }
+        ],
+        "observationIncomplete": false,
+        "reasons": [
+          "安全维度 authentication 得分 0 < 50（已观察，非盲区）——不得输出 APPROVED",
+          "覆盖率不可测（项目无 protocols.json）——按「不适用」处理，不作门禁（R98）"
+        ]
+      }
+    },
+    {
+      "project": "_covfix",
+      "score": 90,
+      "decision": "NEEDS_REVIEW",
+      "confidence": "LOW",
+      "violations": 0,
+      "auth": 100,
+      "observedProtocols": [],
+      "blindProtocols": [
+        "authentication",
+        "authorization",
+        "payment",
+        "data_integrity",
+        "ledger"
+      ],
+      "protocolSafetyScore": 100,
+      "protocolSafetyConfidence": "LOW",
+      "coverage": 0,
+      "coverageApplicable": true,
+      "mappingRate": 14,
+      "gates": {
+        "securityFloorBreach": false,
+        "breachedProtocols": [],
+        "observationIncomplete": true,
+        "reasons": [
+          "覆盖率置信度 LOW（已测得）——本次扫描不足以支撑「通过」结论"
+        ]
+      }
+    }
+  ]
+}

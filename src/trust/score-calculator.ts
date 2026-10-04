@@ -19,6 +19,7 @@ import type {
   VerificationCoverageScore,
   CoverageDetail,
   ExplainabilityStatus,
+  DecisionGates,
 } from "./types";
 import {
   DEFAULT_DIMENSION_WEIGHTS,
@@ -27,6 +28,8 @@ import {
   DEFAULT_COVERAGE_MAX_SCORES,
   DEFAULT_GOVERNANCE_DEDUCTIONS,
   DECISION_THRESHOLDS,
+  SECURITY_PROTOCOLS,
+  SECURITY_PROTOCOL_FLOOR,
 } from "./types";
 
 // ═══════════════════════════════════════════════
@@ -108,14 +111,18 @@ export function scoreProtocolSafety(
 
   const score = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 100;
 
-  // Determine confidence for this dimension
-  // A protocol is considered "checked" if it was evaluated (score < 100 found issues,
-  // or score = 100 with no violations means we checked and it passed clean)
-  const protocolsChecked = Object.values(details).filter(
-    (d) => d.score <= 100 // all protocols are always evaluated
-  ).length;
+  // ── 观察度（§53 / R97）：0 条违规的协议不是「查过且干净」，而是「没看到东西」 ──
+  // 此前这里写的是 `d.score <= 100`（字面恒真）⇒ 5/5 ⇒ 永远 HIGH。
+  // 后果：authentication 0 分、其余 4 个协议零观察，整维度仍报 confidence HIGH，
+  // 进而让 overall confidence = HIGH。改成按**真的产出过观察**的协议计数。
+  const observedProtocols = protocolNames.filter(
+    (n) => (byProtocol[n] || []).length > 0
+  );
+  const blindProtocols = protocolNames.filter(
+    (n) => (byProtocol[n] || []).length === 0
+  );
   const confidenceRatio = protocolNames.length > 0
-    ? Math.min(1, protocolsChecked / protocolNames.length)
+    ? observedProtocols.length / protocolNames.length
     : 1;
   const confidence = mapDimensionConfidence(confidenceRatio);
 
@@ -130,6 +137,8 @@ export function scoreProtocolSafety(
     confidence,
     details,
     violations: protocolViolations,
+    observedProtocols,
+    blindProtocols,
   };
 }
 
@@ -261,6 +270,70 @@ export function calculateOverallScore(dimensions: DimensionInput[]): number {
 // ═══════════════════════════════════════════════
 
 /**
+ * 计算决策封顶门禁（§53 / R97）。纯函数，只依赖已算好的维度结果。
+ *
+ * 只回答两个问题：
+ *   ① 「有没有一条**我们确实看过**的安全维度塌了」——有 ⇒ 不许说通过。
+ *   ② 「覆盖率测出来是不是真的很低」——**仅在可测时**才问；不可测 ⇒ 不适用（R98）。
+ *
+ * ⚠ 两者都不**扣分**：没有观察就没有扣分依据（扣分也是臆造）。
+ *   它们只作用于 decision 上限与 confidence，这正是「ABSENCE ≠ evidence of
+ *   absence」在聚合层应有的落地形态。
+ *
+ * ⚠ 语义映射命中率（mappingCoverage）**故意不作为门禁**：实测 9 个真实 TS 项目
+ *   的取值范围是 1%~21%（中位 ~9%），没有任何一个够得到 30%。拿它当门槛就等于
+ *   宣布「TS 项目永不放行」——那是常数不是判据，而且阈值会变成从数据里挑出来的
+ *   数字（R86）。它只出现在输出里供人看，不参与决策。
+ */
+export function evaluateDecisionGates(input: {
+  protocolSafety: ProtocolSafetyScore;
+  /** 覆盖率等级；仅当 coverageApplicable 为真时才用作门禁 */
+  coverageLevel?: string;
+  /** 覆盖率是否可测（项目有没有 protocols.json） */
+  coverageApplicable?: boolean;
+}): DecisionGates {
+  const reasons: string[] = [];
+
+  // ① 安全维度下限 —— 只对「有观察」的协议生效（0 条违规的盲区不参与，避免臆造）
+  const breachedProtocols = (SECURITY_PROTOCOLS as readonly string[])
+    .filter((p) => input.protocolSafety.observedProtocols.includes(p))
+    .map((p) => ({
+      protocol: p,
+      score: input.protocolSafety.details[p]?.score ?? 100,
+    }))
+    .filter((d) => d.score < SECURITY_PROTOCOL_FLOOR);
+
+  for (const b of breachedProtocols) {
+    reasons.push(
+      `安全维度 ${b.protocol} 得分 ${b.score} < ${SECURITY_PROTOCOL_FLOOR}（已观察，非盲区）——不得输出 APPROVED`
+    );
+  }
+
+  // ② 覆盖率门槛 —— 只在**可测**时生效
+  let observationIncomplete = false;
+  if (input.coverageLevel === "LOW") {
+    if (input.coverageApplicable) {
+      observationIncomplete = true;
+      reasons.push("覆盖率置信度 LOW（已测得）——本次扫描不足以支撑「通过」结论");
+    } else {
+      // 不适用：没有 protocols.json ⇒ 0% 是「没得测」，不是「测得低」。
+      // 若在此处当成 LOW 处理，门禁会对所有未接入协议定义的项目 100% 触发
+      // ⇒ 连「0 违规、auth=100」的项目也被封顶（实测 6/6）。这是常数不是判据。
+      reasons.push(
+        "覆盖率不可测（项目无 protocols.json）——按「不适用」处理，不作门禁（R98）"
+      );
+    }
+  }
+
+  return {
+    securityFloorBreach: breachedProtocols.length > 0,
+    breachedProtocols,
+    observationIncomplete,
+    reasons,
+  };
+}
+
+/**
  * Maps score + gates → APPROVED / NEEDS_REVIEW / BLOCKED.
  *
  * Rules:
@@ -268,12 +341,18 @@ export function calculateOverallScore(dimensions: DimensionInput[]): number {
  *   - Score < 60 → BLOCKED
  *   - 60 ≤ Score < 80 → NEEDS_REVIEW
  *   - Score ≥ 80 → APPROVED
+ *   - 安全维度下限被击穿 ⇒ 上限 NEEDS_REVIEW（§53/R97）
+ *   - 观察度不足 ⇒ 上限 NEEDS_REVIEW（§53/R97）
  *   - Explainability UNCERTAIN → degrade one level
+ *
+ * ⚠ 封顶（cap）不是降级（degrade）：封顶只阻止「说通过」，不会把 BLOCKED 抬上来，
+ *   也不会把 NEEDS_REVIEW 打成 BLOCKED —— 避免为了修「虚高」而过冲成「虚低」。
  */
 export function determineDecision(
   overallScore: number,
   hasCriticalViolation: boolean,
-  explainabilityStatus: ExplainabilityStatus
+  explainabilityStatus: ExplainabilityStatus,
+  gates?: DecisionGates
 ): TrustDecisionValue {
   // Hard gate: critical = BLOCKED regardless of score
   if (hasCriticalViolation) {
@@ -288,6 +367,18 @@ export function determineDecision(
     decision = "NEEDS_REVIEW";
   } else {
     decision = "BLOCKED";
+  }
+
+  // ── §53 / R97：封顶 ──
+  // 背景：immich（auth 0 分 / coverage 0% / mapping 8%）与 nocodb
+  // （auth 0 分 / 586 条 / mapping 4%）都拿到了 83 / APPROVED / HIGH。
+  // 「分数够高」不等于「可以说通过」——前提是我们确实看过、且看过的维度没塌。
+  if (
+    gates &&
+    (gates.securityFloorBreach || gates.observationIncomplete) &&
+    decision === "APPROVED"
+  ) {
+    decision = "NEEDS_REVIEW";
   }
 
   // Explainability degrade: drop one level
@@ -315,7 +406,16 @@ export function determineDecision(
  */
 export function determineConfidence(
   dimConfidences: Array<Exclude<ConfidenceLevel, "UNCERTAIN">>,
-  explainabilityStatus: ExplainabilityStatus
+  explainabilityStatus: ExplainabilityStatus,
+  /**
+   * §53 / R97：观察度不足时，置信度**封顶**为 MEDIUM。
+   *
+   * 背景：immich 的 coverageConfidence 是 0% ±25% LOW，而 overall confidence
+   * 仍是 HIGH —— 四个维度的 confidence 里没有一项接了覆盖率这条线。
+   * 代码里甚至已经写了「本次扫描是废票，不得据此得出『干净』结论」，
+   * 但没有任何一行消费它。**声明与实现分离**是这里真正的缺陷。
+   */
+  observationIncomplete?: boolean
 ): ConfidenceLevel {
   // Explainability gate overrides everything
   if (explainabilityStatus === "UNCERTAIN") {
@@ -328,6 +428,9 @@ export function determineConfidence(
   if (lowCount > 0) return "LOW";
   if (mediumCount >= 2) return "MEDIUM";
   if (mediumCount === 1) return "MEDIUM"; // Even one medium drags confidence
+
+  // 观察度不足 ⇒ 即便各维度都报 HIGH，也不得给出 HIGH
+  if (observationIncomplete) return "MEDIUM";
   return "HIGH";
 }
 

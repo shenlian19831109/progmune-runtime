@@ -78,12 +78,24 @@ export interface TrustDecision {
     score: number;
     decision: TrustDecisionValue;
     confidence: ConfidenceLevel;
+    /**
+     * §53 / R97：决策门禁 —— 为什么这个 decision 被封顶/没被封顶。
+     *
+     * ⚠ 出现 `reasons` 非空即代表「分数够高」但「不许说通过」。
+     *   消费方（CI / MCP / patrol）应据此拦截，不要只看 score。
+     */
+    decisionGates?: DecisionGates;
     /** Phase 1: Coverage-based confidence (computed, not labeled) */
     coverageConfidence?: {
       score: number;
       margin: number;
       level: "HIGH" | "MEDIUM" | "LOW";
       summary: string;
+      /**
+       * §53：本指标是否可测。false = 项目没有 protocols.json（或 IR 提取失败），
+       * 此时 score=0 代表「没得测」，**不得**当作「测得低」用作门禁（R98）。
+       */
+      applicable?: boolean;
     };
     /** 2026-09-22：IR 提取失败警告——结果基于空/残缺 IR，不可信。
      *  出现即代表本次扫描是废票（如 python3 提取器被 OOM 杀后
@@ -261,12 +273,57 @@ export interface DimensionScore {
 
 export interface ProtocolSafetyScore extends DimensionScore {
   details: Record<string, ProtocolDetail>;
+  /**
+   * 本次扫描**有过观察**的协议（至少产出过 1 条违规）。
+   * 与 blindProtocols 互斥且并集为全部协议名。
+   */
+  observedProtocols: string[];
+  /**
+   * 本次扫描**完全没看到东西**的协议（0 条违规）。
+   *
+   * ⚠ 语义声明：0 条违规 ≠ 「查过且干净」，也可能只是**这条线路没接线**
+   * （见 R94：48 条 SAFEGUARD_RULES 里 15 条是 python-only，在 TS 上 never fires）。
+   * 列出来是为了让下游**不许把盲区当满分凭据**，而不是为了给它们打低分
+   * （没有观察 ⇒ 没有扣分依据，扣分同样是臆造）。
+   */
+  blindProtocols: string[];
 }
 
 export interface ProtocolDetail {
   score: number;
   violations: number;
   weight: number;
+}
+
+// ── Decision Gates（§53 / R97） ──
+//
+// 背景（immich + nocodb 实测）：authentication 子协议 0 分（21 条 / 586 条违规）、
+// coverageConfidence 0% LOW、mappingCoverage 4%~8% LOW —— 三项独立的
+// 「我们其实没看到什么」指标全部触底，输出却仍是 83 / APPROVED / HIGH。
+// 根因是聚合层只有「分数 → 档位」一条路径，没有任何**下限**与**观察度门槛**。
+
+/** 安全相关协议：这些维度出现塌方时，不得给出「通过」结论 */
+export const SECURITY_PROTOCOLS = [
+  "authentication",
+  "authorization",
+  "data_integrity",
+] as const;
+
+/** 安全协议分数下限：任一条已观察的安全协议低于此分 ⇒ decision 不得为 APPROVED */
+export const SECURITY_PROTOCOL_FLOOR = 50;
+
+/** 观察度门槛：coverage / mapping 命中率低于此值 ⇒ 视为「没看清楚」 */
+export const OBSERVATION_RATE_FLOOR = 0.3;
+
+export interface DecisionGates {
+  /** 至少一条**已观察**的安全协议低于 SECURITY_PROTOCOL_FLOOR */
+  securityFloorBreach: boolean;
+  /** 触发下限的协议名 + 分数（可复核对账） */
+  breachedProtocols: Array<{ protocol: string; score: number }>;
+  /** 观察度不足（coverage 或 mapping 低于门槛 / level 为 LOW） */
+  observationIncomplete: boolean;
+  /** 人类可读的封顶理由（会进入输出，供复核） */
+  reasons: string[];
 }
 
 export interface VerificationCoverageScore extends DimensionScore {

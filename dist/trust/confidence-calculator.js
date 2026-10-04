@@ -207,6 +207,8 @@ function computeCoverageConfidence(projectPath) {
     // 1. Load protocol transition space
     const space = loadTransitionSpace(projectPath);
     const namespaces = [...space.perNamespace.keys()];
+    // §53：协议定义不存在 ⇒ 本指标不可测（0 分是「没得测」，不是「测得低」）
+    const applicable = fs.existsSync(path.join(projectPath, "protocols.json"));
     // 2. Load trajectory coverage
     const coverage = loadTrajectoryCoverage(projectPath);
     // 3. Compute per-namespace confidence
@@ -250,7 +252,7 @@ function computeCoverageConfidence(projectPath) {
     const summary = `Weighted coverage: ${score}% ±${margin}%. ` +
         `${saturated} namespaces saturated, ${partial} partial, ${noVocab} no vocabulary. ` +
         (noVocab > 0 ? `Top gap: add trajectories for ${noVocab} uncovered namespaces.` : "");
-    return { score, margin, level, breakdown, summary };
+    return { score, margin, level, breakdown, summary, applicable };
 }
 /**
  * Clear internal caches (for testing or when corpus is updated).

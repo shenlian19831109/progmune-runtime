@@ -1,0 +1,82 @@
+{
+  "generated_at": "2026-10-03T14:03:54.690Z",
+  "projects": {
+    "nocodb": {
+      "dir": "benchmarks/ts-apps/nocodb/packages/nocodb",
+      "ms": 92554,
+      "modules": 7,
+      "moduleArg": {
+        "identifier:ceModuleConfig": 1,
+        "identifier:nocoModuleMetadata": 1,
+        "object-literal": 2,
+        "identifier:authModuleMetadata": 1,
+        "identifier:JobsModuleMetadata": 1,
+        "identifier:oAuthModuleMetadata": 1
+      },
+      "moduleProvidersFiles": 0,
+      "providerElements": {},
+      "appTokensSeen": {
+        "APP_FILTER": 2,
+        "APP_GUARD": 2
+      },
+      "routeDecorators": {
+        "Get": 144,
+        "Post": 114,
+        "Delete": 40,
+        "All": 4,
+        "Patch": 45,
+        "Put": 1
+      },
+      "routeArgKind": {
+        "array": 250,
+        "identifier": 2,
+        "string": 79,
+        "other:TemplateExpression": 16,
+        "other:NoSubstitutionTemplateLiteral": 1
+      },
+      "mutationParams": {
+        "@Req": 173,
+        "@Param": 243,
+        "@Body": 128,
+        "@UploadedFiles": 4,
+        "@Query": 31,
+        "@TenantContext": 152,
+        "@Res": 9,
+        "@Request": 12,
+        "@Response": 4,
+        "@Headers": 2
+      },
+      "paramTypeShape": {
+        "primitive": 317,
+        "simple-class-like": 56,
+        "array": 2,
+        "other:Record<string, any>": 1,
+        "other:{ hash: string; ops: { o": 1,
+        "other:{ operation: \"copy\" | \"p": 1,
+        "other:{ op: \"list\"; limit: num": 1,
+        "other:\"mcpList\" | \"mcpCreate\" ": 1,
+        "other:{ job?: import(\"/Users/s": 1,
+        "other:{ order: number; }": 1,
+        "other:{ fk_column_id: string; ": 1,
+        "other:{ color: string; is_set_": 2,
+        "imported-type": 4,
+        "other:{ contentType: string; f": 1,
+        "other:{ id: string; }": 2,
+        "other:{ _mid: number; data: { ": 1,
+        "other:\"csv\" | \"json\" | \"excel\"": 2,
+        "other:{ delimiter?: string; ex": 2,
+        "other:{ options?: { excludeDat": 3,
+        "other:{ title?: string; option": 1,
+        "other:{ migrationUrl: string; ": 1
+      },
+      "dtoClasses": {
+        "plain-dto(no-validator)": 1
+      },
+      "usePipesCount": 0,
+      "useGuardsCount": 110,
+      "useGlobalPipes": false,
+      "useGlobalGuards": false,
+      "pipesArgNames": {}
+    }
+  }
+}

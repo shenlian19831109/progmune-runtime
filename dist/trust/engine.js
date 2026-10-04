@@ -178,16 +178,30 @@ async function evaluateTrust(ctx) {
     const effectiveScore = policyResult.hasCritical
         ? Math.min(overallScore, types_1.DECISION_THRESHOLDS.criticalLock)
         : overallScore;
-    const decision = (0, score_calculator_1.determineDecision)(effectiveScore, policyResult.hasCritical, explainResult.status);
     // ── Phase 1: Coverage-based confidence (replaces qualitative labels) ──
     const coverageConfidence = (0, confidence_calculator_1.computeCoverageConfidence)(ctx.projectPath);
+    // ═══════════════════════════════════════════════════════════════════
+    //  §53 / R97：决策门禁
+    //
+    //  实测触发场景（immich / nocodb）：authentication 子协议 0 分（21 / 586 条违规），
+    //  coverageConfidence 0% LOW，mappingCoverage 4%~8% LOW —— 三项独立的
+    //  「其实没看到什么」的指标全部触底，聚合结果却仍是 83 / APPROVED / HIGH。
+    //
+    //  门禁只做**封顶**（不许说通过），不做扣分：没有观察就没有扣分依据。
+    // ═══════════════════════════════════════════════════════════════════
+    const decisionGates = (0, score_calculator_1.evaluateDecisionGates)({
+        protocolSafety: protocolResult,
+        coverageLevel: coverageConfidence.level,
+        coverageApplicable: coverageConfidence.applicable,
+    });
+    const decision = (0, score_calculator_1.determineDecision)(effectiveScore, policyResult.hasCritical, explainResult.status, decisionGates);
     const dimConfidences = [
         policyResult.hasCritical ? "LOW" : coverageResult.confidence,
         protocolResult.confidence,
         coverageResult.confidence,
         governanceResult.confidence,
     ];
-    const confidence = (0, score_calculator_1.determineConfidence)(dimConfidences, explainResult.status);
+    const confidence = (0, score_calculator_1.determineConfidence)(dimConfidences, explainResult.status, decisionGates.observationIncomplete);
     // ═══════════════════════════════════════
     //  PHASE 5: ASSEMBLE
     // ═══════════════════════════════════════
@@ -227,17 +241,21 @@ async function evaluateTrust(ctx) {
             score: effectiveScore,
             decision,
             confidence,
+            decisionGates,
             coverageConfidence: extractionWarning
                 ? {
                     score: 0,
                     margin: 25,
                     level: "LOW",
+                    // §53：IR 提取失败同样是「没得测」，不是「测得低」
+                    applicable: false,
                     summary: `${extractionWarning}——本次扫描是废票，不得据此得出「干净」结论`,
                 }
                 : {
                     score: coverageConfidence.score,
                     margin: coverageConfidence.margin,
                     level: coverageConfidence.level,
+                    applicable: coverageConfidence.applicable,
                     summary: coverageConfidence.summary,
                 },
             extractionWarning,
