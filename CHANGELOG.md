@@ -22,6 +22,33 @@ external-ID）用 JSON 列 `.contains()` 做匹配——contains() 在 JSON 列�
 不可点亮：污点根是 DB 字段（跨请求存储污点），现有管线结构性够不着，
 归入漏报根因新子类（详见 CAPABILITY_THREE_PROOFS_V1.md）。
 
+### fr-014 点亮 + fr-015 关闭（2026-10-05）
+
+- **fr-014（8/17，DETECTED-with-boundary）**：mockoon 管理 API 裸奔检出——
+  两处 Express 检测器可见性缺口修复：①`extractRoutes` 支持模板字符串路径
+  （库形态模块路径全是 `${prefix}/...` 变量拼前缀，此前整文件 0 路由）；
+  ②`app: Express` 形参的 setup 模块纳入整 app 无认证判定（此前落在
+  creator 门与 hasAnyAuth 门之间的盲区）。修复后残留归因到匿名中间件
+  函数体内的 bearer 校验超出名字级分类；AUTH_MIDDLEWARE_PATTERNS 补
+  timingSafeEqual/extractBearerToken（对具名形态有效）。express-realworld
+  回归 20 路由零新增误报。
+- **fr-015 判定关闭（corpus_invalid）**：真值 sink 在虚拟模块
+  （#og-image-virtual/public-assets.mjs，pre 快照不存在），mini 切片无 sink；
+  且 pre-fix 已有 isBlockedUrl 守卫未接在 fonts 路径——fr-009 同族
+  「守卫存在但不足」。检测无从谈起，如实不覆盖。
+
+### fr-012 复测点亮 + fr-004 判定关闭（2026-10-05）
+
+- **fr-012（7/17，DETECTED-with-boundary）**：MCP 工具实参污点根（3.7.33 C 系列）
+  上线后修复前 markdownUpload 已命中路径穿越标记——此前未复测。修复后残留
+  2 条归因到 local 部署 by-design 分支（IS_REMOTE 拒绝 filePath 是修复，
+  local 保留文件读取是设计；提取器无分支语义，fr-009 同族边界）。
+- **fr-004 判定关闭**：形态是闭包晚绑定（循环内 cookies 被内层函数晚绑定
+  捕获，多工具服务器时共享最后连接的 cookie jar）而非污点流——检测需变量
+  绑定分析，词形判据下 FP 爆炸，不硬做。根因归类修正为「作用域语义
+  （闭包晚绑定）」。注：fix_commit cd9db21c 是「重构形式的安全修复」
+  （fr-013 教训的镜像：fix 性质必须以公告摘要核对）。
+
 ## [3.7.57] — 2026-10-04（未发布）
 
 ### §51 held-out 验证 + §52-53 决策门禁 + 修冤枉第一刀（Data Mutation 族移除）

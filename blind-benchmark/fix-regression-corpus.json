@@ -811,7 +811,7 @@
       "ground_truth_files": [
         "backend/open_webui/utils/tools.py"
       ],
-      "result": "MISS (2026-09-11)"
+      "result": "MISS（2026-10-04 复核：判定不可点亮）——形态是闭包晚绑定（循环内构建的 cookies 被内层 tool_function 晚绑定捕获，多工具服务器时所有 callable 共享最后一个连接的 cookie jar），非污点流。检测需变量绑定分析（区分参数绑定 vs 闭包捕获），词形判据下「循环内赋值+闭包引用」是 Python 极常见无害模式，硬做 FP 爆炸。根因归类修正：从「凭据数据流」改为「作用域语义（闭包晚绑定）」变体。注：fix_commit cd9db21c 的 message 是 refac（bind cookies per connection）——是「重构形式的安全修复」而非文档提交（fr-013 教训的镜像：fix 性质必须以公告摘要核对）。"
     },
     {
       "id": "fr-005",
@@ -962,7 +962,7 @@
       ],
       "ground_truth_note": "真值 sink = index.ts::markdownUpload(projectId, filePath) — fs.existsSync(filePath) / fs.readFileSync(filePath)，filePath 由工具实参 args.file_path 一跳传入（无路径校验）。本条锚定「文件读取」半边：其修复为 PR #482「fix: make download and upload work for remote deployments」（2026-05-21，remote 时 upload_markdown 只接受内联内容）。同一 GHSA 的另半边「SSE 传输未鉴权」由 PR #554（e436ee4a，2026-06-22）修复——若扫描 PR #482 的 base 之前的快照，两条缺陷同时在场。",
       "sha_verified": "2026-09-18（api.github.com 核验：PR #482 merge=7d19ebf6，base=c2577169；PR #554 merge=e436ee4a）",
-      "result": "MISS（2026-09-18，真值函数切片语料；trust 扫描 pre=0 / post=0 违规）",
+      "result": "DETECTED-with-boundary（2026-10-05 复测）：修复前 markdownUpload 命中 __progmune_path_traversal__（C 系列 MCP 实参污点根 3.7.33 上线后生效，此前未复测）；修复后残留 2 条（markdownUpload + handleToolCall 跨函数传播）归因到 local 部署 by-design 分支——IS_REMOTE 时拒绝 filePath（漏洞修复），local 部署保留文件读取（设计功能），提取器无分支语义（与 fr-009 守卫不足同族边界）。修复回归战绩计 6→7（带注记）。",
       "result_detail": "★语料形态说明：gitlab-mcp 的 index.ts 单文件 454 KB，本机 8 GB 内存 + swap 已用 8.6/10 GB，全文件扫描被 OOM kill（exit 137），故按「大仓用真值切片」规则取 markdownUpload 函数体切片（55 行 pre / 45 行 post）扫描。切片保留了 filePath 形参 → fs.readFileSync 的完整污点链。★根因：A1 路径穿越标记要求 request 根表达式（`req.params` 等）为污点源；本例污点来自 **MCP 工具实参**（`args.file_path` → `filePath` 形参），不在 request 词汇表内 → 标记不注入。这是「污点源词汇表」的缺口，与 skyvern/open-webui 暴露的认证词表缺口同族。见 V2 报告 §6",
       "result_reason": "corpus_mismatch",
       "result_note": "2026-09-19 复核（对 fix commit 完整 index.ts 逐行 diff）：本条【不适合作为污点流判别力的验收条目】——修复机制与条目类型不匹配。真修复在 markdownUpload 里是 `if (IS_REMOTE && filePath) throw`（远程/网络模式下禁止使用 file_path，并新增 base64 inline-content 模式），属**部署模式闸门**，不是路径校验；本地模式的 taint→readFileSync 流在修复后依然存在且本就不算漏洞。因此 pre/post 在污点流层面**本来就应该同数**，用本条判定 PATH_GUARD_EVIDENCE 的判别力是无效实验。另：下载侧 localPath 的 `path.normalize + isAbsolute || '..' || startsWith('..'+sep) || includes(sep+'..'+sep)`在 pre 与 post **都存在**（pre 7968-7977 / post 8719-8728 完全一致）——它是既有代码、不是本次修复，但正因如此，它是真实世界的「已校验」负样本，可直接用于 G1 的「有守卫 → 不得标记」用例。"
@@ -1012,7 +1012,7 @@
       ],
       "ground_truth_note": "修复 = admin-api.ts 新增 bearer token 鉴权（extractBearerToken + timingSafeEqual）+ CORS 来源白名单（adminApiCorsOrigins 取代硬编码 '*'）+ 事务脱敏（redactTransaction）。漏洞形态 = **中间件/鉴权整体缺席**（pre-fix admin-api.ts 无任何 auth 检查）+ 配置层 CORS 通配。注意：该管理 API 是库形态（commons-server 内部 server.use 挂载），不是 app.get('/path', handler) 的顶层路由注册形态——这是框架适配器可见性的已知软肋。",
       "sha_verified": "2026-09-18（api.github.com 核验；PR #2254 merge=c420b5a5 34 文件）",
-      "result": "MISS（2026-09-18，mini 语料；trust 扫描 0 违规，pre/post 均 0）",
+      "result": "DETECTED-with-boundary（2026-10-05）：修复前 admin-api.ts 报 EXPRESS_NO_AUTH_MIDDLEWARE critical（两处检测器可见性缺口修复：①extractRoutes 支持模板字符串路径——库形态模块路径全是 ${prefix}/... 变量拼前缀，字符串字面量 regex 整文件 0 路由；②「app: Express 形参」的 setup 模块纳入整 app 无认证判定——此前落在 creator 门与 hasAnyAuth 门之间）。修复后残留 1 条归因到「匿名中间件函数体内的 bearer 校验（hasValidAdminApiToken/timingSafeEqual）超出中间件名级分类」——AUTH_MIDDLEWARE_PATTERNS 已补 timingSafeEqual/extractBearerToken 词（对具名形态 app.use(extractBearerToken) 有效），匿名函数体需要全局覆盖分析（未做）。express-realworld 回归 20 路由零新增误报。",
       "result_detail": "mini 语料（5 个真值文件）提取 99 个函数，trust 引擎 0 违规。根因类别 = 缺失检查类 + 配置类（CORS 通配无域名恰语义），且管理路由以库内 server.use 挂载、不具 app.get 形态",
       "result_reason": "corpus_unverified",
       "result_note": "mini 语料；5 个真值文件均在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。"
@@ -1034,7 +1034,7 @@
       ],
       "ground_truth_note": "**重要发现：pre-fix 快照里 `util/ssrf.ts` 及其守卫 `isBlockedUrl()` 已经存在** —— 漏洞不是「没有守卫」，而是「守卫没接在 fonts 这条路径上」+ 守卫本身对同源自信任/重定向放行过宽。这使其成为 fr-009 同类的「守卫存在但不足」样本。修复三处：① fonts.ts 对 URL 解码来的 fonts[] 做字段类型/长度/数量边界校验；② ssrf.ts 新增 trustedHost 豁免并对每一跳重定向重新做 isBlockedUrl；③ 新增 bindings/font-assets/external-url.ts（该绑定文件 pre-fix 不存在，故不计入 pre 语料）。",
       "sha_verified": "2026-09-18（api.github.com 核验；PR #637 merge=243cac22 「fix: prevent unauthenticated SSRF via font URL parameter」）",
-      "result": "MISS（2026-09-18，mini 语料；trust 扫描 pre=0 / post=0 违规）",
+      "result": "corpus_invalid + 守卫不足（2026-10-05 复核确认）：真值 sink 在虚拟模块 #og-image-virtual/public-assets.mjs（pre 快照不存在、语料外），mini 切片无 sink；且 pre-fix 已有 isBlockedUrl 守卫（未接在 fonts 路径上）——fr-009 同族「守卫存在但不足」。检测无从谈起，如实不覆盖。",
       "result_detail": "★阻塞已解除：此前 >480s 未完成的根因是提取器 SSRF 标记的正则死循环（3.7.28 引入，2026-09-18 修复，见 V2 报告 §5）。修复后 og-mini-pre 48s 完成。**0 违规的原因值得单独记录**：SSRF 标记要求 fetch 后的 300 字符窗口内出现污点名；本例 fonts[] 的 URL 来自 `decodeURIComponent` 解码后的对象字段（`font.path`），不在 URL_PARAM_NAME 词汇表内，也不构成 `req.*` 污染 → 标记不注入。与 fr-009/fr-015 同属「守卫存在但没接在这条路径」+「污点源词汇表缺口」的叠加。见 V2 报告 §6",
       "result_reason": "corpus_invalid",
       "result_note": "不可判定：mini 切片（fonts.ts + ssrf.ts）内没有任何出站 sink——唯一 fetch 在 ssrf.ts:260，真值链路的 sink 在 src/runtime/server/util/fetchLocalAsset.ts（$fetch）等未被收录的文件。按 R1/R3：该 MISS 不代表引擎能力。"

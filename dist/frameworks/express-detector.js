@@ -76,6 +76,11 @@ const AUTH_MIDDLEWARE_PATTERNS = [
     /\bensureAuthenticated\b/,
     /\bauthGuard\b/,
     /\bAuthGuard\b/,
+    // 匿名中间件函数体内的 bearer 校验证据（2026-10-05 fr-014 mockoon 修复形态：
+    // app.use(`${prefix}*`, (req,res,next) => { hasValidAdminApiToken(...) })——
+    // 认证在函数体里，中间件名不可见）
+    /\btimingSafeEqual\b/,
+    /\bextractBearerToken\b/,
     /\brequire\w*[Aa]uth\b/,
     /\bcheckAuth\b/,
     /\bprotect\b/,
@@ -161,17 +166,22 @@ function extractRoutes(code, appName) {
     for (const method of methods) {
         // Pattern: app.get('/path', middleware1, middleware2, handler)
         // or: router.post('/path', handler)
-        const routeRegex = new RegExp(`\\b${receivers}\\.${method}\\s*\\(\\s*['\"]([^'\"]+)['\"]\\s*,([^;]+)\\)`, "gi");
+        // 2026-10-05（fr-014 mockoon）：路径也支持模板字符串
+        // app.get(`${adminApiPrefix}/events`, ...)——库形态模块（app 经参数传入）
+        // 的路径几乎全是变量拼前缀的模板串，字符串字面量 regex 整文件 0 路由。
+        // 捕获组：1=单引号 2=双引号 3=模板串；path 取三者首个非空。
+        const routeRegex = new RegExp(`\\b${receivers}\\.${method}\\s*\\(\\s*(?:'([^']+)'|\"([^\"]+)\"|\`([^\`]+)\`)\\s*,([^;]+)\\)`, "gi");
         let match;
         while ((match = routeRegex.exec(code)) !== null) {
-            const rawArgs = match[2].trim();
+            const routePath = match[1] ?? match[2] ?? match[3] ?? "";
+            const rawArgs = match[4].trim();
             const args = rawArgs.split(",").map(a => a.trim()).filter(a => a.length > 0);
             // Last arg is the handler, everything before is middleware
             const handler = args[args.length - 1] || "anonymous";
             const middlewares = args.slice(0, -1);
             routes.push({
                 method,
-                path: match[1],
+                path: routePath,
                 handler,
                 middlewares,
                 line: code.slice(0, match.index).split("\n").length,
@@ -274,9 +284,14 @@ function analyzeExpressApp(code) {
     const hasSession = globalMiddleware.some(m => m.type === "session") || /\bsession\s*\(/.test(code);
     // ── Generate Issues ──
     // 整 app 无认证：仅真 app（实例化 express()）且自身有非公开 mutation
-    // 路由时报——main.ts 只挂载路由模块（真实认证在 controllers 内）不算裸
+    // 路由时报——main.ts 只挂载路由模块（真实认证在 controllers 内）不算裸。
+    // 2026-10-05（fr-014 mockoon）：库形态 setup 模块（app: Express 经参数
+    // 传入、在调用方 app 上挂载）同样报——此前「非 creator 且无 auth」落在
+    // 两条判定路之间（整 app 报要求 creator、逐路由报要求 hasAnyAuth），
+    // 管理 API 裸奔的系统性盲区。
+    const appIsParam = /\bapp\s*:\s*Express\b/.test(code);
     const hasNakedMutation = routes.some(nonPublicMutation);
-    if (!hasAnyAuth && appIsCreator && hasNakedMutation) {
+    if (!hasAnyAuth && (appIsCreator || appIsParam) && hasNakedMutation) {
         issues.push({
             severity: "critical",
             rule: "EXPRESS_NO_AUTH_MIDDLEWARE",
