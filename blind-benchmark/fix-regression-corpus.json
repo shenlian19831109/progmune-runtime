@@ -781,7 +781,7 @@
         "backend/open_webui/routers/auths.py",
         "backend/open_webui/utils/oauth.py"
       ],
-      "result": "MISS (2026-09-11)"
+      "result": "DETECTED（2026-10-05，提取器标记 __progmune_token_exchange_unguarded__ + 规则 Token Exchange Missing OAuth Guard：token_exchange 缺角色判定（get_user_role/update_user_from_oauth）报出。三态验证：fr-002 parent 报（role 缺）、fr-002 fix 0（role+domain 齐）、fr-003 fix 报（该时间点 role 漏洞在场，正确）。与 fr-003 同一函数两个独立公告。"
     },
     {
       "id": "fr-003",
@@ -796,7 +796,7 @@
       "ground_truth_files": [
         "backend/open_webui/routers/auths.py"
       ],
-      "result": "MISS (2026-09-11)"
+      "result": "DETECTED（2026-10-05，同 fr-002 判据：token_exchange 缺域白名单检查（OAUTH_ALLOWED_DOMAINS/email.split('@')）报出。三态验证见 fr-002。"
     },
     {
       "id": "fr-004",
@@ -847,7 +847,7 @@
         "backend/open_webui/retrieval/web/utils.py",
         "backend/open_webui/utils/misc.py"
       ],
-      "result": "MISS (2026-09-11)"
+      "result": "MISS（2026-10-05 判定不可点亮）：形态是 SSRF 防护黑名单条目缺失（Azure 平台通道 168.63.129.16 等不在 DEFAULT_WEB_FETCH_FILTER_LIST）——「该有的条目没有」是全局知识问题（黑名单完备性），任何静态判据都无法穷举，不硬做。归入漏报根因「配置/词表完备性」类。"
     },
     {
       "id": "fr-007",

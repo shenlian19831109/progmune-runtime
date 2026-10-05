@@ -782,6 +782,32 @@ def has_identity_substring_match(node):
     return False
 
 
+TOKEN_EXCHANGE_UNGUARDED_MARKER = "__progmune_token_exchange_unguarded__"
+
+
+def has_token_exchange_missing_guard(node):
+    """OAuth 令牌交换路径绕过正常回调路径的检查（REALWORLD_FIX_REGRESSION_V1
+    fr-002/fr-003 open-webui——同一函数 token_exchange 的两个独立公告）：
+    fr-002 角色策略（OAUTH_ALLOWED_ROLES/ADMIN_ROLES）未在令牌交换路径执行，
+    被角色策略拒绝的用户仍可登录；fr-003 域白名单（OAUTH_ALLOWED_DOMAINS）
+    同样只在正常 callback 检查、token_exchange 跳过。
+    判据（语义定义，正向证据）：函数名是 token exchange 形态，且函数体
+    （AST 全量文本）缺角色判定或缺域检查——Python 提取器有 AST 全量函数体，
+    缺席证据不是 TS 侧「calls 通道有损」的盲判（R75 的适用范围说明）。"""
+    try:
+        name = getattr(node, "name", "")
+        if not re.search(r"token[_\s]?exchange", name, re.I):
+            return False
+        text = ast.unparse(node)
+    except Exception:
+        return False
+    has_role = bool(re.search(r"get_user_role|update_user_from_oauth|determined_role", text))
+    has_domain = bool(
+        re.search(r"OAUTH_ALLOWED_DOMAINS|ALLOWED_DOMAINS|email\.split\([^)]*@", text)
+    )
+    return not has_role or not has_domain
+
+
 def has_cross_user_resource_write(node):
     """跨用户资源写入（REALWORLD_FIX_REGRESSION_V1 fr-005 open-webui）：
     函数把请求 payload 里的外来资源 id（folder_id 等）连同持久化调用
@@ -995,6 +1021,8 @@ def extract_calls(node, unsafe_vars=None, imports=None, module_constants=None, g
         calls.append(CROSS_USER_WRITE_MARKER)
     if has_identity_substring_match(node) and IDENTITY_SUBSTRING_MARKER not in calls:
         calls.append(IDENTITY_SUBSTRING_MARKER)
+    if has_token_exchange_missing_guard(node) and TOKEN_EXCHANGE_UNGUARDED_MARKER not in calls:
+        calls.append(TOKEN_EXCHANGE_UNGUARDED_MARKER)
     if has_command_taint_flow(node) and CMD_FLOW_MARKER not in calls:
         calls.append(CMD_FLOW_MARKER)
     if has_csrf_exempt(node) and CSRF_MARKER not in calls:

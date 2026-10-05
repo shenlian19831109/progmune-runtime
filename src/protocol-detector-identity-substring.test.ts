@@ -111,3 +111,60 @@ async def get_oauth_subject_from_claim(claim, db=None):
     }
   });
 });
+
+describe("fr-002/003 token exchange missing guard（提取器标记）", () => {
+  const TK_MARKER = "__progmune_token_exchange_unguarded__";
+
+  it("修复前形态：token_exchange 缺角色判定 → 注入标记（fr-002）", () => {
+    write("auths.py", `
+async def token_exchange(request, provider, token_data, db=None):
+    email = token_data.get('email', '').lower()
+    user = await Users.get_user_by_oauth_sub(provider, token_data.get('sub'), db)
+    return await create_session_response(request, user, db, source='oauth')
+`);
+    const ir = extractIRPython(dir);
+    const fn = ir.find((f) => f.name === "token_exchange");
+    expect(fn).toBeDefined();
+    expect(fn!.calls).toContain(TK_MARKER);
+  });
+
+  it("修复前形态：token_exchange 缺域检查 → 注入标记（fr-003）", () => {
+    write("auths.py", `
+async def token_exchange(request, provider, token_data, db=None):
+    email = token_data.get('email', '').lower()
+    user = await Users.get_user_by_oauth_sub(provider, token_data.get('sub'), db)
+    role = await oauth_manager.get_user_role(user, user_data)
+    return await create_session_response(request, user, db, source='oauth')
+`);
+    const ir = extractIRPython(dir);
+    const fn = ir.find((f) => f.name === "token_exchange");
+    expect(fn!.calls).toContain(TK_MARKER);
+  });
+
+  it("修复后形态：角色判定 + 域检查都有 → 无标记", () => {
+    write("auths.py", `
+async def token_exchange(request, provider, token_data, db=None):
+    email = token_data.get('email', '').lower()
+    if '*' not in auth_manager_config.OAUTH_ALLOWED_DOMAINS and email.split('@')[-1] not in auth_manager_config.OAUTH_ALLOWED_DOMAINS:
+        raise HTTPException(status_code=403)
+    user = await Users.get_user_by_oauth_sub(provider, token_data.get('sub'), db)
+    user = await oauth_manager.update_user_from_oauth(request=request, user=user, user_data=user_data, provider=provider, token=token_data, db=db)
+    return await create_session_response(request, user, db, source='oauth')
+`);
+    const ir = extractIRPython(dir);
+    const fn = ir.find((f) => f.name === "token_exchange");
+    expect(fn).toBeDefined();
+    expect(fn!.calls).not.toContain(TK_MARKER);
+  });
+
+  it("负例：非 token exchange 函数 → 无标记", () => {
+    write("utils.py", `
+async def refresh_token(request, db=None):
+    return await create_session_response(request, None, db)
+`);
+    const ir = extractIRPython(dir);
+    for (const f of ir) {
+      expect(f.calls).not.toContain(TK_MARKER);
+    }
+  });
+});

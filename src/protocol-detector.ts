@@ -944,6 +944,22 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     conceptExpected: ["oauth[provider]['sub'] == sub", "scim[provider]['external_id'] == external_id"],
   },
   {
+    name: "Token Exchange Missing OAuth Guard",
+    category: "auth",
+    // 2026-10-05（REALWORLD_FIX_REGRESSION_V1 fr-002/fr-003）：OAuth 令牌
+    // 交换路径绕过正常回调路径的检查——open-webui 的 token_exchange 函数
+    // 缺角色策略判定（fr-002）与域白名单检查（fr-003）两个独立公告。
+    // Python 提取器在「函数名 token exchange 形态 + 函数体（AST 全量）
+    // 缺角色判定或缺域检查」时注入标记。缺席证据来自 AST 全量文本，
+    // 非 TS 侧 calls 通道（R75 的适用范围：calls 有损的盲判不适用）。
+    languages: ["python"],
+    trigger: /\b(__progmune_token_exchange_unguarded__)\b/,
+    safeguards: [],
+    violationMessage: "OAuth token exchange endpoint is missing the authorization checks the normal OAuth callback enforces — role policy (get_user_role / OAUTH_ALLOWED_ROLES) and/or email domain allowlist (OAUTH_ALLOWED_DOMAINS). Users rejected by role policy or outside the domain allowlist can still sign in through the token exchange path.",
+    conceptMissing: ["RolePolicyOnTokenExchange", "DomainAllowlistOnTokenExchange"],
+    conceptExpected: ["get_user_role before session creation", "OAUTH_ALLOWED_DOMAINS check"],
+  },
+  {
     name: "XSS (Unsafe Template Rendering)",
     category: "xss",
     languages: ["python"],

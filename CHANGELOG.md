@@ -1,6 +1,27 @@
 # Changelog
 
-## [3.7.58] — 2026-10-04（未发布）
+## [3.7.60] — 2026-10-05（未发布）
+
+### fr-002/003 点亮：令牌交换路径检查完备性（修复回归 10/17）
+
+**策略分支漏报根因第一刀**：OAuth 令牌交换路径绕过正常回调路径的检查——
+open-webui 同一函数 `token_exchange` 的两个独立公告：缺角色策略判定
+（fr-002，被角色策略拒绝的用户仍可登录）+ 缺域白名单检查（fr-003）。
+
+- 提取器 `tools/extract_ir.py`：`has_token_exchange_missing_guard`——函数名
+  token exchange 形态 + 函数体（AST 全量文本）缺角色判定或缺域检查 ⇒
+  注入 `__progmune_token_exchange_unguarded__`。缺席证据来自 AST 全量
+  文本（非 TS 侧 calls 通道的盲判，R75 适用边界明确）
+- 引擎规则 "Token Exchange Missing OAuth Guard"（python-only marker-driven）
+- **三态验证**：fr-002 parent 报（role 缺）/ fr-002 fix 0（两项齐）/
+  fr-003 fix 报（该时间点 role 漏洞在场，正确）；Python 盲测 90 项目
+  零触发（2533 条逐条一致）；定向测试 8/8
+- **fr-corpus 战绩：8 干净 DETECTED + 2 with-boundary = 有效 10/17**
+- **fr-006 判定不可点亮**：SSRF 黑名单条目缺失是「配置/词表完备性」
+  知识问题，静态判据无法穷举「该有的条目」，不硬做。归入漏报根因
+  新类「配置/词表完备性」
+
+### fr-014 点亮 + fr-015 关闭（2026-10-05）
 
 ### fr-001 点亮：身份映射子串匹配（修复回归 6/17）
 
@@ -49,7 +70,7 @@ external-ID）用 JSON 列 `.contains()` 做匹配——contains() 在 JSON 列�
   （闭包晚绑定）」。注：fix_commit cd9db21c 是「重构形式的安全修复」
   （fr-013 教训的镜像：fix 性质必须以公告摘要核对）。
 
-## [3.7.57] — 2026-10-04（未发布）
+## [3.7.57] — 2026-10-04（3.7.57~3.7.59 合并条目）
 
 ### §51 held-out 验证 + §52-53 决策门禁 + 修冤枉第一刀（Data Mutation 族移除）
 
