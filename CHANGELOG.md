@@ -1,5 +1,49 @@
 # Changelog
 
+## [3.7.61] — 2026-10-06（未发布）
+
+### fr-017 点亮：授权身份锚点取自请求输入（修复回归 11/17）
+
+**归属语义漏报根因第一刀**：tinacms 的 `isAuthorized` 把「token 属于哪个
+app/client」的身份锚点从 `req.query.clientID` 读取去问身份服务——攻击者
+注册自己的 app 拿合法 token，即通过任意站点的后端授权（confused-deputy
+变体，GHSA-g74q-6g2f-874x）。修复 = 锚点改从服务端配置取
+（`expectedClientID ?? process.env.NEXT_PUBLIC_TINA_CLIENT_ID`）+ 取不到
+fail-closed。
+
+- 提取器 `src/extract-ir.ts`：`hasRequestAnchoredIdentity`——判据三元组
+  ① 从请求取 token（req.headers.authorization / headers().get('authorization')）
+  ② 从请求输入取 app/client 身份锚点（query/body/params 或 searchParams）
+  ③ 无服务端锚点证据（process.env. / getConfig( / config.）
+  ⇒ 注入 `__progmune_request_anchored_identity__`
+- 规则 "Authorization Identity Anchor from Request"（ts/js，marker-driven，
+  进 safeguard 告警流，与 fr-001/002/003 同族）
+- 边界（写死在判据里）：锚点名不含 tenant（多租户从请求解析租户锚点是
+  合法形态）；OAuth token 端点（req.body.client_id + client_secret，无
+  authorization header）不触发
+- **三态验证**：修复前 2/2 真值函数命中（@tinacms/auth 与
+  next-tinacms-azure 两个变体）/ 修复后 0/0；TS 盲测 119 项目逐函数
+  零漂移（LOST 0/ADDED 0）；fp-pool 真实语料 9 切片 1186 函数 0 命中；
+  定向测试 8/8。快照入库 `blind-benchmark/fr-corpus/fr-017-tinacms/`
+
+### fr-008 / fr-013 判定关闭（修复回归语料全量定性收官）
+
+- **fr-008**（SimpleWebAuthn，密码学协议语义）：证书链 walk 在第一个自签名
+  证书处 break，永不检查链尾拼上的配置信任锚点——「链内部自洽」冒充
+  「链终止于信任锚点」（修复 = break 条件改为 `issuer.equal(anchor)`）。
+  检出需要建模证书链验证协议语义，任何标记/污点/缺席判据都够不着，
+  归入 V1 七类根因「密码学协议语义」，不做。
+- **fr-013**（gitlab-mcp，五子问题全部分类）：F1(a) GraphQL 逗号前导形态
+  = 字符串解析语义；F1(b) execute_graphql 缺项目范围检查 = 缺席型判据
+  **唯一可点亮方向**，但判据是 MCP 工具处理器专属词汇，需 MCP 类公告
+  语料族（≥2-3 条）支撑，单条按三要件不做；F2/F3 配置通道路由（启动校验
+  门缺凭证形态 / SSE 默认无认证 + DNS rebinding）；F4 会话耗尽 DoS；
+  F5 内容级提示注入防御。constant-time 比较属加固建议类不单做。
+- **fr-corpus 17 条全部定性收官：有效 11/17（9 干净 DETECTED + 2
+  with-boundary），6 条判定关闭**（fr-004 闭包晚绑定 / fr-006 黑名单
+  完备性 / fr-008 密码学协议语义 / fr-009 守卫不足 / fr-013 五子问题
+  全出检出面 / fr-015 corpus_invalid+守卫不足）。
+
 ## [3.7.60] — 2026-10-05
 
 ### fr-002/003 点亮：令牌交换路径检查完备性（修复回归 10/17）

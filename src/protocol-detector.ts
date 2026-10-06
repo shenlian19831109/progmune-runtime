@@ -960,6 +960,23 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     conceptExpected: ["get_user_role before session creation", "OAUTH_ALLOWED_DOMAINS check"],
   },
   {
+    name: "Authorization Identity Anchor from Request",
+    category: "auth",
+    // 2026-10-06（REALWORLD_FIX_REGRESSION fr-017）：身份校验的锚点
+    // （token 属于哪个 app/client）从请求输入读取——tinacms 的 isAuthorized
+    // 从 req.query.clientID 取锚点去问身份服务「这 token 是不是该 app 的」，
+    // 攻击者注册自己的 app 拿合法 token 即通过任意站点的后端授权
+    // （GHSA-g74q-6g2f-874x）。修复 = 锚点改从服务端配置/环境取 +
+    // 取不到 fail-closed。判据在提取器侧 hasRequestAnchoredIdentity
+    // （三元组：请求取 token + 请求取 app/client 锚点 + 无服务端锚点证据）。
+    languages: ["typescript", "javascript"],
+    trigger: /\b(__progmune_request_anchored_identity__)\b/,
+    safeguards: [],
+    violationMessage: "Authorization validates a token against an app/client identity read from the request (query/body/searchParams) rather than server configuration — an attacker registers their own app identity, supplies a token that IS valid for it, and passes authorization on any endpoint using this function. Anchor the identity in server config/env and fail closed when it cannot be resolved.",
+    conceptMissing: ["ServerConfiguredIdentityAnchor"],
+    conceptExpected: ["expectedClientID from config/env", "fail-closed when anchor unresolved"],
+  },
+  {
     name: "XSS (Unsafe Template Rendering)",
     category: "xss",
     languages: ["python"],
