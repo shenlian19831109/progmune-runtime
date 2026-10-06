@@ -2891,6 +2891,41 @@ const URL_PARAM_NAME = /^(url|target|endpoint|link|href|webUrl|web_url|sourceUrl
 function collectUrlParamNames(params) {
     return params.map((p) => p.name).filter((n) => URL_PARAM_NAME.test(n));
 }
+// ═══════════════════════════════════════════════════════════════
+// 请求锚定身份标记（2026-10-06，fr-017 tinacms GHSA-g74q-6g2f-874x）
+//
+// 身份校验把「token 属于哪个 app/client」这一身份锚点从**请求输入**读取
+// （req.query.clientID / searchParams.get('clientID')）。攻击者注册自己的
+// app 拿到合法 token，再对受害者后端指定自己的 clientID——后端问身份服务
+// 「这 token 是不是该 app 的」→ 是 → 授权通过。修复形态 = 锚点改从服务端
+// 配置取（expectedClientID ?? process.env.NEXT_PUBLIC_TINA_CLIENT_ID），
+// 且取不到 fail-closed。
+//
+// 判据三元组（与 fr-002/003 的缺席判据同族）：
+//   ① 从请求取 token（req.headers.authorization / headers().get('authorization')）
+//   ② 从请求输入取身份锚点（req.query|body|params.<锚点名> 或 searchParams.get）
+//   ③ 无服务端锚点证据（process.env. / getConfig( / config.）
+// 锚点名不含 tenant——多租户从请求解析租户锚点是合法形态，只有 app/client
+// 身份才是「服务器该知道自己的身份」的一侧。
+// 消费方：protocol-detector 的 "Authorization Identity Anchor from Request"。
+// ═══════════════════════════════════════════════════════════════
+const REQUEST_ANCHORED_IDENTITY_MARKER = "__progmune_request_anchored_identity__";
+const IDENTITY_ANCHOR_NAMES = /clientID|clientId|client_id|appId|appID|app_id|applicationId|applicationID|application_id/;
+/** ① 从请求取 token（NextApiRequest 与 NextRequest 两种形态） */
+const REQ_TOKEN_SRC = /req\.headers\.authorization|\.get\(\s*["']authorization["']\s*\)/i;
+/** ② 从请求输入取身份锚点（query/body/params 成员或 searchParams.get） */
+const REQ_ANCHOR_SRC = new RegExp(`(?:req\\.(?:query|body|params)\\.(?:${IDENTITY_ANCHOR_NAMES.source})\\b|searchParams\\.get\\(\\s*["'](?:${IDENTITY_ANCHOR_NAMES.source})["']\\s*\\))`);
+/** ③ 服务端锚点证据：出现即视为锚点有服务端绑定（配置/环境/配置对象），不标记 */
+const SERVER_ANCHOR_EVIDENCE = /process\.env\.|\bgetConfig\s*\(|\bconfig\./i;
+function hasRequestAnchoredIdentity(text) {
+    if (!REQ_TOKEN_SRC.test(text))
+        return false;
+    if (!REQ_ANCHOR_SRC.test(text))
+        return false;
+    if (SERVER_ANCHOR_EVIDENCE.test(text))
+        return false;
+    return true;
+}
 /**
  * 标记增强的内联实现（2026-09-15 性能重构）：消费主循环已获取的
  * 函数文本与形参名，输出该函数应附加的合成标记。
@@ -2973,6 +3008,12 @@ function computeMarkerCalls(text, paramNames, sinkParams, onMethodHit, guardFns,
                 break;
             }
         }
+    }
+    // ── 请求锚定身份（2026-10-06，fr-017）──
+    // 纯函数体文本判据，无需函数名——isUserAuthorized（被调用方）体内没有
+    // req.headers.authorization 形态，不会误标；只有面向请求的校验入口会命中。
+    if (hasRequestAnchoredIdentity(text)) {
+        markers.push(REQUEST_ANCHORED_IDENTITY_MARKER);
     }
     return markers;
 }
