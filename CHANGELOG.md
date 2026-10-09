@@ -1,5 +1,36 @@
 # Changelog
 
+## [3.7.62] — 2026-10-09
+
+### 迁移脚本排除出应用面（修冤枉第三刀：§49.19 补标注后首个数据驱动修复）
+
+**背景**：§49.19 补标注队列全部完成——docmost 174/174 条逐条人工核实
+（gold_confidence=verified，verified_by=ai-read-source），**全部为 FP**。
+这补齐了修冤枉第二刀撞到的数据边界（fp-pool 重扫 381→189 后「可干净
+动刀的根因挖完」的剩余瓶颈就是标注不足）。
+
+- **证据**：`blind-benchmark/reports/advisories/annotation-queue.jsonl`
+  （174 条全量 gold 字段落档）+ `blind-benchmark/fp-gold.jsonl`（+174 条
+  schema v2）+ `annotate-batches/`（16 批原始标注记录）
+- **首个根因**：Kysely 迁移脚本 `up()/down()`（src/database/migrations/）
+  被多族规则误报——addColumn/createTable 词撞 Authorization
+  (Unauthenticated Mutation)，dropTable 撞 Data Mutation 族。
+  迁移只在部署时跑一次、不暴露请求面，与 node_modules/benchmarks 同属
+  「无应用面」判定。
+- **修复**：`src/extract-ir.ts` 提取循环跳过 `/migrations/` 路径
+  （与 node_modules 跳过并列；Python 侧 alembic 未在本轮测量，暂不动——
+  按三要件，没有数据不扩面）
+- **A/B 实测**（docmost apps/server 同引擎双扫描）：告警流 992 → 942
+  （−50，恰好等于 fullscan 里 47 条 Unauthenticated Mutation + 3 条
+  Ownership Check 的迁移脚本 FP）；**判定/分数/主路径违规零变化**
+  （NEEDS_REVIEW 86 / 7 violations / auth 44，两侧完全一致）
+- **回归锁定**：新测试 `src/extract-ir-migrations.test.ts`（2 例：迁移
+  不提取 + migrations 字样非目录不误伤）；TS 盲测 119 项目零漂移
+  （仅时间戳变化）；taintpath 160/160；fr-007 pre5/post0、fr-016
+  pre7/post0 维持
+- 已知代价（如实记录）：迁移文件里的真实问题（如数据回填 SQLi）不再
+  检出——与 node_modules 跳过同一取舍，提取面=应用面
+
 ## [3.7.61] — 2026-10-06
 
 ### fr-017 点亮：授权身份锚点取自请求输入（修复回归 11/17）
