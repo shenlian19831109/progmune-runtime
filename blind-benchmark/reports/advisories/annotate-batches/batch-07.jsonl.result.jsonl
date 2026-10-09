@@ -1,0 +1,12 @@
+{"queue_id": 2, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（页面历史快照入库）", "verified_by": "ai-read-source"}
+{"queue_id": 6, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（backlink 入库，队列任务/导入管线）", "verified_by": "ai-read-source"}
+{"queue_id": 9, "gold": "FP", "gold_confidence": "verified", "gold_reason": "页面内容经 parseProsemirrorContent → PM JSON 入库，渲染走 PM schema 校验，非原始 HTML sink；insert 词撞（insertPage）", "verified_by": "ai-read-source"}
+{"queue_id": 16, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（会话记录入库）", "verified_by": "ai-read-source"}
+{"queue_id": 23, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（页面入库）", "verified_by": "ai-read-source"}
+{"queue_id": 30, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（watcher 入库）", "verified_by": "ai-read-source"}
+{"queue_id": 32, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（public space upsert）", "verified_by": "ai-read-source"}
+{"queue_id": 33, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（watcher 批量入库）", "verified_by": "ai-read-source"}
+{"queue_id": 37, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（space 入库）", "verified_by": "ai-read-source"}
+{"queue_id": 48, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（transclusion 批量入库）", "verified_by": "ai-read-source"}
+{"queue_id": 54, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（attachment 入库）", "verified_by": "ai-read-source"}
+{"queue_id": 58, "gold": "FP", "gold_confidence": "verified", "gold_reason": "transclusion 反同步（删除引用关系），无渲染 sink；insert 词撞（insertMany 调用）", "verified_by": "ai-read-source"}

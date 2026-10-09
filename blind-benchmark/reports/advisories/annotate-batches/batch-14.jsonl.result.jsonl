@@ -1,0 +1,12 @@
+{"queue_id": 92, "gold": "FP", "gold_confidence": "verified", "gold_reason": "page.controller JwtAuthGuard + 页面删除流程含权限检查", "verified_by": "ai-read-source"}
+{"queue_id": 100, "gold": "FP", "gold_confidence": "verified", "gold_reason": "favorite.controller:28 @UseGuards(JwtAuthGuard)；移除自身收藏", "verified_by": "ai-read-source"}
+{"queue_id": 113, "gold": "FP", "gold_confidence": "verified", "gold_reason": "字符串工具 removeAccent（去重音符号），remove 词撞，无资源变更", "verified_by": "ai-read-source"}
+{"queue_id": 116, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层标签移除（页面编辑流程，守卫后）", "verified_by": "ai-read-source"}
+{"queue_id": 5, "gold": "FP", "gold_confidence": "verified", "gold_reason": "FK 规则：父引用（workspace）由 @AuthWorkspace 注入已认证；成员加入有管理员能力检查", "verified_by": "ai-read-source"}
+{"queue_id": 12, "gold": "FP", "gold_confidence": "verified", "gold_reason": "FK 规则：创建默认组，workspaceId 来自已认证流程", "verified_by": "ai-read-source"}
+{"queue_id": 26, "gold": "FP", "gold_confidence": "verified", "gold_reason": "内存速率限制器（无 DB），非 FK 语义；add 词撞", "verified_by": "ai-read-source"}
+{"queue_id": 27, "gold": "FP", "gold_confidence": "verified", "gold_reason": "FK 规则：新用户注册流程自动入默认组（注册即凭据）", "verified_by": "ai-read-source"}
+{"queue_id": 65, "gold": "FP", "gold_confidence": "verified", "gold_reason": "FK 规则：space 创建后 addUserToSpace 同事务，authUser.id 为自身", "verified_by": "ai-read-source"}
+{"queue_id": 69, "gold": "FP", "gold_confidence": "verified", "gold_reason": "FK 规则：标签挂页（页面编辑流程，page 已认证可写）", "verified_by": "ai-read-source"}
+{"queue_id": 114, "gold": "FP", "gold_confidence": "verified", "gold_reason": "FK 规则：space 成员添加（space-member.service 校验+能力检查后）", "verified_by": "ai-read-source"}
+{"queue_id": 142, "gold": "FP", "gold_confidence": "verified", "gold_reason": "FK 规则：watcher 批量添加（页面访问流程派生）", "verified_by": "ai-read-source"}

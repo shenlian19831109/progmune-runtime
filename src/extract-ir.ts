@@ -3189,6 +3189,13 @@ function _extractSingleProject(
   };
   for (const sf of project.getSourceFiles()) {
     if (sf.getFilePath().includes("node_modules")) continue; // lib.d.ts 等声明文件只贡献噪声（2026-09-17 性能）
+    // 2026-10-08（§49.19 补标注 174/174 的证据）：迁移脚本不是应用表面——
+    // Kysely 的 addColumn/createTable/insertInto 词撞变更/审计规则族
+    // （docmost 全量告警 ~5% 全 FP：up()/down() 迁移函数被多族规则报）。
+    // 与 node_modules 同款「无应用面」判定：迁移只在部署时跑一次，
+    // 不暴露请求面。Python 侧 alembic（/migrations/ 或 /alembic/versions/）
+    // 未在本轮测量，暂不动。
+    if (sf.getFilePath().split(path.sep).join("/").includes("/migrations/")) continue;
     const relPath = path.relative(absRoot, sf.getFilePath());
     const _ft0 = Date.now();
     for (const f of sf.getFunctions()) {

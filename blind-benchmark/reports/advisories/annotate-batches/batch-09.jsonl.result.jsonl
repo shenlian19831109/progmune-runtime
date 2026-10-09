@@ -1,0 +1,8 @@
+{"queue_id": 135, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（watcher upsert）", "verified_by": "ai-read-source"}
+{"queue_id": 136, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（notification 入库）", "verified_by": "ai-read-source"}
+{"queue_id": 137, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（template 入库）", "verified_by": "ai-read-source"}
+{"queue_id": 143, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（page access 入库）", "verified_by": "ai-read-source"}
+{"queue_id": 151, "gold": "FP", "gold_confidence": "verified", "gold_reason": "transclusion 批量入库（复制/导入管线），无渲染 sink", "verified_by": "ai-read-source"}
+{"queue_id": 155, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（space member 入库）", "verified_by": "ai-read-source"}
+{"queue_id": 168, "gold": "FP", "gold_confidence": "verified", "gold_reason": "render 是 @react-email/render（服务端把代码内定义的 React 组件渲染为邮件 HTML），模板非用户输入、用户数据经 React 转义", "verified_by": "ai-read-source"}
+{"queue_id": 172, "gold": "FP", "gold_confidence": "verified", "gold_reason": "insert 词撞——Kysely insertInto 数据入库，非 XSS 渲染 sink（无 render/innerHTML/document.write 形态）（user token 入库）", "verified_by": "ai-read-source"}

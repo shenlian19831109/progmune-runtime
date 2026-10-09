@@ -1,0 +1,12 @@
+{"queue_id": 77, "gold": "FP", "gold_confidence": "verified", "gold_reason": "page.controller.ts:57 @UseGuards(JwtAuthGuard)；函数内以 user.id 记账 contributor", "verified_by": "ai-read-source"}
+{"queue_id": 78, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层；调用链 transclusion/page 服务 → page.controller（@UseGuards）", "verified_by": "ai-read-source"}
+{"queue_id": 79, "gold": "FP", "gold_confidence": "verified", "gold_reason": "import.controller.ts:46/125 @UseGuards(JwtAuthGuard)；导入流程", "verified_by": "ai-read-source"}
+{"queue_id": 85, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层 backlink 更新；调用链页面保存流程（守卫后）", "verified_by": "ai-read-source"}
+{"queue_id": 90, "gold": "FP", "gold_confidence": "verified", "gold_reason": "SSRF 出站守卫工具函数 isPrivateAddress（outbound-url.guard.ts），非变更操作；触发词撞（isAlwaysBlockedAddress 解析词）", "verified_by": "ai-read-source"}
+{"queue_id": 93, "gold": "FP", "gold_confidence": "verified", "gold_reason": "pino 日志配置工厂 createPinoConfig，非 API 非数据变更；create* 词撞", "verified_by": "ai-read-source"}
+{"queue_id": 96, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层；group.service:76 → group.controller（JwtAuthGuard）", "verified_by": "ai-read-source"}
+{"queue_id": 98, "gold": "FP", "gold_confidence": "verified", "gold_reason": "迁移脚本 up(db)（audit 建表）", "verified_by": "ai-read-source"}
+{"queue_id": 101, "gold": "FP", "gold_confidence": "verified", "gold_reason": "WebSocket 网关初始化 afterInit（setServer）；handleConnection 有 verifyJwt 认证；set* 词撞", "verified_by": "ai-read-source"}
+{"queue_id": 104, "gold": "FP", "gold_confidence": "verified", "gold_reason": "迁移脚本 up(db)（file_tasks 建表）", "verified_by": "ai-read-source"}
+{"queue_id": 108, "gold": "FP", "gold_confidence": "verified", "gold_reason": "邀请接受端点 @Public() 设计公开（workspace.controller.ts:295），凭据=邀请令牌本身", "verified_by": "ai-read-source"}
+{"queue_id": 112, "gold": "FP", "gold_confidence": "verified", "gold_reason": "纯读取函数（分页查询+filterAccessiblePageIds 过滤）；get+Created 词形撞变更规则", "verified_by": "ai-read-source"}

@@ -1,0 +1,8 @@
+{"queue_id": 94, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层 upsert；输入校验在 DTO/controller 层（__progmune_input_schema__ 标记在场）", "verified_by": "ai-read-source"}
+{"queue_id": 109, "gold": "FP", "gold_confidence": "verified", "gold_reason": "会话创建（输入=服务端 User 对象），校验在调用方", "verified_by": "ai-read-source"}
+{"queue_id": 128, "gold": "FP", "gold_confidence": "verified", "gold_reason": "配置 getter（getAzureStorageEndpoint）；endpoint 词撞", "verified_by": "ai-read-source"}
+{"queue_id": 130, "gold": "FP", "gold_confidence": "verified", "gold_reason": "StaticModule 静态资源路径装配；register 词撞", "verified_by": "ai-read-source"}
+{"queue_id": 165, "gold": "FP", "gold_confidence": "verified", "gold_reason": "bootstrap（main.ts）；register 词撞（WebSocket adapter register）", "verified_by": "ai-read-source"}
+{"queue_id": 139, "gold": "FP", "gold_confidence": "verified", "gold_reason": "路径穿越标记误报：extractDir 由服务端生成的 fileTaskId 构成（workspaceId/imports/<uuid>），非用户可控路径；C4 传播跨过服务端生成边界", "verified_by": "ai-read-source"}
+{"queue_id": 163, "gold": "FP", "gold_confidence": "verified", "gold_reason": "协作服务器 bootstrap（listen）；TLS 由反向代理/部署配置负责，非代码层", "verified_by": "ai-read-source"}
+{"queue_id": 173, "gold": "FP", "gold_confidence": "verified", "gold_reason": "函数内 CASL ability.cannot 检查（createForUser+cannot 调用在场）+ auth_machinery 标记；规则词表未认出该组合", "verified_by": "ai-read-source"}

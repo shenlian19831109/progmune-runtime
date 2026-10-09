@@ -1,0 +1,12 @@
+{"queue_id": 1, "gold": "FP", "gold_confidence": "verified", "gold_reason": "配置 getter（getFileUploadSizeLimit），非上传端点；upload/limit 词撞", "verified_by": "ai-read-source"}
+{"queue_id": 44, "gold": "FP", "gold_confidence": "verified", "gold_reason": "上传校验在控制器层（attachment.controller req.file({limits:{fileSize:maxFileSize}})+413 处理）；驱动/门面层不负责校验", "verified_by": "ai-read-source"}
+{"queue_id": 83, "gold": "FP", "gold_confidence": "verified", "gold_reason": "上传校验在控制器层（attachment.controller req.file({limits:{fileSize:maxFileSize}})+413 处理）；驱动/门面层不负责校验（LocalDriver 存储驱动层）", "verified_by": "ai-read-source"}
+{"queue_id": 115, "gold": "FP", "gold_confidence": "verified", "gold_reason": "上传校验在控制器层（attachment.controller req.file({limits:{fileSize:maxFileSize}})+413 处理）；驱动/门面层不负责校验（存储门面层）", "verified_by": "ai-read-source"}
+{"queue_id": 134, "gold": "FP", "gold_confidence": "verified", "gold_reason": "上传校验在控制器层（attachment.controller req.file({limits:{fileSize:maxFileSize}})+413 处理）；驱动/门面层不负责校验（S3 驱动层）", "verified_by": "ai-read-source"}
+{"queue_id": 145, "gold": "FP", "gold_confidence": "verified", "gold_reason": "上传校验在控制器层（attachment.controller req.file({limits:{fileSize:maxFileSize}})+413 处理）；驱动/门面层不负责校验（Azure 驱动层）", "verified_by": "ai-read-source"}
+{"queue_id": 4, "gold": "FP", "gold_confidence": "verified", "gold_reason": "group.controller:28 @UseGuards(JwtAuthGuard)；函数带 owner_self_assigned/input_guard 标记+findAndValidateGroup 校验", "verified_by": "ai-read-source"}
+{"queue_id": 25, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层成员移除（space-member.service 管理流程，守卫+能力检查后）", "verified_by": "ai-read-source"}
+{"queue_id": 49, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层页面软删（page 删除流程，守卫+CASL 检查后）", "verified_by": "ai-read-source"}
+{"queue_id": 57, "gold": "FP", "gold_confidence": "verified", "gold_reason": "page.controller:57 JwtAuthGuard（标签移除=页面编辑操作）", "verified_by": "ai-read-source"}
+{"queue_id": 62, "gold": "FP", "gold_confidence": "verified", "gold_reason": "Yjs 文档 mark 工具（协作数据对象），无用户资源所有权概念", "verified_by": "ai-read-source"}
+{"queue_id": 76, "gold": "FP", "gold_confidence": "verified", "gold_reason": "Yjs 文档 mark 工具，同 Q62", "verified_by": "ai-read-source"}

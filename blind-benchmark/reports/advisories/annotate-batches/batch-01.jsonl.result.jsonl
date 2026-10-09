@@ -1,0 +1,12 @@
+{"queue_id": 3, "gold": "FP", "gold_confidence": "verified", "gold_reason": "Kysely 迁移脚本 up(db)（src/database/migrations/20260213T085259-notifications.ts）——schema 建表/建索引，非 API；触发词来自 calls 解析词 addColumn/createTable", "verified_by": "ai-read-source"}
+{"queue_id": 14, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层 UserRepo.updateUser；调用方 auth.service:143 是改密流程（先 comparePasswords 校验旧密码），258/305 为登录/会话流程，均在认证上下文", "verified_by": "ai-read-source"}
+{"queue_id": 22, "gold": "FP", "gold_confidence": "verified", "gold_reason": "AES-GCM 加密封装（integration 层），无 DB 无 API；\"update\" 来自 cipher.update() 词撞", "verified_by": "ai-read-source"}
+{"queue_id": 41, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层 insertPagePermissions；全仓库 grep 仅定义处出现（其余注入点调的是 canUserEditPage 等其它方法），无可达未认证路径", "verified_by": "ai-read-source"}
+{"queue_id": 42, "gold": "FP", "gold_confidence": "verified", "gold_reason": "会话活跃时间戳记账（lastActiveAt），session-activity.service:29 调用，非业务数据变更", "verified_by": "ai-read-source"}
+{"queue_id": 43, "gold": "FP", "gold_confidence": "verified", "gold_reason": "读取函数 ShareRepo.findById 被误报为变更；\"update\" 来自 SQL forUpdate 行锁词撞", "verified_by": "ai-read-source"}
+{"queue_id": 51, "gold": "FP", "gold_confidence": "verified", "gold_reason": "workspace.controller.ts:41 @UseGuards(JwtAuthGuard)；函数内 isAdminActingOnOwner 角色检查 + 审计日志", "verified_by": "ai-read-source"}
+{"queue_id": 53, "gold": "FP", "gold_confidence": "verified", "gold_reason": "space.controller.ts:39 @UseGuards(JwtAuthGuard)", "verified_by": "ai-read-source"}
+{"queue_id": 55, "gold": "FP", "gold_confidence": "verified", "gold_reason": "迁移脚本 up(db)（add_license_key_to_workspace）", "verified_by": "ai-read-source"}
+{"queue_id": 63, "gold": "FP", "gold_confidence": "verified", "gold_reason": "迁移脚本 up(db)（labels 建表）", "verified_by": "ai-read-source"}
+{"queue_id": 70, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层；调用链 workspace.service:525/542 → workspace.controller（@UseGuards）", "verified_by": "ai-read-source"}
+{"queue_id": 73, "gold": "FP", "gold_confidence": "verified", "gold_reason": "import 管线私有工具 createDrawioSvg（SVG 组装），非 API；触发来自函数名 create*", "verified_by": "ai-read-source"}

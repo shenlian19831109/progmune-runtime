@@ -1,0 +1,9 @@
+{"queue_id": 144, "gold": "FP", "gold_confidence": "verified", "gold_reason": "page.controller:57 @UseGuards(JwtAuthGuard)", "verified_by": "ai-read-source"}
+{"queue_id": 146, "gold": "FP", "gold_confidence": "verified", "gold_reason": "space.controller:39 @UseGuards(JwtAuthGuard)", "verified_by": "ai-read-source"}
+{"queue_id": 149, "gold": "FP", "gold_confidence": "verified", "gold_reason": "workspace.controller:41 类级 JwtAuthGuard（邀请管理端点）", "verified_by": "ai-read-source"}
+{"queue_id": 150, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层递归 CTE 查询（权限检查用的工具查询），非 API 端点", "verified_by": "ai-read-source"}
+{"queue_id": 152, "gold": "FP", "gold_confidence": "verified", "gold_reason": "@Interval 定时任务（每 24h 清理回收站），非 API", "verified_by": "ai-read-source"}
+{"queue_id": 153, "gold": "FP", "gold_confidence": "verified", "gold_reason": "favorite.controller:28 @UseGuards(JwtAuthGuard)+where userId 限定自身", "verified_by": "ai-read-source"}
+{"queue_id": 154, "gold": "FP", "gold_confidence": "verified", "gold_reason": "Azure Blob 存储驱动层 read（downloadToBuffer），非 API", "verified_by": "ai-read-source"}
+{"queue_id": 169, "gold": "FP", "gold_confidence": "verified", "gold_reason": "React 邮件模板组件（.tsx 渲染函数），非数据访问", "verified_by": "ai-read-source"}
+{"queue_id": 170, "gold": "FP", "gold_confidence": "verified", "gold_reason": "分享树端点 @Public()（253）设计公开，凭据=shareId 分享链接；函数内 isSharingAllowed 检查", "verified_by": "ai-read-source"}

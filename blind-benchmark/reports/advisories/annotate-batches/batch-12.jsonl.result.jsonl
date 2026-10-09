@@ -1,0 +1,7 @@
+{"queue_id": 123, "gold": "FP", "gold_confidence": "verified", "gold_reason": "邮件队列处理器记账（email.processor:28），非用户变更操作", "verified_by": "ai-read-source"}
+{"queue_id": 129, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层附件删除（attachment.service:237 附件替换流程，守卫后）", "verified_by": "ai-read-source"}
+{"queue_id": 148, "gold": "FP", "gold_confidence": "verified", "gold_reason": "Redis 锁释放（协作同步机制）", "verified_by": "ai-read-source"}
+{"queue_id": 156, "gold": "FP", "gold_confidence": "verified", "gold_reason": "where userId+workspaceId 限定（注销/清用户自身会话）", "verified_by": "ai-read-source"}
+{"queue_id": 158, "gold": "FP", "gold_confidence": "verified", "gold_reason": "space.controller:39 JwtAuthGuard + deleteSpace 端点 CASL ability.cannot(Manage,Settings)→Forbidden 检查", "verified_by": "ai-read-source"}
+{"queue_id": 159, "gold": "FP", "gold_confidence": "verified", "gold_reason": "分享创建端点 share.controller:39 类级 JwtAuthGuard（@Public 仅限只读分享端点 61/91/114/253）", "verified_by": "ai-read-source"}
+{"queue_id": 161, "gold": "FP", "gold_confidence": "verified", "gold_reason": "@OnEvent 事件监听（页面更新后队列副作用）", "verified_by": "ai-read-source"}

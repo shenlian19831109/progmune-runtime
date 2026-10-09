@@ -1,0 +1,12 @@
+{"queue_id": 66, "gold": "FP", "gold_confidence": "verified", "gold_reason": "分享页信息端点 @Public() 设计公开（share.controller:61，凭据=分享链接）；函数内 hasRestrictedAncestor 阻断受限页面", "verified_by": "ai-read-source"}
+{"queue_id": 68, "gold": "FP", "gold_confidence": "verified", "gold_reason": "导入任务管线内部（file-import-task.service:499 队列作业上下文），非 API", "verified_by": "ai-read-source"}
+{"queue_id": 72, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层；group-user.service:128 成员管理流程（守卫后）", "verified_by": "ai-read-source"}
+{"queue_id": 74, "gold": "FP", "gold_confidence": "verified", "gold_reason": "通知处理器（notification.processor:71 队列作业），非 API 端点", "verified_by": "ai-read-source"}
+{"queue_id": 81, "gold": "FP", "gold_confidence": "verified", "gold_reason": "DB listener 配置判断（getSearchDriver==='typesense'），非数据访问", "verified_by": "ai-read-source"}
+{"queue_id": 84, "gold": "FP", "gold_confidence": "verified", "gold_reason": "License 检查私有方法（动态 require + try/catch），非 API", "verified_by": "ai-read-source"}
+{"queue_id": 87, "gold": "FP", "gold_confidence": "verified", "gold_reason": "DB listener 配置判断，同 Q81", "verified_by": "ai-read-source"}
+{"queue_id": 95, "gold": "FP", "gold_confidence": "verified", "gold_reason": "WebSocket 协作事件处理器注册表（网关内部；网关连接 handleConnection 有 verifyJwt）", "verified_by": "ai-read-source"}
+{"queue_id": 99, "gold": "FP", "gold_confidence": "verified", "gold_reason": "导出管线路径计算工具（encodeURIComponent/递归路径），非 API", "verified_by": "ai-read-source"}
+{"queue_id": 119, "gold": "FP", "gold_confidence": "verified", "gold_reason": "路径字符串拼接工具（switch 返回目录名），非数据访问", "verified_by": "ai-read-source"}
+{"queue_id": 124, "gold": "FP", "gold_confidence": "verified", "gold_reason": "space.controller:39 @UseGuards(JwtAuthGuard)；按 userId 取自身空间列表", "verified_by": "ai-read-source"}
+{"queue_id": 140, "gold": "FP", "gold_confidence": "verified", "gold_reason": "导出管线 URI 解码工具函数", "verified_by": "ai-read-source"}

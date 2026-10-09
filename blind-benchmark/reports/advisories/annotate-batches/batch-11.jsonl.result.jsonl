@@ -1,0 +1,12 @@
+{"queue_id": 59, "gold": "FP", "gold_confidence": "verified", "gold_reason": "Redis 锁释放+集群广播（协作同步机制），无资源所有权概念", "verified_by": "ai-read-source"}
+{"queue_id": 60, "gold": "FP", "gold_confidence": "verified", "gold_reason": "@Interval 定时遥测（匿名化 HMAC），非资源变更操作", "verified_by": "ai-read-source"}
+{"queue_id": 67, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层 where id=userId 限定——用户更新自身通知设置（user.controller @UseGuards+@AuthUser）", "verified_by": "ai-read-source"}
+{"queue_id": 80, "gold": "FP", "gold_confidence": "verified", "gold_reason": "公开分享内容准备（share.service:408/427 内部；公开分享设计+内部 sanitize），非越权变更", "verified_by": "ai-read-source"}
+{"queue_id": 91, "gold": "FP", "gold_confidence": "verified", "gold_reason": "Redis 分布式锁维护（协作同步），无所有权概念", "verified_by": "ai-read-source"}
+{"queue_id": 103, "gold": "FP", "gold_confidence": "verified", "gold_reason": "过期令牌清理（登录/定时上下文），无所有权概念", "verified_by": "ai-read-source"}
+{"queue_id": 106, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层页面批量迁移内部操作（updateSpaceIdByPageIds），守卫后流程", "verified_by": "ai-read-source"}
+{"queue_id": 110, "gold": "FP", "gold_confidence": "verified", "gold_reason": "Azure 存储驱动读取（readRangeStream），非可归属资源", "verified_by": "ai-read-source"}
+{"queue_id": 111, "gold": "FP", "gold_confidence": "verified", "gold_reason": "Azure 存储驱动上传，非可归属资源", "verified_by": "ai-read-source"}
+{"queue_id": 117, "gold": "FP", "gold_confidence": "verified", "gold_reason": "分享页信息端点 @Public()（91）设计公开，凭据=分享链接", "verified_by": "ai-read-source"}
+{"queue_id": 121, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层 workspace 设置更新（管理端点守卫后）", "verified_by": "ai-read-source"}
+{"queue_id": 122, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层读取（findByPageId），无变更操作", "verified_by": "ai-read-source"}

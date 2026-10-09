@@ -1,0 +1,10 @@
+{"queue_id": 118, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层；space.service:212 → space.controller:39（JwtAuthGuard）", "verified_by": "ai-read-source"}
+{"queue_id": 131, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层；调用链页面保存/复制流程（守卫后）", "verified_by": "ai-read-source"}
+{"queue_id": 138, "gold": "FP", "gold_confidence": "verified", "gold_reason": "page.controller:57 @UseGuards(JwtAuthGuard)；update 端点已认证", "verified_by": "ai-read-source"}
+{"queue_id": 141, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层 watcher upsert；watcher.service:84 → watcher.controller（JwtAuthGuard）", "verified_by": "ai-read-source"}
+{"queue_id": 147, "gold": "FP", "gold_confidence": "verified", "gold_reason": "page.controller:633 @UseGuards(JwtAuthGuard)；函数内 filterAccessibleTreePages 权限过滤", "verified_by": "ai-read-source"}
+{"queue_id": 160, "gold": "FP", "gold_confidence": "verified", "gold_reason": "存储驱动层（本地文件写）；attachment.controller 全端点 @UseGuards(JwtAuthGuard)（89/177/273/401/429/460）", "verified_by": "ai-read-source"}
+{"queue_id": 164, "gold": "FP", "gold_confidence": "verified", "gold_reason": "会话撤销 where id+userId+workspaceId 三重限定；session.service:89 登出流程", "verified_by": "ai-read-source"}
+{"queue_id": 166, "gold": "FP", "gold_confidence": "verified", "gold_reason": "group.controller:28 @UseGuards(JwtAuthGuard)；含审计日志", "verified_by": "ai-read-source"}
+{"queue_id": 171, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层；workspace.service:154 注册/创建工作区流程（注册即凭据）", "verified_by": "ai-read-source"}
+{"queue_id": 174, "gold": "FP", "gold_confidence": "verified", "gold_reason": "页面复制/导入管线内部步骤（page.service:724），守卫后", "verified_by": "ai-read-source"}

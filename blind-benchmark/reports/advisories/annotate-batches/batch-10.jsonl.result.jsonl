@@ -1,0 +1,12 @@
+{"queue_id": 7, "gold": "FP", "gold_confidence": "verified", "gold_reason": "@OnEvent 事件监听（删除已完成后的队列副作用），无资源变更操作", "verified_by": "ai-read-source"}
+{"queue_id": 8, "gold": "FP", "gold_confidence": "verified", "gold_reason": "格式转换（PM JSON→Yjs Buffer），无所有权概念；create 词撞", "verified_by": "ai-read-source"}
+{"queue_id": 15, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层 transclusion 引用删除（同步流程内部，三条件 where 限定）", "verified_by": "ai-read-source"}
+{"queue_id": 17, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层；space-member.service:347 成员管理（守卫+能力检查后）", "verified_by": "ai-read-source"}
+{"queue_id": 19, "gold": "FP", "gold_confidence": "verified", "gold_reason": "纯读取函数（select + forUpdate 行锁）；update 词撞 forUpdate", "verified_by": "ai-read-source"}
+{"queue_id": 20, "gold": "FP", "gold_confidence": "verified", "gold_reason": "attachment.controller:460 @UseGuards(JwtAuthGuard)；空间图标管理操作", "verified_by": "ai-read-source"}
+{"queue_id": 28, "gold": "FP", "gold_confidence": "verified", "gold_reason": "Redis 分布式锁 TTL 刷新（协作同步机制），无资源所有权概念", "verified_by": "ai-read-source"}
+{"queue_id": 29, "gold": "FP", "gold_confidence": "verified", "gold_reason": "通知处理器（队列作业），按 watcher/访问权限过滤收件人", "verified_by": "ai-read-source"}
+{"queue_id": 35, "gold": "FP", "gold_confidence": "verified", "gold_reason": "存储门面层（委托 driver），上传内容为文件而非可归属资源", "verified_by": "ai-read-source"}
+{"queue_id": 39, "gold": "FP", "gold_confidence": "verified", "gold_reason": "where userId 限定——删除自身 watcher（workspace.service:1022 删用户时清自身数据）", "verified_by": "ai-read-source"}
+{"queue_id": 45, "gold": "FP", "gold_confidence": "verified", "gold_reason": "Yjs 文档内 mark 属性更新（协作数据对象），无用户资源所有权概念", "verified_by": "ai-read-source"}
+{"queue_id": 52, "gold": "FP", "gold_confidence": "verified", "gold_reason": "@OnEvent 事件监听（删除后队列副作用）", "verified_by": "ai-read-source"}

@@ -1,0 +1,12 @@
+{"queue_id": 10, "gold": "FP", "gold_confidence": "verified", "gold_reason": "页面保存链路的内部同步（persistence.extension:272），守卫后", "verified_by": "ai-read-source"}
+{"queue_id": 11, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层计数查询；label.service:67 → label.controller（JwtAuthGuard）", "verified_by": "ai-read-source"}
+{"queue_id": 24, "gold": "FP", "gold_confidence": "verified", "gold_reason": "配置 getter（configService.get POSTHOG_KEY），非数据访问", "verified_by": "ai-read-source"}
+{"queue_id": 31, "gold": "FP", "gold_confidence": "verified", "gold_reason": "配置 getter（AI_EMBEDDING_DIMENSION parseInt）", "verified_by": "ai-read-source"}
+{"queue_id": 34, "gold": "FP", "gold_confidence": "verified", "gold_reason": "NestJS 响应转换拦截器（框架机制）；get 词撞 reflector.get/getHandler", "verified_by": "ai-read-source"}
+{"queue_id": 36, "gold": "FP", "gold_confidence": "verified", "gold_reason": "share.controller:39 类级 @UseGuards(JwtAuthGuard)；端点 @AuthUser + validateCanView（非 @Public，相邻 @Public 属 transclusionLookup）", "verified_by": "ai-read-source"}
+{"queue_id": 38, "gold": "FP", "gold_confidence": "verified", "gold_reason": "忘记密码端点设计公开（凭据=邮箱+邮件令牌），类级 @UseGuards(ThrottlerGuard) 节流；30 分钟令牌+邮箱投递", "verified_by": "ai-read-source"}
+{"queue_id": 40, "gold": "FP", "gold_confidence": "verified", "gold_reason": "同 Q147：page.controller:57 @UseGuards(JwtAuthGuard)+filterAccessibleTreePages；get 词撞（getPageAndDescendants）", "verified_by": "ai-read-source"}
+{"queue_id": 47, "gold": "FP", "gold_confidence": "verified", "gold_reason": "notification.controller:15 @UseGuards(JwtAuthGuard)；where userId 限定自身", "verified_by": "ai-read-source"}
+{"queue_id": 50, "gold": "FP", "gold_confidence": "verified", "gold_reason": "workspace.controller:41 类级 JwtAuthGuard；getInviteLink 非 @Public（@Public 属 checkHostname）+ CASL ability.cannot 检查", "verified_by": "ai-read-source"}
+{"queue_id": 56, "gold": "FP", "gold_confidence": "verified", "gold_reason": "repo 层；group-user.repo:142 成员管理内部流程（守卫后）", "verified_by": "ai-read-source"}
+{"queue_id": 64, "gold": "FP", "gold_confidence": "verified", "gold_reason": "配置 getter（AWS_S3_BUCKET）", "verified_by": "ai-read-source"}

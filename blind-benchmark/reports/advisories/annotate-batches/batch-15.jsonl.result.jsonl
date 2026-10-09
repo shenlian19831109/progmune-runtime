@@ -1,0 +1,12 @@
+{"queue_id": 157, "gold": "FP", "gold_confidence": "verified", "gold_reason": "FK 规则：组内成员添加（group 管理流程，守卫后）", "verified_by": "ai-read-source"}
+{"queue_id": 167, "gold": "FP", "gold_confidence": "verified", "gold_reason": "FK 规则：组入空间（space 管理流程，守卫后）", "verified_by": "ai-read-source"}
+{"queue_id": 13, "gold": "FP", "gold_confidence": "verified", "gold_reason": "游标分页工具函数；reverse 词撞（列表 .reverse()）", "verified_by": "ai-read-source"}
+{"queue_id": 107, "gold": "FP", "gold_confidence": "verified", "gold_reason": "面包屑导航查询（页面读取流程）；无 refund 语义", "verified_by": "ai-read-source"}
+{"queue_id": 125, "gold": "FP", "gold_confidence": "verified", "gold_reason": "Notion 导入格式化器；无 refund 语义", "verified_by": "ai-read-source"}
+{"queue_id": 18, "gold": "FP", "gold_confidence": "verified", "gold_reason": "迁移脚本 down(db)（migrations），非 API", "verified_by": "ai-read-source"}
+{"queue_id": 21, "gold": "FP", "gold_confidence": "verified", "gold_reason": "应用 bootstrap（listen 词撞）；限流由 ThrottlerGuard/controller 层负责", "verified_by": "ai-read-source"}
+{"queue_id": 46, "gold": "FP", "gold_confidence": "verified", "gold_reason": "StaticModule 静态资源服务初始化；register/signup 词撞（register 词出现于应用装配代码）", "verified_by": "ai-read-source"}
+{"queue_id": 132, "gold": "FP", "gold_confidence": "verified", "gold_reason": "bootstrap（main.ts）应用装配；register 词撞（WebSocket adapter register）", "verified_by": "ai-read-source"}
+{"queue_id": 82, "gold": "FP", "gold_confidence": "verified", "gold_reason": "EmailProcessor 是队列消费者本身（重试机制载体），非缺重试的通知发送", "verified_by": "ai-read-source"}
+{"queue_id": 162, "gold": "FP", "gold_confidence": "verified", "gold_reason": "PostmarkDriver 邮件传输层（调用方经队列重试）", "verified_by": "ai-read-source"}
+{"queue_id": 86, "gold": "FP", "gold_confidence": "verified", "gold_reason": "登录时间戳记账（updateLastLogin）；会话超时由配置/会话层负责", "verified_by": "ai-read-source"}
