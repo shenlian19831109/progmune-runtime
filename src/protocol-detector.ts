@@ -1175,10 +1175,25 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     ],
   },
   // ── Resource: Input sanitization missing ──
+  //
+  // 修冤枉第四刀（2026-10-09，§49.19 补标注数据）：trigger 里三个「输出系」
+  // 通用词在真实与合成语料上系统性词撞，全量 FP——
+  //   insert：Kysely insertInto 数据入库（docmost 标注 30/30 FP；
+  //           盲测 webshape_F 2/2 FP）
+  //   append：Python list.append 内存数组（Python 盲测 270/270 FP）
+  //   write： 文件写入 writeFileSync（TS 盲测 33/33 FP）
+  // 本意是 XSS sink（DOM 插入/文档写入），逐条核实无一条真阳性。
+  // 收窄方案：删通用词，DOM sink 用**原始调用名**显式保留
+  // （extractDirectCalls 对属性访问发射 getName() 原样名：
+  //  el.insertAdjacentHTML(...) → "insertAdjacentHTML"）。
+  // 已知代价（如实记录）：document.write 的原始发射名是 "write"，
+  // 与文件写入词法不可区分，本刀后不再命中——盲测/语料里 0 条由
+  // document.write 驱动，风险=浏览器侧代码的 XSS sink 词，留待
+  // marker 化证据通道（R27 方向）。
   {
     name: "No Input Sanitization",
     category: "resource",
-    trigger: /\b(render|display|write|output|append|insert|innerHTML|dangerouslySetInnerHTML|document\.write|echo|printf|sprintf)\b/i,
+    trigger: /\b(render|display|output|innerHTML|dangerouslySetInnerHTML|echo|printf|sprintf|insertAdjacentHTML)\b/i,
     safeguards: [
       { pattern: /\b(sanitize|escape|encode|html\w*entities|htmlspecialchars|encodeURI|stripTags|purify|DOMPurify|clean|filter\w*html|escape\w*html)\b/i, label: "sanitize" },
     ],

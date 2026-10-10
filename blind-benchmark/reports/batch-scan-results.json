@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-08T13:39:43.796Z",
+  "generated": "2026-10-09T06:27:24.624Z",
   "projects": [
     {
       "project": "analytics_A",
@@ -6692,13 +6692,6 @@
           "type": "missing_safeguard",
           "detail": "File upload does not validate file type, size, or content. Vulnerable to malicious file uploads (webshells, oversized files, malware).",
           "conceptDetail": "Missing: FileTypeValidation, FileSizeLimit, MalwareScanning. Expected at least one of: validateFileType, checkFileSize, virus scan"
-        },
-        {
-          "rule": "No Input Sanitization",
-          "category": "resource",
-          "type": "missing_safeguard",
-          "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-          "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
         }
       ],
       "resourceViolations": [],
@@ -6814,13 +6807,6 @@
               "type": "missing_safeguard",
               "detail": "File upload does not validate file type, size, or content. Vulnerable to malicious file uploads (webshells, oversized files, malware).",
               "conceptDetail": "Missing: FileTypeValidation, FileSizeLimit, MalwareScanning. Expected at least one of: validateFileType, checkFileSize, virus scan"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -10904,13 +10890,6 @@
           "type": "missing_safeguard",
           "detail": "File upload does not validate file type, size, or content. Vulnerable to malicious file uploads (webshells, oversized files, malware).",
           "conceptDetail": "Missing: FileTypeValidation, FileSizeLimit, MalwareScanning. Expected at least one of: validateFileType, checkFileSize, virus scan"
-        },
-        {
-          "rule": "No Input Sanitization",
-          "category": "resource",
-          "type": "missing_safeguard",
-          "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-          "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
         }
       ],
       "resourceViolations": [],
@@ -11022,13 +11001,6 @@
               "type": "missing_safeguard",
               "detail": "File upload does not validate file type, size, or content. Vulnerable to malicious file uploads (webshells, oversized files, malware).",
               "conceptDetail": "Missing: FileTypeValidation, FileSizeLimit, MalwareScanning. Expected at least one of: validateFileType, checkFileSize, virus scan"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -34628,13 +34600,6 @@
           "type": "missing_safeguard",
           "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
           "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-        },
-        {
-          "rule": "No Input Sanitization",
-          "category": "resource",
-          "type": "missing_safeguard",
-          "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-          "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
         }
       ],
       "resourceViolations": [],
@@ -34709,13 +34674,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -34930,13 +34888,6 @@
           "type": "missing_safeguard",
           "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
           "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-        },
-        {
-          "rule": "No Input Sanitization",
-          "category": "resource",
-          "type": "missing_safeguard",
-          "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-          "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
         }
       ],
       "resourceViolations": [],
@@ -35033,13 +34984,6 @@
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
             },
             {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            },
-            {
               "rule": "Notification Without Retry",
               "category": "notification",
               "type": "missing_safeguard",
@@ -35100,13 +35044,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -35160,13 +35097,6 @@
           "type": "missing_safeguard",
           "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
           "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-        },
-        {
-          "rule": "No Input Sanitization",
-          "category": "resource",
-          "type": "missing_safeguard",
-          "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-          "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
         }
       ],
       "resourceViolations": [],
@@ -35187,13 +35117,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -35206,15 +35129,7 @@
             "writeToFileByExtension"
           ],
           "protocolViolations": [],
-          "safeguardViolations": [
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            }
-          ]
+          "safeguardViolations": []
         },
         {
           "name": "emitFromEntries",
@@ -35232,13 +35147,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -35258,13 +35166,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -35284,13 +35185,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -35301,15 +35195,7 @@
             "writeToFileByExtension"
           ],
           "protocolViolations": [],
-          "safeguardViolations": [
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            }
-          ]
+          "safeguardViolations": []
         },
         {
           "name": "touchOnly",
@@ -35329,15 +35215,7 @@
             "writeFrom"
           ],
           "protocolViolations": [],
-          "safeguardViolations": [
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            }
-          ]
+          "safeguardViolations": []
         },
         {
           "name": "writeYaml",
@@ -35348,15 +35226,7 @@
             "__progmune_input_effect__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": [
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            }
-          ]
+          "safeguardViolations": []
         },
         {
           "name": "writeToFileByExtension",
@@ -35373,13 +35243,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -35398,13 +35261,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -35415,15 +35271,7 @@
             "writeYaml"
           ],
           "protocolViolations": [],
-          "safeguardViolations": [
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            }
-          ]
+          "safeguardViolations": []
         },
         {
           "name": "touchPath",
@@ -35505,13 +35353,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -35533,13 +35374,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -35554,15 +35388,7 @@
             "__progmune_input_effect__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": [
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            }
-          ]
+          "safeguardViolations": []
         },
         {
           "name": "emitCollectThenIterate",
@@ -35581,13 +35407,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -35608,13 +35427,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -35628,15 +35440,7 @@
             "__progmune_input_effect__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": [
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            }
-          ]
+          "safeguardViolations": []
         },
         {
           "name": "emitHelperFixed",
@@ -35656,13 +35460,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -35688,15 +35485,7 @@
             "__progmune_input_effect__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": [
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            }
-          ]
+          "safeguardViolations": []
         },
         {
           "name": "emitUntrackedAggregate",
@@ -35707,15 +35496,7 @@
             "__progmune_input_effect__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": [
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            }
-          ]
+          "safeguardViolations": []
         },
         {
           "name": "getFileNamePath",
@@ -35809,13 +35590,6 @@
           "type": "missing_safeguard",
           "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
           "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-        },
-        {
-          "rule": "No Input Sanitization",
-          "category": "resource",
-          "type": "missing_safeguard",
-          "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-          "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
         }
       ],
       "resourceViolations": [],
@@ -36022,13 +35796,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -36062,15 +35829,7 @@
             "__progmune_input_effect__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": [
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            }
-          ]
+          "safeguardViolations": []
         },
         {
           "name": "emitMemberChainClean",
@@ -38833,13 +38592,6 @@
           "type": "missing_safeguard",
           "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
           "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-        },
-        {
-          "rule": "No Input Sanitization",
-          "category": "resource",
-          "type": "missing_safeguard",
-          "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-          "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
         }
       ],
       "resourceViolations": [],
@@ -38860,13 +38612,6 @@
               "type": "missing_safeguard",
               "detail": "File opened with a path derived from user-controlled request input — path traversal / arbitrary file access.",
               "conceptDetail": "Missing: PathTraversalPrevention, InputPathValidation. Expected at least one of: path allowlist, basename normalization, path sanitization"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -38879,15 +38624,7 @@
             "__progmune_input_effect__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": [
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            }
-          ]
+          "safeguardViolations": []
         },
         {
           "name": "ArchiveService.extractConstant",
@@ -38897,15 +38634,7 @@
             "__progmune_input_effect__"
           ],
           "protocolViolations": [],
-          "safeguardViolations": [
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-            }
-          ]
+          "safeguardViolations": []
         }
       ]
     },
@@ -38935,13 +38664,6 @@
           "type": "missing_safeguard",
           "detail": "Mutation function does not check authentication. Anyone can create or modify data without credentials.",
           "conceptDetail": "Missing: AuthenticationCheck, AccessControl. Expected at least one of: token validation, session check, auth middleware"
-        },
-        {
-          "rule": "No Input Sanitization",
-          "category": "resource",
-          "type": "missing_safeguard",
-          "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-          "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
         }
       ],
       "resourceViolations": [],
@@ -39010,13 +38732,6 @@
               "type": "missing_safeguard",
               "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
               "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -39283,13 +38998,6 @@
           "conceptDetail": "Missing: FileTypeValidation, FileSizeLimit, MalwareScanning. Expected at least one of: validateFileType, checkFileSize, virus scan"
         },
         {
-          "rule": "No Input Sanitization",
-          "category": "resource",
-          "type": "missing_safeguard",
-          "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-          "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
-        },
-        {
           "rule": "Notification Without Retry",
           "category": "notification",
           "type": "missing_safeguard",
@@ -39350,13 +39058,6 @@
               "type": "missing_safeguard",
               "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
               "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -39445,13 +39146,6 @@
               "type": "missing_safeguard",
               "detail": "File upload does not validate file type, size, or content. Vulnerable to malicious file uploads (webshells, oversized files, malware).",
               "conceptDetail": "Missing: FileTypeValidation, FileSizeLimit, MalwareScanning. Expected at least one of: validateFileType, checkFileSize, virus scan"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -39489,13 +39183,6 @@
               "type": "missing_safeguard",
               "detail": "Content creation function does not validate or sanitize input. XSS, injection, and oversized content possible.",
               "conceptDetail": "Missing: InputSanitization, ContentValidation, SizeLimit. Expected at least one of: validateContent, sanitizeInput, checkLength"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -40302,13 +39989,6 @@
           "type": "missing_safeguard",
           "detail": "File upload does not validate file type, size, or content. Vulnerable to malicious file uploads (webshells, oversized files, malware).",
           "conceptDetail": "Missing: FileTypeValidation, FileSizeLimit, MalwareScanning. Expected at least one of: validateFileType, checkFileSize, virus scan"
-        },
-        {
-          "rule": "No Input Sanitization",
-          "category": "resource",
-          "type": "missing_safeguard",
-          "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-          "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
         }
       ],
       "resourceViolations": [],
@@ -40341,13 +40021,6 @@
               "type": "missing_safeguard",
               "detail": "File upload does not validate file type, size, or content. Vulnerable to malicious file uploads (webshells, oversized files, malware).",
               "conceptDetail": "Missing: FileTypeValidation, FileSizeLimit, MalwareScanning. Expected at least one of: validateFileType, checkFileSize, virus scan"
-            },
-            {
-              "rule": "No Input Sanitization",
-              "category": "resource",
-              "type": "missing_safeguard",
-              "detail": "User-controlled content rendered/displayed without sanitization. Vulnerable to XSS attacks.",
-              "conceptDetail": "Missing: XSSPrevention, OutputEncoding, ContentSanitization. Expected at least one of: sanitize, escapeHtml, encodeURI"
             }
           ]
         },
@@ -43642,8 +43315,8 @@
     "totalFunctions": 1627,
     "totalLines": 15353,
     "protocolFindings": 55,
-    "safeguardFindings": 526,
+    "safeguardFindings": 516,
     "resourceFindings": 0,
-    "totalFindings": 581
+    "totalFindings": 571
   }
 }
