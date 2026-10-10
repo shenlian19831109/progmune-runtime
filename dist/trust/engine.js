@@ -1496,7 +1496,14 @@ async function collectProtocolViolations(ctx, callGraph) {
                 // 不改 decision/score——排序告警是给人工审查的入口（§49.16：
                 // 排序不删告警，一条不少；groupAlerts 分组防整族沉底）。
                 const safeguardAlertsRaw = [];
+                const safeguardAlertsSuppressed = [];
                 const svLang = ctx.language || "typescript";
+                // 修冤枉第五刀（2026-10-10）：守卫传播豁免——授权族告警的
+                // 「守卫在 controller 层」根因。保守判据见
+                // computeGuardPropagatedSet（R1-R4）：全部调用方已守卫才豁免、
+                // ≤3 跳、歧义 fail-safe。豁免仅作用于 authorization 类规则
+                // 且函数自身不直接带标记（R5/R6）——标记而非静默丢弃。
+                const guardPropagated = (0, protocol_detector_1.computeGuardPropagatedSet)(functions);
                 for (const f of functions) {
                     const fCalls = f.calls || [];
                     let svs;
@@ -1509,21 +1516,31 @@ async function collectProtocolViolations(ctx, callGraph) {
                     if (svs.length === 0)
                         continue;
                     const params = (f.params || []).map((p) => ({ n: p.name, t: p.type || "" }));
+                    const directlyMarked = fCalls.includes("__progmune_auth_machinery__");
+                    const guardExempt = !directlyMarked && guardPropagated.has(f.name);
                     for (const v of svs) {
-                        safeguardAlertsRaw.push({
+                        const alert = {
                             rule: v.rule,
                             file: f.file,
                             function: f.name,
                             calls: fCalls,
                             nRules: svs.length,
                             params,
-                        });
+                        };
+                        if (guardExempt && v.category === "authorization") {
+                            alert.suppressedByGuardPropagation = true;
+                            safeguardAlertsSuppressed.push(alert);
+                        }
+                        else {
+                            safeguardAlertsRaw.push(alert);
+                        }
                     }
                 }
                 safeguardAlerts = {
                     total: safeguardAlertsRaw.length,
                     groups: (0, alert_ranker_1.groupAlerts)(safeguardAlertsRaw),
                     topRanked: (0, alert_ranker_1.rankAlerts)(safeguardAlertsRaw, { minPerRule: 1 }),
+                    suppressed: safeguardAlertsSuppressed,
                 };
             }
         }

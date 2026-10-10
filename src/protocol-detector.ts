@@ -1735,6 +1735,120 @@ export function buildCallerMap(funcs: Array<{ name: string; calls?: string[] }>)
 }
 
 /**
+ * 修冤枉第五刀（2026-10-10）：守卫沿调用链传播——
+ * 授权族告警的「守卫在 controller 层、名字级看不见」根因的保守豁免。
+ *
+ * 语义：「函数的**全部**直接调用方都已守卫 ⇒ 该函数视为守卫后」。
+ * 证据：docmost 补标注 111 条授权族告警全 FP，其中 49 条（44%）是
+ * controller 已 @UseGuards、service/repo 层函数被误报。保守量化
+ * （blind-benchmark/auth-guard-propagation-probe.ts）：
+ *   docmost 745 条授权族告警可压 47 条（6.3%），TS 盲测可压 0 条。
+ *
+ * 保守规则（R1-R4，fail-safe 方向）：
+ *   R1 只有【全部】调用方已守卫才豁免；任一调用方无守卫证据 → 照报
+ *   R2 守卫沿调用链向下传播 ≤ maxDepth（默认 3）跳
+ *   R3 传播通道只认 `marker`（默认 __progmune_auth_machinery__）一个标记
+ *   R4 裸名调用解析分层消歧（唯一才解析，否则给全部候选挂未解析边）：
+ *      ① 名字后缀唯一 ② 同文件唯一 ③ 同目录唯一
+ *      ④ 类根对齐唯一（调用方 XController/Service → 候选类根同为 X）
+ *   R6 豁免只给【非直接标记】函数——自身带标记的维持既有 E2 语义
+ *      （只接受标记的规则由 detector 自身处理；不接受标记的规则照报）
+ *
+ * 返回集合含直接标记函数本身（消费方须自行应用 R6 过滤），
+ * 因为传递闭包的种子就是它们。
+ */
+export function computeGuardPropagatedSet(
+  funcs: Array<{ name: string; file?: string; calls?: string[] }>,
+  opts?: { marker?: string; maxDepth?: number }
+): Set<string> {
+  const marker = opts?.marker ?? "__progmune_auth_machinery__";
+  const maxDepth = opts?.maxDepth ?? 3;
+
+  const byName = new Map<string, { name: string; file?: string; calls?: string[] }>();
+  for (const f of funcs) if (!byName.has(f.name)) byName.set(f.name, f);
+
+  // 后缀索引：裸名 → 候选全限定名（>1 ⇒ 歧义）
+  const bySuffix = new Map<string, string[]>();
+  for (const f of funcs) {
+    const bare = f.name.split(".").pop() || f.name;
+    if (!bySuffix.has(bare)) bySuffix.set(bare, []);
+    bySuffix.get(bare)!.push(f.name);
+  }
+
+  // 反向调用图：被调【全限定名】→ 调用方列表（resolved=false = 歧义 fail-safe）。
+  // 边解析分层消歧（R4）：① 后缀唯一 ② 同文件唯一 ③ 同目录唯一
+  // ④ 类根对齐唯一（XController→XService→XRepo 的 MVC 命名惯例）；
+  // 全部失败 ⇒ 给全部同名候选挂未解析边（fail-safe）。
+  const dirOf = (p?: string) => (p ? p.split("/").slice(0, -1).join("/") : "");
+  const rootOf = (n: string) => {
+    const cls = n.split(".")[0] || n;
+    return cls.replace(/(Controller|Service|Repo|Repository|Listener|Processor|Handler|Extension|Util|Utils|Helper|Driver|Provider)$/, "");
+  };
+  const calleeToCallers = new Map<string, Array<{ caller: string; resolved: boolean }>>();
+  for (const f of funcs) {
+    for (const c of f.calls || []) {
+      if (!bySuffix.has(c)) continue; // 非项目函数名（外部库调用）→ 无守卫语义
+      // 排除调用方自身：controller.create 调 "create" 时，自己就是后缀
+      // 候选之一，同文件/同目录层会错误自我捕获（递归/自调不提供守卫证据）
+      const cands = bySuffix.get(c)!.filter((n) => n !== f.name);
+      if (cands.length === 0) continue;
+      let targets: string[] | null = null;
+      if (cands.length === 1) {
+        targets = cands;
+      } else {
+        const sameFile = cands.filter((n) => {
+          const g = byName.get(n);
+          return g && g.file && f.file && g.file === f.file;
+        });
+        if (sameFile.length === 1) targets = sameFile;
+        else {
+          const sameDir = cands.filter((n) => {
+            const g = byName.get(n);
+            return g && g.file && f.file && dirOf(g.file) === dirOf(f.file);
+          });
+          if (sameDir.length === 1) targets = sameDir;
+          else {
+            const rootMatch = cands.filter((n) => rootOf(n) === rootOf(f.name));
+            if (rootMatch.length === 1) targets = rootMatch;
+          }
+        }
+      }
+      if (targets === null) {
+        for (const n of cands) {
+          if (!calleeToCallers.has(n)) calleeToCallers.set(n, []);
+          calleeToCallers.get(n)!.push({ caller: f.name, resolved: false });
+        }
+      } else {
+        for (const n of targets) {
+          if (!calleeToCallers.has(n)) calleeToCallers.set(n, []);
+          calleeToCallers.get(n)!.push({ caller: f.name, resolved: true });
+        }
+      }
+    }
+  }
+
+  // 种子：直接带标记的函数
+  const guarded = new Set<string>();
+  for (const f of funcs) if ((f.calls || []).includes(marker)) guarded.add(f.name);
+
+  // 不动点传播（≤ maxDepth 轮）：被调方全部调用方已守卫 ⇒ 已守卫。
+  // 快照语义：每轮基于【轮初】守卫集计算、轮末统一应用——
+  // 轮内级联会让深度失去意义（同轮后半段函数借前半段的新增一步到位）。
+  for (let round = 0; round < maxDepth; round++) {
+    const toAdd: string[] = [];
+    for (const f of funcs) {
+      if (guarded.has(f.name)) continue;
+      const callers = calleeToCallers.get(f.name) || [];
+      if (callers.length === 0) continue; // 无调用方（入口/未连通）→ 不豁免
+      if (callers.every((c) => c.resolved && guarded.has(c.caller))) toAdd.push(f.name);
+    }
+    if (toAdd.length === 0) break;
+    for (const n of toAdd) guarded.add(n);
+  }
+  return guarded;
+}
+
+/**
  * v7: Build safeguard context — own → same-file → caller chain.
  *
  * Hierarchy:

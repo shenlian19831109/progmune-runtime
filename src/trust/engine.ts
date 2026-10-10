@@ -84,7 +84,7 @@ import {
 import type { SSGValidationResult } from "./ssg-bridge";
 import { buildCallSequences, collectProjectFunctionNames } from "../call-sequence";
 import type { CallSequence } from "../call-sequence";
-import { detectSafeguardViolations } from "../protocol-detector";
+import { detectSafeguardViolations, computeGuardPropagatedSet } from "../protocol-detector";
 import type { SafeguardViolation } from "../protocol-detector";
 import { rankAlerts, groupAlerts } from "./alert-ranker";
 import type { RankableAlert, Ranked } from "./alert-ranker";
@@ -1400,6 +1400,13 @@ interface ProtocolViolationResult {
     groups: Array<{ rule: string; prior: number; count: number; alerts: Ranked<RankableAlert>[] }>;
     /** 全局平铺（minPerRule=1 保底——每族至少一条进头部） */
     topRanked: Ranked<RankableAlert>[];
+    /**
+     * 修冤枉第五刀（2026-10-10）：守卫传播豁免清单——授权族告警被
+     * 「全部调用方已守卫」判据压下的部分。**不进 total/groups/topRanked
+     * 主计数**，但完整保留（带 suppressedByGuardPropagation 标记）——
+     * 标记而非静默丢弃（R9：抑制不可逆，压掉的真阳性必须能复核）。
+     */
+    suppressed?: RankableAlert[];
   };
   coverage: {
     totalApis: number;
@@ -1722,7 +1729,14 @@ async function collectProtocolViolations(
         // 不改 decision/score——排序告警是给人工审查的入口（§49.16：
         // 排序不删告警，一条不少；groupAlerts 分组防整族沉底）。
         const safeguardAlertsRaw: RankableAlert[] = [];
+        const safeguardAlertsSuppressed: RankableAlert[] = [];
         const svLang = ctx.language || "typescript";
+        // 修冤枉第五刀（2026-10-10）：守卫传播豁免——授权族告警的
+        // 「守卫在 controller 层」根因。保守判据见
+        // computeGuardPropagatedSet（R1-R4）：全部调用方已守卫才豁免、
+        // ≤3 跳、歧义 fail-safe。豁免仅作用于 authorization 类规则
+        // 且函数自身不直接带标记（R5/R6）——标记而非静默丢弃。
+        const guardPropagated = computeGuardPropagatedSet(functions);
         for (const f of functions) {
           const fCalls = f.calls || [];
           let svs: SafeguardViolation[];
@@ -1740,21 +1754,30 @@ async function collectProtocolViolations(
           }
           if (svs.length === 0) continue;
           const params = (f.params || []).map((p: any) => ({ n: p.name, t: p.type || "" }));
+          const directlyMarked = fCalls.includes("__progmune_auth_machinery__");
+          const guardExempt = !directlyMarked && guardPropagated.has(f.name);
           for (const v of svs) {
-            safeguardAlertsRaw.push({
+            const alert: RankableAlert = {
               rule: v.rule,
               file: f.file,
               function: f.name,
               calls: fCalls,
               nRules: svs.length,
               params,
-            });
+            };
+            if (guardExempt && v.category === "authorization") {
+              alert.suppressedByGuardPropagation = true;
+              safeguardAlertsSuppressed.push(alert);
+            } else {
+              safeguardAlertsRaw.push(alert);
+            }
           }
         }
         safeguardAlerts = {
           total: safeguardAlertsRaw.length,
           groups: groupAlerts(safeguardAlertsRaw),
           topRanked: rankAlerts(safeguardAlertsRaw, { minPerRule: 1 }),
+          suppressed: safeguardAlertsSuppressed,
         };
       }
     } catch { /* best-effort */ }

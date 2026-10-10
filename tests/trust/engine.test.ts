@@ -526,3 +526,78 @@ public class UserService {
     expect(ssg.filter((v) => v.function !== "updateUser")).toEqual([]);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════
+// 修冤枉第五刀（2026-10-10）：守卫传播豁免（产品路径锁定）
+//
+// 判据：controller 类级 @UseGuards（E2 标记）→ service 层函数的
+// 「未认证访问」告警进 suppressed 清单（不进 total/topRanked 主计数），
+// 带 suppressedByGuardPropagation 标记可复核；无守卫的对照组照常上报。
+// 语义：safeguard 告警流是人工审查入口——传播豁免只分桶不丢弃
+// （R9：抑制不可逆，压掉的真阳性必须能复核）。
+// ═══════════════════════════════════════════════════════════════
+
+describe("evaluateTrust：守卫传播豁免（修冤枉第五刀）", () => {
+  const TS_SOURCE = (guarded: boolean) => `
+declare const UseGuards: any;
+declare const Controller: any;
+declare class JwtAuthGuard {}
+${guarded ? "@UseGuards(JwtAuthGuard)" : ""}
+@Controller("pages")
+export class PageController {
+  getSecretPage() { return this.pageService.getSecretPageData(); }
+}
+export class PageService {
+  getSecretPageData() { return "data"; }
+}
+`;
+
+  async function runWith(source: string) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-engine-guard-"));
+    try {
+      fs.writeFileSync(path.join(dir, "app.ts"), source);
+      fs.writeFileSync(
+        path.join(dir, "tsconfig.json"),
+        JSON.stringify({ compilerOptions: { target: "ES2020", module: "commonjs", strict: false, skipLibCheck: true, noEmit: true }, include: ["**/*.ts"] })
+      );
+      return await evaluateTrust({
+        projectPath: dir,
+        projectName: "guard-propagation-test",
+        commit: "test",
+        language: "typescript",
+      });
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it("守卫后的 service 层告警进 suppressed 清单，不进主计数", async () => {
+    const r = await runWith(TS_SOURCE(true));
+    const sa = r.overall.safeguardAlerts;
+    expect(sa).toBeDefined();
+    const supp = sa!.suppressed || [];
+    const hit = supp.find(
+      (x: any) => x.function === "PageService.getSecretPageData" &&
+        x.rule === "Authorization (Unauthenticated Access)"
+    );
+    expect(hit).toBeDefined();
+    expect(hit!.suppressedByGuardPropagation).toBe(true);
+    // 不进主计数：topRanked/groups/total 都不含该函数
+    expect(sa!.topRanked.some((x: any) => x.alert.function === "PageService.getSecretPageData")).toBe(false);
+    expect(sa!.groups.every((g: any) => g.alerts.every((x: any) => x.alert.function !== "PageService.getSecretPageData"))).toBe(true);
+    expect(sa!.total).toBe(sa!.topRanked.length);
+  }, 150_000);
+
+  it("对照组（无守卫）同函数照常进主告警流", async () => {
+    const r = await runWith(TS_SOURCE(false));
+    const sa = r.overall.safeguardAlerts;
+    expect(sa).toBeDefined();
+    const hit = sa!.topRanked.find(
+      (x: any) => x.alert.function === "PageService.getSecretPageData" &&
+        x.alert.rule === "Authorization (Unauthenticated Access)"
+    );
+    expect(hit).toBeDefined();
+    const supp = sa!.suppressed || [];
+    expect(supp.some((x: any) => x.function === "PageService.getSecretPageData")).toBe(false);
+  }, 150_000);
+});
