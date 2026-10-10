@@ -1,5 +1,45 @@
 # Changelog
 
+## [3.7.64] — 2026-10-10
+
+### 守卫沿调用链传播（修冤枉第五刀：授权族告警的「守卫在 controller 层」根因）
+
+**根因**：docmost 补标注 111 条授权族告警全 FP，其中 49 条（44%）是
+service/repo 层函数被误报「未认证/无归属检查」——守卫其实写在
+controller 层的 @UseGuards(JwtAuthGuard) 上，名字级检测器看不见。
+
+- **机制**：`computeGuardPropagatedSet`（protocol-detector.ts）——
+  「函数的**全部**调用方都已守卫 ⇒ 该函数视为守卫后」，守卫沿调用链
+  向下传播 ≤3 跳，只认 `__progmune_auth_machinery__` 一个标记通道
+  （E2 已在带 @UseGuards 装饰器的函数上注入）
+- **保守判据（R1-R4，fail-safe）**：全部调用方已守卫才豁免（任一
+  未守卫→照报）；裸名调用分层消歧——后缀唯一→同文件→同目录→类根
+  对齐（XController→XService→XRepo 惯例），唯一才解析、歧义给全部
+  候选挂未解析边；调用方自身排除（controller.create 调 "create" 时
+  同文件层自我捕获的坑）
+- **标记而非静默丢弃（R9）**：被压告警进 `overall.safeguardAlerts.
+  suppressed` 独立清单（带 suppressedByGuardPropagation 标记），
+  **不进 total/groups/topRanked 主计数**但完整保留可复核；
+  豁免仅作用于 authorization 类规则、且不作用于自身直接带标记的
+  函数（R5/R6，维持 E2 既有语义）
+- **同条件 A/B（docmost 双扫描）**：主告警流 865→748（−117 =
+  Unauthenticated Access 46 + Ownership Check 36 + Unauthenticated
+  Mutation 31 + Resource Ownership 4），suppressed 清单 117 条全带
+  标记，748+117=865 证据一条不少；**主路径 violations 9=9 /
+  score 85=85 完全一致**
+- **可压名单交叉核对**：117 条中 25 条在 174 标注队列（14 同规则
+  FP + 11 同函数不同规则 FP）；92 条未标注的逐条列调用链复核——全部
+  由直接守卫 controller 或传播守卫 service 调用（附件
+  blind-benchmark/auth-guard-crosscheck.ts 可复跑）
+- **回归锁定**：单元测试 12 例（protocol-detector-guard-propagation
+  .test.ts：全调用方守卫/歧义 fail-safe/同文件/同目录/类根消歧/深度
+  限制/自定义标记/种子语义）+ 引擎产品路径 2 例（tests/trust/engine
+  .test.ts：守卫后进 suppressed 不进主计数 + 无守卫对照组照常上报）；
+  引擎套件 25/25；TS 盲测零漂移（注：batch-scan 不经过引擎告警循环，
+  此门对本改动是空过——真实门=引擎测试+docmost A/B，如实记录）
+- 工具入册：`blind-benchmark/auth-guard-propagation-probe.ts`（量化
+  探针）+ `auth-guard-crosscheck.ts`（标注交叉核对）
+
 ## [3.7.63] — 2026-10-10
 
 ### No Input Sanitization 触发词收窄（修冤枉第四刀：删 insert/append/write 通用词）
