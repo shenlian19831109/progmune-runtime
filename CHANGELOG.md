@@ -1,5 +1,40 @@
 # Changelog
 
+## [3.7.63] — 2026-10-10
+
+### No Input Sanitization 触发词收窄（修冤枉第四刀：删 insert/append/write 通用词）
+
+**根因**：trigger 里三个「输出系」通用词系统性词撞，从没在真实语料命中过
+一条 XSS——`insert` 撞 Kysely `insertInto` 数据入库（docmost 补标注
+30/30 条 FP）、`append` 撞 Python `list.append` 内存数组（Python 盲测
+45 项目 270 条 FP）、`write` 撞 `writeFileSync` 文件写入（TS 盲测 8 项目
+FP + docmost 告警流 6 条）。
+
+- **修复**：trigger 收窄为 `render|display|output|innerHTML|
+  dangerouslySetInnerHTML|echo|printf|sprintf|insertAdjacentHTML`——
+  DOM sink 用原始调用名显式保留（`el.insertAdjacentHTML(...)` 的提取名
+  就是 `insertAdjacentHTML`），XSS 本意完整保留
+- **逐条归类（R30）**：TS 盲测 LOST 10（8 项目 writeFileSync 族 +
+  webshape_F insertInto/insert）、Python 盲测 LOST 45 项目（全部
+  list.append）、ADDED 0/0——**无一例外是存储 I/O 词撞，零 XSS sink**
+- **头条数字零影响（如实）**：TS 795 gold 与 Python 729 gold 均不含
+  No Input Sanitization 条目（金标全为 protocol/auth/resource 类），
+  recall/precision 不变；docmost 告警流 942→865（No Input Sanitization
+  83→6，残留 6 条为 render/output 词族：react-email 服务端渲染×2、
+  函数名 generatePdfRenderToken 撞 render×1、存储驱动 outputFile×3）
+- **A/B 隔离注记**：主路径 violations 扫描间 7↔10 波动为 LLM 语义映射
+  抖动（已知类，见 skyvern CROSS_DOMAIN 记录），与本次改动无因果——
+  safeguard 规则不进 violations（§51 证据流与判定分离），同条件 A/B
+  对照主路径一致
+- **回归锁定**：`src/protocol-detector-nis-trigger.test.ts` 5 例
+  （insertInto/writeFileSync/list.append 不触发、insertAdjacentHTML 仍
+  触发、render+sanitize 守卫仍抑制）；taintpath 160/160；fr-007
+  pre5/post0、fr-016 pre7/post0 维持
+- **已知代价（如实记录）**：`document.write` 的提取名是裸 `write`，
+  与文件写入词法不可区分，本刀后不再命中——三语料里 0 条由
+  document.write 驱动；浏览器侧 DOM sink 证据通道（marker 化）留待
+  R27 方向
+
 ## [3.7.62] — 2026-10-09
 
 ### 迁移脚本排除出应用面（修冤枉第三刀：§49.19 补标注后首个数据驱动修复）
