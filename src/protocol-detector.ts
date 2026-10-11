@@ -465,6 +465,9 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     safeguards: [
       { pattern: /\b(checkOwner|isOwner|ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy\s*[!=]==?|\.owner\s*[!=]==?|\.user\s*[!=]==?)\b/i, label: "ownership_check" },
       { pattern: /\b(hasPermission|checkPermission|checkAccess|isAuthorized|checkRole|requireRole|adminCheck|isAdmin|canModify|canDelete|canEdit)\b/i, label: "authz_check" },
+      // 修冤枉第六刀：队列/定时/事件处理器不面向请求面——鉴权发生在入队侧，
+      // 「改资源没查属主」的提问在处理器层不适用（docmost 补标注 FP 类）
+      { pattern: /\b(__progmune_no_request_surface__)\b/, label: "no_request_surface" },
       { pattern: /\b(__progmune_ownership_checked__)\b/, label: "inline_ownership_check" },
       // §46 ②：资源属主被**赋值为当前主体**（`{ userId: user.id }` / `where:{userId: user.id}`）。
       // 这类函数的被操作对象就是（或已被限定在）主体自己，谈不上「改别人的东西」。
@@ -508,7 +511,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     paramTypeSafeguards: [SESSION_BEARING_TYPE_RE],
     trigger: /\b(list|download|view|fetch)(?:[A-Z]\w*|_\w+)|get(?:[A-Z]\w+|_\w+)/i,
     safeguards: [
-      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|jwt\.decode|decode_token|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__)\b/i, label: "auth_check" },
+      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|jwt\.decode|decode_token|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__|__progmune_no_request_surface__)\b/i, label: "auth_check" },
       // §40 C1：裸 can —— verdaccio 的 can('publish') 中间件就是这里的授权判定
       { pattern: AUTHZ_BARE_CAN_RE, label: "bare_can", callsOnly: true },
     ],
@@ -544,7 +547,7 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     // (listPosts/getPost/deletePost fire via identifier-parsed words).
     trigger: /\b(add|create|update|set|publish|insert|submit)(?:[A-Z]\w*|_\w+)|(?:[A-Z]\w*|_\w+)(Add|Create|Update|Set|Publish|Insert|Submit)\b/i,
     safeguards: [
-      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__)\b/i, label: "auth_check" },
+      { pattern: /\b(getUser|validateToken|verifyToken|verifySession|validateSession|getSessionUser|getSession\b|getCurrentUser|token\w*(Check|Verify|Valid)|session\w*(Check|Verify|Valid)|auth\w*(Check|Verify|Valid|Guard|Middleware|Required)|requireAuth|withAuth|authenticate\w*(User|Request|Token)?|checkAuth|isAuth|hasAuth|checkAccess|hasAccess|get_user|get_session_user|get_current_user|validate_session|verify_token|require_auth|with_auth|check_auth|auth_required|authenticate_user|authenticate_request|authenticate_token|token_check|token_verify|token_valid|session_check|session_verify|session_valid|auth_check|auth_guard|auth_middleware|get_current_user_authorizer|current_user_authorizer|login_required|permission_required|user_passes_test|check_authorization|check_permission|__progmune_auth_checked__|__progmune_credential_check__|__progmune_drf_permissions__|__progmune_auth_machinery__|__progmune_no_request_surface__)\b/i, label: "auth_check" },
       // §40 C1：裸 can —— 同上
       { pattern: AUTHZ_BARE_CAN_RE, label: "bare_can", callsOnly: true },
       // §46 ①：凭签发入口豁免 —— 独立 safeguard，**不并入 auth_check**。
@@ -704,6 +707,8 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
     safeguards: [
       { pattern: /\b(ownerId\s*[!=]==?|authorId\s*[!=]==?|userId\s*[!=]==?|createdBy|\.owner\s*[!=]==?)/i, label: "ownership_comparison" },
       { pattern: /\b(__progmune_ownership_checked__)\b/, label: "inline_ownership_check" },
+      // 修冤枉第六刀：同上（无请求面 ⇒ 属主校验提问不适用）
+      { pattern: /\b(__progmune_no_request_surface__)\b/, label: "no_request_surface" },
       // §38：同 Ownership Check，组合式谓语一并接上（这条规则更严，更需要）
       { pattern: AUTHZ_PREDICATE_RE, label: "casl_predicate" },
       { pattern: AUTHZ_CAN_HELPER_RE, label: "can_helper" },

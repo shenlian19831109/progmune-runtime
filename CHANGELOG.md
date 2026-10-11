@@ -1,5 +1,41 @@
 # Changelog
 
+## [3.7.65] — 2026-10-11
+
+### 队列/定时/事件处理器无请求面豁免（修冤枉第六刀：授权族告警的「作业处理器不是请求面」根因）
+
+**根因**：docmost 补标注里队列作业/定时任务类 FP 占授权族 FP 的
+10/111——鉴权发生在入队侧（controller 把任务塞进队列时已鉴权），
+BullMQ 处理器 / NestJS Schedule / EventEmitter 监听器的函数体
+不面向 HTTP 请求，「缺鉴权/缺属主校验」的提问在处理器层不适用。
+
+- **机制**：提取器注入 `__progmune_no_request_surface__` 标记——
+  类级 `@Processor(队列名)`（BullMQ，该类全部方法）、方法级
+  `@Interval/@Cron/@Timeout/@OnEvent`（须带实参）；规则侧仅授权族
+  四条（Unauthenticated Access/Mutation + Ownership Check + Resource
+  Ownership）在 safeguard 位接受该标记（与 E2 同款「只做减法」）
+- **反例挡住（是请求面，不注入）**：@Sse（HTTP SSE）、
+  @SubscribeMessage（WebSocket）、@MessagePattern/@EventPattern
+  （微服务 RPC）；`@Processor()` 空实参不是 BullMQ 形态不注入
+- **同条件 A/B（docmost 双扫描，fresh IR 各自重提）**：主告警流
+  748→720（−28 = Ownership Check 10 + Unauthenticated Access 9 +
+  Unauthenticated Mutation 9），**主路径 violations 11=11 内容级零差 /
+  score 84=84 / suppressed 117=117**；注入关对照 = 748 与 3.7.64 时代
+  基线一致 ⇒ 压降完全归因本刀，非扫描间抖动
+- **可压名单交叉核对**：28 条被压告警逐条列函数/文件，全部命中
+  @Processor（FileTask/Notification/History/GeneralQueue ×4 类）或
+  @Interval（cleanupSessions/cleanupOldTrash/sendTelemetry）或
+  @OnEvent（Page/Space/Workspace Listener）形态，TP 0
+- **回归锁定**：提取器测试 4 例（类级全方法/方法级四种/反例四种/
+  空实参边界）+ 规则侧测试 5 例（四族抑制 + 非授权族不受影响）；
+  TS 盲测 119 项目零漂移（LOST 0/ADDED 0——generated 语料无装饰器
+  形状，此门对本改动是空过，真实门=docmost A/B + 定向测试，如实记录）
+- **⚠ 过程教训（TSError 型 toggle）**：上一会话用 `return [];` 做
+  A/B 开关——unreachable 代码中 TS 控制流分析不执行收窄，`name`
+  保持 `string | undefined` 编译失败，对照扫描 0 字节静默中断两轮。
+  toggle 必须用环境变量分支，且对照扫描前必须删 ir.json（IR-STALE
+  复用含标记缓存会让「对照」跑在注入开的数据上）
+
 ## [3.7.64] — 2026-10-10
 
 ### 守卫沿调用链传播（修冤枉第五刀：授权族告警的「守卫在 controller 层」根因）
