@@ -462,6 +462,44 @@ function authMachineryFromDecorators(decorators) {
     return auth && !skip ? [AUTH_MACHINERY_MARKER] : [];
 }
 // ═══════════════════════════════════════════════════════════════
+// 修冤枉第六刀（2026-10-10）：队列/定时/事件处理器 → 无请求面标记
+//
+// 数据：docmost 补标注 111 条授权族 FP 里 10 条是队列作业/定时任务——
+// 鉴权发生在入队侧（controller 层），处理器函数本身不面向 HTTP 请求，
+// 授权族规则按「请求面缺鉴权」提问时结论不适用。
+// 当前流量化：44 个队列/定时函数命中 19 条授权族告警（全 FP 类）。
+//
+// 形态：@Processor(队列名) 类级（BullMQ，该类全部方法都是作业）；
+// @Interval/@Cron/@Timeout 方法级（NestJS Schedule）；
+// @OnEvent 方法级（NestJS EventEmitter2）。
+// ⚠ 反例（是请求面，不注入）：@Sse（HTTP SSE）、@SubscribeMessage
+//   （WebSocket 消息）、@MessagePattern/@EventPattern（微服务 RPC）。
+// ═══════════════════════════════════════════════════════════════
+const NO_REQUEST_SURFACE_MARKER = "__progmune_no_request_surface__";
+/** 队列/定时/事件装饰器 —— 出现即注入无请求面标记（须带实参：@Interval('name', ms) 等） */
+const NO_SURFACE_CLASS_DECORATOR = /^Processor$/i;
+const NO_SURFACE_METHOD_DECORATOR = /^(?:Interval|Cron|Timeout|OnEvent)$/i;
+/**
+ * 由类/方法装饰器判定是否注入无请求面标记（与 authMachineryFromDecorators 同款文本匹配）。
+ * @returns [] 或 [NO_REQUEST_SURFACE_MARKER]
+ */
+function noRequestSurfaceFromDecorators(decorators) {
+    let noSurface = false;
+    for (const d of decorators) {
+        const text = (d?.getText?.() ?? "").trim();
+        const name = /^@([A-Za-z_$][\w$]*)/.exec(text)?.[1];
+        if (!name)
+            continue;
+        if (!NO_SURFACE_CLASS_DECORATOR.test(name) && !NO_SURFACE_METHOD_DECORATOR.test(name))
+            continue;
+        // 须带实参（@Processor() 空参不是 BullMQ 形态；@Interval 必带名字+毫秒）
+        if (!/^@[\w$]*\([^)]+\)/.test(text))
+            continue;
+        noSurface = true;
+    }
+    return noSurface ? [NO_REQUEST_SURFACE_MARKER] : [];
+}
+// ═══════════════════════════════════════════════════════════════
 // E3（2026-09-22）：TS 侧「入参已按 schema 校验」语义标记
 //
 // 判据（先抄准再写 expect，R22）：
@@ -3250,6 +3288,15 @@ function _extractSingleProject(absRoot, tsconfigPath) {
                 // E2（2026-09-22）：类级 + 方法级守卫装饰器 → 框架鉴权标记。鉴权写在装饰器里，
                 // 函数体文本与 calls 都看不到（镜像 Python 提取器的「类级框架守卫」处理）。
                 for (const mk of authMachineryFromDecorators([
+                    ...(cls.getDecorators?.() ?? []),
+                    ...(m.getDecorators?.() ?? []),
+                ])) {
+                    if (!mCalls.includes(mk))
+                        mCalls.push(mk);
+                }
+                // 修冤枉第六刀：队列/定时/事件处理器 → 无请求面标记（与 E2 并列，
+                // 语义相反——E2 是「有鉴权」，本标记是「鉴权问题不适用」）
+                for (const mk of noRequestSurfaceFromDecorators([
                     ...(cls.getDecorators?.() ?? []),
                     ...(m.getDecorators?.() ?? []),
                 ])) {
