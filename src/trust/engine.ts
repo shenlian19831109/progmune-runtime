@@ -84,7 +84,7 @@ import {
 import type { SSGValidationResult } from "./ssg-bridge";
 import { buildCallSequences, collectProjectFunctionNames } from "../call-sequence";
 import type { CallSequence } from "../call-sequence";
-import { detectSafeguardViolations, computeGuardPropagatedSet } from "../protocol-detector";
+import { detectSafeguardViolations, computeGuardPropagatedSet, computeJobSurfacePropagatedSet } from "../protocol-detector";
 import type { SafeguardViolation } from "../protocol-detector";
 import { rankAlerts, groupAlerts } from "./alert-ranker";
 import type { RankableAlert, Ranked } from "./alert-ranker";
@@ -1401,10 +1401,11 @@ interface ProtocolViolationResult {
     /** 全局平铺（minPerRule=1 保底——每族至少一条进头部） */
     topRanked: Ranked<RankableAlert>[];
     /**
-     * 修冤枉第五刀（2026-10-10）：守卫传播豁免清单——授权族告警被
-     * 「全部调用方已守卫」判据压下的部分。**不进 total/groups/topRanked
-     * 主计数**，但完整保留（带 suppressedByGuardPropagation 标记）——
-     * 标记而非静默丢弃（R9：抑制不可逆，压掉的真阳性必须能复核）。
+     * 修冤枉第五刀（2026-10-10）+ 第七刀（2026-10-11）：豁免清单——
+     * 授权族告警被「全部调用方已守卫」（suppressedByGuardPropagation）
+     * 或「全部调用方是无请求面作业」（suppressedByJobSurfacePropagation）
+     * 判据压下的部分。**不进 total/groups/topRanked 主计数**，但完整
+     * 保留——标记而非静默丢弃（R9：抑制不可逆，压掉的真阳性必须能复核）。
      */
     suppressed?: RankableAlert[];
   };
@@ -1737,6 +1738,15 @@ async function collectProtocolViolations(
         // ≤3 跳、歧义 fail-safe。豁免仅作用于 authorization 类规则
         // 且函数自身不直接带标记（R5/R6）——标记而非静默丢弃。
         const guardPropagated = computeGuardPropagatedSet(functions);
+        // 修冤枉第七刀（2026-10-11）：队列作业调用方传播——「函数只被
+        // 作业/定时/事件处理器调用 ⇒ 无请求面」。B 判据（裸名并集，见
+        // computeJobSurfacePropagatedSet）：并集非空且全部已豁免才豁免，
+        // 默认 1 轮。豁免仅作用于 authorization 类且函数自身不直接带
+        // 标记（R5/R6）——与第五刀同：标记而非静默丢弃。
+        const jobSurfacePropagated =
+          process.env.PROGMUNE_JOB_SURFACE_TOGGLE === "off"
+            ? new Set<string>()
+            : computeJobSurfacePropagatedSet(functions);
         for (const f of functions) {
           const fCalls = f.calls || [];
           let svs: SafeguardViolation[];
@@ -1755,7 +1765,9 @@ async function collectProtocolViolations(
           if (svs.length === 0) continue;
           const params = (f.params || []).map((p: any) => ({ n: p.name, t: p.type || "" }));
           const directlyMarked = fCalls.includes("__progmune_auth_machinery__");
+          const directlyJobMarked = fCalls.includes("__progmune_no_request_surface__");
           const guardExempt = !directlyMarked && guardPropagated.has(f.name);
+          const jobExempt = !directlyJobMarked && jobSurfacePropagated.has(f.name);
           for (const v of svs) {
             const alert: RankableAlert = {
               rule: v.rule,
@@ -1765,12 +1777,22 @@ async function collectProtocolViolations(
               nRules: svs.length,
               params,
             };
-            if (guardExempt && v.category === "authorization") {
-              alert.suppressedByGuardPropagation = true;
-              safeguardAlertsSuppressed.push(alert);
-            } else {
-              safeguardAlertsRaw.push(alert);
+            if (v.category === "authorization") {
+              let suppressed = false;
+              if (guardExempt) {
+                alert.suppressedByGuardPropagation = true;
+                suppressed = true;
+              }
+              if (jobExempt) {
+                alert.suppressedByJobSurfacePropagation = true;
+                suppressed = true;
+              }
+              if (suppressed) {
+                safeguardAlertsSuppressed.push(alert);
+                continue;
+              }
             }
+            safeguardAlertsRaw.push(alert);
           }
         }
         safeguardAlerts = {

@@ -601,3 +601,80 @@ export class PageService {
     expect(supp.some((x: any) => x.function === "PageService.getSecretPageData")).toBe(false);
   }, 150_000);
 });
+
+// ═══════════════════════════════════════════════════════════════
+// 修冤枉第七刀（2026-10-11）：队列作业调用方传播（产品路径锁定）
+//
+// 判据：@Processor 作业（第六刀标记）调用的 service 层函数的授权族
+// 告警进 suppressed 清单（不进 total/topRanked 主计数），带
+// suppressedByJobSurfacePropagation 标记可复核；调用方含 HTTP 面的
+// 对照组照常上报。语义与第五刀同：传播豁免只分桶不丢弃（R9）。
+// ═══════════════════════════════════════════════════════════════
+
+describe("evaluateTrust：队列作业调用方传播（修冤枉第七刀）", () => {
+  const TS_SOURCE = (jobCaller: boolean) => `
+declare const Processor: any;
+declare const Controller: any;
+${jobCaller ? `@Processor("notification-queue")
+export class NotificationProcessor {
+  process() { return this.pageNotificationService.processPageUpdate(); }
+}
+` : `@Controller("pages")
+export class PageController {
+  getPage() { return this.pageNotificationService.processPageUpdate(); }
+}
+`}
+export class PageNotificationService {
+  processPageUpdate() { return "x"; }
+}
+`;
+
+  async function runWith(source: string) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-engine-job-"));
+    try {
+      fs.writeFileSync(path.join(dir, "app.ts"), source);
+      fs.writeFileSync(
+        path.join(dir, "tsconfig.json"),
+        JSON.stringify({ compilerOptions: { target: "ES2020", module: "commonjs", strict: false, skipLibCheck: true, noEmit: true }, include: ["**/*.ts"] })
+      );
+      return await evaluateTrust({
+        projectPath: dir,
+        projectName: "job-surface-propagation-test",
+        commit: "test",
+        language: "typescript",
+      });
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it("作业调用的 service 层告警进 suppressed 清单，不进主计数", async () => {
+    const r = await runWith(TS_SOURCE(true));
+    const sa = r.overall.safeguardAlerts;
+    expect(sa).toBeDefined();
+    const supp = sa!.suppressed || [];
+    const hit = supp.find(
+      (x: any) => x.function === "PageNotificationService.processPageUpdate" &&
+        x.rule === "Authorization (Unauthenticated Mutation)"
+    );
+    expect(hit).toBeDefined();
+    expect(hit!.suppressedByJobSurfacePropagation).toBe(true);
+    // 不进主计数：topRanked/groups/total 都不含该函数
+    expect(sa!.topRanked.some((x: any) => x.alert.function === "PageNotificationService.processPageUpdate")).toBe(false);
+    expect(sa!.groups.every((g: any) => g.alerts.every((x: any) => x.alert.function !== "PageNotificationService.processPageUpdate"))).toBe(true);
+    expect(sa!.total).toBe(sa!.topRanked.length);
+  }, 150_000);
+
+  it("对照组（调用方含 HTTP controller）同函数照常进主告警流", async () => {
+    const r = await runWith(TS_SOURCE(false));
+    const sa = r.overall.safeguardAlerts;
+    expect(sa).toBeDefined();
+    const hit = sa!.topRanked.find(
+      (x: any) => x.alert.function === "PageNotificationService.processPageUpdate" &&
+        x.alert.rule === "Authorization (Unauthenticated Mutation)"
+    );
+    expect(hit).toBeDefined();
+    const supp = sa!.suppressed || [];
+    expect(supp.some((x: any) => x.function === "PageNotificationService.processPageUpdate")).toBe(false);
+  }, 150_000);
+});
