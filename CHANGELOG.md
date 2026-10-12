@@ -1,5 +1,41 @@
 # Changelog
 
+## [3.7.67] — 2026-10-12
+
+### 词撞类豁免（修冤枉第八刀：mutation/access trigger 词段碰撞）
+
+**根因**：mutation/access trigger 的 `/i` 标志让 `[A-Z]\w*` 退化为
+`[A-Za-z]\w*`——第二分支 `(?:[A-Z]\w*|_\w+)(Add|Create|Update|...)`
+实际匹配任何**含** mutation 词段的 camelCase 词：`for+Update`（Kysely
+悲观锁）、`create+Cipheriv`（crypto AEAD 构造器）、`Last+UpdatedBy`
+（select 子查询构建器）、`getConfig`（存储驱动配置）全数误命中。
+与 3.7.63 第四刀（NIS 触发词收窄）同族，但 mutation 动词是核心词
+不能删，改为 excludePatterns 精确豁免。
+
+- **Mutation 规则 excludePatterns 增补**：`/\bforUpdate\b/`（Kysely/
+  TypeORM SELECT … FOR UPDATE 锁子句——逐条核对纯 SELECT 非变更）、
+  `/\bcreateCipheriv\b|\bcreateDecipheriv\b/`（crypto 构造器）、
+  `/\bwith[A-Z]\w*UpdatedBy\b/`（select 子查询构建器）
+- **Access 规则增补**：`/\bgetConfig\b/`（存储驱动配置读取，
+  snake_case 形态已有 /get_config/）
+- **已知 FN 边界（记录在案）**：excludePatterns 是函数级豁免——
+  若未来出现「锁后写/加密后存」形态（函数同时含撞词与真实写调用），
+  会被整体豁免。docmost 全 IR 扫描 12 个含撞词函数中唯一「写调用」
+  是 cipher.update()（加密流 API），TP 0；盲测语料 0 个函数含候选
+  token ⇒ 零漂移由构造保证（knife8-replay-probe.ts 复核）
+- **同条件 A/B（docmost，同一 fresh IR）**：主告警流 697→685
+  （−12 = Mutation 9 + Access 3，消失清单与离线重放预测逐条一致，
+  新增 0）；suppressed 140 不变；**主路径 violations 11=11 内容级
+  零差 / score 84=84 / NEEDS_REVIEW 不变**
+- **回归锁定**：单测 6 例（protocol-detector-knife8-word-collision
+  .test.ts：四个词撞形状 + updateTable/getUserData 反例照常触发）；
+  检测器套件 49/49；引擎套件 27/27；taintpath 160 / webshape 72 /
+  fr-007 5-0 / fr-016 7-0 维持；TS 盲测对 HEAD 基线 LOST 0/ADDED 0
+- **预研探针（可复跑）**：knife8-word-collision-probe.ts（577 条授权
+  族分类：词撞类仅 ~15 条=2.6%，主力是 repo-update 149/ getter 198
+  语义类——下刀候选）+ knife8-trigger-origin-probe.ts（触发来源定位：
+  /i 退化机制）+ knife8-replay-probe.ts（离线重放预测 12=实际 12）
+
 ## [3.7.66] — 2026-10-12
 
 ### 队列作业调用方传播（修冤枉第七刀：授权族告警的「只被作业调用的函数没有请求面」根因）
