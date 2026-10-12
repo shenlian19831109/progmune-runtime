@@ -1,5 +1,51 @@
 # Changelog
 
+## [3.7.66] — 2026-10-12
+
+### 队列作业调用方传播（修冤枉第七刀：授权族告警的「只被作业调用的函数没有请求面」根因）
+
+**根因**：第六刀（3.7.65）只豁免了作业处理器**自身**——docmost 残留
+告警中 service/repo 层函数只被 @Processor/@Interval 作业调用（鉴权
+发生在入队侧 controller，队列下游函数体不面向 HTTP 请求），授权族
+「缺鉴权/缺属主校验」的提问在它们身上同样不适用。
+
+- **机制**：`computeJobSurfacePropagatedSet`（protocol-detector.ts，
+  与第五刀镜像但判据不同）——**B 判据：调用方裸名并集**。凡调用名
+  裸化后等于 F 裸名的函数都是「可能调用方」；并集非空且**全部**
+  已豁免（种子 = 第六刀的 `__progmune_no_request_surface__` 标记）
+  ⇒ F 豁免。裸化只增候选（限定形态调用名也进并集）⇒ 真实调用方
+  必在并集中（R75 正向证据）。**歧义下比第五刀更保守**：同名族
+  任一成员被非作业调用，整个裸名族都不豁免（逐边消歧在作业链
+  Processor→XxxService 上恒失败——docmost 实测只剩同文件层 4 条）
+- **快照轮次语义**，默认 1 轮（只豁免直接作业下游；传递闭包
+  docmost 实测 +16 条但豁免集 120→173，留作数据驱动再开）；
+  `PROGMUNE_JOB_SURFACE_TOGGLE=off` 环境变量逃生门
+- **标记而非静默丢弃（R9）**：被压告警进 `overall.safeguardAlerts.
+  suppressed` 清单（带 suppressedByJobSurfacePropagation 标记），
+  不进 total/groups/topRanked 主计数；豁免仅作用于 authorization
+  类、且不作用于自身直接带标记的函数（R5/R6）
+- **同条件 A/B（docmost 双扫描，fresh IR）**：主告警流 720→697
+  （−23 = Unauthenticated Access 14 + Ownership Check 5 +
+  Unauthenticated Mutation 4），suppressed 117→140（+23 全带标记）；
+  **主路径 violations 11=11 内容级零差 / score 84=84 / NEEDS_REVIEW
+  不变**；control（toggle off）= 720/117 与 3.7.65 基线告警集逐位
+  一致 ⇒ 压降完全归因本刀
+- **23 条被压逐条核对**（blind-benchmark/verify-job-surface-66.ts）：
+  调用方并集全部为 @Processor 作业（NotificationProcessor.process /
+  onCompleted / handleFailedImportJob）或 @Interval 清理作业
+  （cleanupOldTrash / cleanupSessions），TP 0；同名族保守性独立复核
+  通过（无任何被压函数存在非作业调用方）
+- **回归锁定**：单元测试 11 例（protocol-detector-job-surface.test.ts：
+  全作业传播/同名裸名多候选并集豁免（第五刀此处会阻断）/同名族保守/
+  混合调用方 fail-safe/无调用方/1 轮边界/maxHops/自调无豁免证据/
+  限定调用名裸化/种子语义/自定义标记）+ 引擎产品路径 2 例
+  （tests/trust/engine.test.ts：作业下游进 suppressed 不进主计数 +
+  HTTP 对照组照常上报）；引擎套件 27/27；
+  taintpath 160 / webshape 72 / fr-007 5-0 / fr-016 7-0 维持；
+  TS 盲测 LOST 0 / ADDED 0（对 3.7.65 提交基线逐旗标一致；
+  batch-scan 不经过引擎告警循环，此门对本改动空过，
+  真实门 = docmost A/B + 定向测试，如实记录）
+
 ## [3.7.65] — 2026-10-11
 
 ### 队列/定时/事件处理器无请求面豁免（修冤枉第六刀：授权族告警的「作业处理器不是请求面」根因）
