@@ -3,8 +3,8 @@
   "annotated_by": "plant-config + template review (style variants); human (model variants, 2026-07-06)",
   "annotated_at": "2026-08-15",
   "version": "6.0",
-  "detector_scan_generated": "2026-09-02T13:11:35.439Z",
-  "detector_commit": "462edaa4ddf3b900752cfa4e41355abc3e4d8479",
+  "detector_scan_generated": "2026-10-11T12:28:48.881Z",
+  "detector_commit": "068eee57ae7f4e5779dc6cc62913a588bc3d346a",
   "projects": [
     {
       "project_id": "analytics_A",
@@ -92,8 +92,8 @@
           "description": "No input validation on title/body in createEvent.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "ANALYTICS_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -118,8 +118,8 @@
           "description": "No input validation on title/body in createMetric.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "ANALYTICS_A-008",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -151,9 +151,9 @@
       ],
       "progmune_summary": {
         "total_findings": 10,
-        "detected": 10,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 8,
+        "missed": 2,
+        "detection_rate": 80,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -166,10 +166,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "ANALYTICS_A-006: No input validation on title/body in createEvent.",
+          "ANALYTICS_A-008: No input validation on title/body in createMetric."
+        ]
       }
     },
     {
@@ -232,8 +235,8 @@
           "description": "No input validation on title/body in createEvent.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "ANALYTICS_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -258,8 +261,8 @@
           "description": "No input validation on title/body in createMetric.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "ANALYTICS_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -291,9 +294,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -302,10 +305,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "ANALYTICS_B-004: No input validation on title/body in createEvent.",
+          "ANALYTICS_B-006: No input validation on title/body in createMetric."
+        ]
       }
     },
     {
@@ -368,8 +374,8 @@
           "description": "No input validation on title/body in createEvent.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "ANALYTICS_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -394,8 +400,8 @@
           "description": "No input validation on title/body in createMetric.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "ANALYTICS_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -427,9 +433,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -438,10 +444,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "ANALYTICS_C-004: No input validation on title/body in createEvent.",
+          "ANALYTICS_C-006: No input validation on title/body in createMetric."
+        ]
       }
     },
     {
@@ -504,8 +513,8 @@
           "description": "No input validation on title/body in createEvent.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "ANALYTICS_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -530,8 +539,8 @@
           "description": "No input validation on title/body in createMetric.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "ANALYTICS_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -563,9 +572,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -574,10 +583,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "ANALYTICS_D-004: No input validation on title/body in createEvent.",
+          "ANALYTICS_D-006: No input validation on title/body in createMetric."
+        ]
       }
     },
     {
@@ -640,8 +652,8 @@
           "description": "No input validation on title/body in createRoute.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "APIGATEWAY_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -666,8 +678,8 @@
           "description": "No input validation on title/body in createCache.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "APIGATEWAY_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -699,9 +711,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -710,10 +722,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "APIGATEWAY_A-004: No input validation on title/body in createRoute.",
+          "APIGATEWAY_A-006: No input validation on title/body in createCache."
+        ]
       }
     },
     {
@@ -776,8 +791,8 @@
           "description": "No input validation on title/body in createRoute.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "APIGATEWAY_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -802,8 +817,8 @@
           "description": "No input validation on title/body in createCache.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "APIGATEWAY_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -835,9 +850,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -846,10 +861,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "APIGATEWAY_B-004: No input validation on title/body in createRoute.",
+          "APIGATEWAY_B-006: No input validation on title/body in createCache."
+        ]
       }
     },
     {
@@ -912,8 +930,8 @@
           "description": "No input validation on title/body in createRoute.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "APIGATEWAY_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -938,8 +956,8 @@
           "description": "No input validation on title/body in createCache.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "APIGATEWAY_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -971,9 +989,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -982,10 +1000,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "APIGATEWAY_C-004: No input validation on title/body in createRoute.",
+          "APIGATEWAY_C-006: No input validation on title/body in createCache."
+        ]
       }
     },
     {
@@ -1048,8 +1069,8 @@
           "description": "No input validation on title/body in createRoute.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "APIGATEWAY_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1074,8 +1095,8 @@
           "description": "No input validation on title/body in createCache.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "APIGATEWAY_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1107,9 +1128,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -1118,10 +1139,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "APIGATEWAY_D-004: No input validation on title/body in createRoute.",
+          "APIGATEWAY_D-006: No input validation on title/body in createCache."
+        ]
       }
     },
     {
@@ -1184,8 +1208,8 @@
           "description": "No input validation on title/body in createAccount.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BANKING_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1210,8 +1234,8 @@
           "description": "No input validation on title/body in createTransfer.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BANKING_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1243,9 +1267,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -1254,10 +1278,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "BANKING_A-004: No input validation on title/body in createAccount.",
+          "BANKING_A-006: No input validation on title/body in createTransfer."
+        ]
       }
     },
     {
@@ -1320,8 +1347,8 @@
           "description": "No input validation on title/body in createAccount.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BANKING_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1346,8 +1373,8 @@
           "description": "No input validation on title/body in createTransfer.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BANKING_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1379,9 +1406,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -1390,10 +1417,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "BANKING_B-004: No input validation on title/body in createAccount.",
+          "BANKING_B-006: No input validation on title/body in createTransfer."
+        ]
       }
     },
     {
@@ -1456,8 +1486,8 @@
           "description": "No input validation on title/body in createAccount.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BANKING_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1482,8 +1512,8 @@
           "description": "No input validation on title/body in createTransfer.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BANKING_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1515,9 +1545,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -1526,10 +1556,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "BANKING_C-004: No input validation on title/body in createAccount.",
+          "BANKING_C-006: No input validation on title/body in createTransfer."
+        ]
       }
     },
     {
@@ -1592,8 +1625,8 @@
           "description": "No input validation on title/body in createAccount.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BANKING_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1618,8 +1651,8 @@
           "description": "No input validation on title/body in createTransfer.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BANKING_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1651,9 +1684,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -1662,10 +1695,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "BANKING_D-004: No input validation on title/body in createAccount.",
+          "BANKING_D-006: No input validation on title/body in createTransfer."
+        ]
       }
     },
     {
@@ -1724,8 +1760,8 @@
           "severity": "medium",
           "description": "No input validation on post content, titles, or comment content.",
           "protocol": "Resource",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1743,9 +1779,9 @@
       ],
       "progmune_summary": {
         "total_findings": 5,
-        "detected": 5,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 4,
+        "missed": 1,
+        "detection_rate": 80,
         "false_positives": 0,
         "by_severity": {
           "high": {
@@ -1754,14 +1790,16 @@
           },
           "medium": {
             "total": 3,
-            "detected": 3
+            "detected": 2
           },
           "low": {
             "total": 1,
             "detected": 1
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "BLOG-004: No input validation on post content, titles, or comment cont"
+        ]
       }
     },
     {
@@ -1824,8 +1862,8 @@
           "description": "No input validation on title/body in createReservation.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BOOKING_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1850,8 +1888,8 @@
           "description": "No input validation on title/body in createGuest.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BOOKING_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1883,9 +1921,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -1894,10 +1932,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "BOOKING_A-004: No input validation on title/body in createReservation.",
+          "BOOKING_A-006: No input validation on title/body in createGuest."
+        ]
       }
     },
     {
@@ -1960,8 +2001,8 @@
           "description": "No input validation on title/body in createReservation.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BOOKING_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -1986,8 +2027,8 @@
           "description": "No input validation on title/body in createGuest.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BOOKING_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2019,9 +2060,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -2030,10 +2071,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "BOOKING_B-004: No input validation on title/body in createReservation.",
+          "BOOKING_B-006: No input validation on title/body in createGuest."
+        ]
       }
     },
     {
@@ -2096,8 +2140,8 @@
           "description": "No input validation on title/body in createReservation.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BOOKING_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2122,8 +2166,8 @@
           "description": "No input validation on title/body in createGuest.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BOOKING_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2155,9 +2199,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -2166,10 +2210,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "BOOKING_C-004: No input validation on title/body in createReservation.",
+          "BOOKING_C-006: No input validation on title/body in createGuest."
+        ]
       }
     },
     {
@@ -2232,8 +2279,8 @@
           "description": "No input validation on title/body in createReservation.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BOOKING_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2258,8 +2305,8 @@
           "description": "No input validation on title/body in createGuest.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "BOOKING_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2291,9 +2338,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -2302,10 +2349,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "BOOKING_D-004: No input validation on title/body in createReservation.",
+          "BOOKING_D-006: No input validation on title/body in createGuest."
+        ]
       }
     },
     {
@@ -2465,8 +2515,8 @@
           "description": "No input validation on title/body in createArticle.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "CMS_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2491,8 +2541,8 @@
           "description": "No input validation on title/body in createTag.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "CMS_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2524,9 +2574,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -2535,10 +2585,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "CMS_A-004: No input validation on title/body in createArticle.",
+          "CMS_A-006: No input validation on title/body in createTag."
+        ]
       }
     },
     {
@@ -2601,8 +2654,8 @@
           "description": "No input validation on title/body in createArticle.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "CMS_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2627,8 +2680,8 @@
           "description": "No input validation on title/body in createTag.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "CMS_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2660,9 +2713,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -2671,10 +2724,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "CMS_B-004: No input validation on title/body in createArticle.",
+          "CMS_B-006: No input validation on title/body in createTag."
+        ]
       }
     },
     {
@@ -2737,8 +2793,8 @@
           "description": "No input validation on title/body in createArticle.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "CMS_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2763,8 +2819,8 @@
           "description": "No input validation on title/body in createTag.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "CMS_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2796,9 +2852,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -2807,10 +2863,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "CMS_C-004: No input validation on title/body in createArticle.",
+          "CMS_C-006: No input validation on title/body in createTag."
+        ]
       }
     },
     {
@@ -2873,8 +2932,8 @@
           "description": "No input validation on title/body in createArticle.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "CMS_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2899,8 +2958,8 @@
           "description": "No input validation on title/body in createTag.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "CMS_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -2932,9 +2991,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -2943,10 +3002,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "CMS_D-004: No input validation on title/body in createArticle.",
+          "CMS_D-006: No input validation on title/body in createTag."
+        ]
       }
     },
     {
@@ -3264,8 +3326,8 @@
           "description": "No input validation on title/body in createCourse.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "EDTECH_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -3290,8 +3352,8 @@
           "description": "No input validation on title/body in createEnrollment.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "EDTECH_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -3323,9 +3385,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -3334,10 +3396,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "EDTECH_A-004: No input validation on title/body in createCourse.",
+          "EDTECH_A-006: No input validation on title/body in createEnrollment."
+        ]
       }
     },
     {
@@ -3400,8 +3465,8 @@
           "description": "No input validation on title/body in createCourse.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "EDTECH_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -3426,8 +3491,8 @@
           "description": "No input validation on title/body in createEnrollment.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "EDTECH_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -3459,9 +3524,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -3470,10 +3535,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "EDTECH_B-004: No input validation on title/body in createCourse.",
+          "EDTECH_B-006: No input validation on title/body in createEnrollment."
+        ]
       }
     },
     {
@@ -3536,8 +3604,8 @@
           "description": "No input validation on title/body in createCourse.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "EDTECH_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -3562,8 +3630,8 @@
           "description": "No input validation on title/body in createEnrollment.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "EDTECH_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -3595,9 +3663,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -3606,10 +3674,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "EDTECH_C-004: No input validation on title/body in createCourse.",
+          "EDTECH_C-006: No input validation on title/body in createEnrollment."
+        ]
       }
     },
     {
@@ -3672,8 +3743,8 @@
           "description": "No input validation on title/body in createCourse.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "EDTECH_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -3698,8 +3769,8 @@
           "description": "No input validation on title/body in createEnrollment.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "EDTECH_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -3731,9 +3802,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -3742,10 +3813,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "EDTECH_D-004: No input validation on title/body in createCourse.",
+          "EDTECH_D-006: No input validation on title/body in createEnrollment."
+        ]
       }
     },
     {
@@ -4072,8 +4146,8 @@
           "description": "No input validation on title/body in createRepo.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "GITHOST_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4098,8 +4172,8 @@
           "description": "No input validation on title/body in createBranch.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "GITHOST_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4131,9 +4205,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -4142,10 +4216,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "GITHOST_A-004: No input validation on title/body in createRepo.",
+          "GITHOST_A-006: No input validation on title/body in createBranch."
+        ]
       }
     },
     {
@@ -4208,8 +4285,8 @@
           "description": "No input validation on title/body in createRepo.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "GITHOST_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4234,8 +4311,8 @@
           "description": "No input validation on title/body in createBranch.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "GITHOST_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4267,9 +4344,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -4278,10 +4355,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "GITHOST_B-004: No input validation on title/body in createRepo.",
+          "GITHOST_B-006: No input validation on title/body in createBranch."
+        ]
       }
     },
     {
@@ -4344,8 +4424,8 @@
           "description": "No input validation on title/body in createRepo.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "GITHOST_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4370,8 +4450,8 @@
           "description": "No input validation on title/body in createBranch.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "GITHOST_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4403,9 +4483,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -4414,10 +4494,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "GITHOST_C-004: No input validation on title/body in createRepo.",
+          "GITHOST_C-006: No input validation on title/body in createBranch."
+        ]
       }
     },
     {
@@ -4493,8 +4576,8 @@
           "description": "No input validation on title/body in createRepo.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "GITHOST_D-005",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4519,8 +4602,8 @@
           "description": "No input validation on title/body in createBranch.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "GITHOST_D-007",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4552,9 +4635,9 @@
       ],
       "progmune_summary": {
         "total_findings": 9,
-        "detected": 9,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 7,
+        "missed": 2,
+        "detection_rate": 77.8,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -4567,10 +4650,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "GITHOST_D-005: No input validation on title/body in createRepo.",
+          "GITHOST_D-007: No input validation on title/body in createBranch."
+        ]
       }
     },
     {
@@ -4633,8 +4719,8 @@
           "description": "No input validation on title/body in createPatient.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HEALTHCARE_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4659,8 +4745,8 @@
           "description": "No input validation on title/body in createPrescription.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HEALTHCARE_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4692,9 +4778,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -4703,10 +4789,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "HEALTHCARE_A-004: No input validation on title/body in createPatient.",
+          "HEALTHCARE_A-006: No input validation on title/body in createPrescription."
+        ]
       }
     },
     {
@@ -4769,8 +4858,8 @@
           "description": "No input validation on title/body in createPatient.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HEALTHCARE_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4795,8 +4884,8 @@
           "description": "No input validation on title/body in createPrescription.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HEALTHCARE_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4828,9 +4917,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -4839,10 +4928,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "HEALTHCARE_B-004: No input validation on title/body in createPatient.",
+          "HEALTHCARE_B-006: No input validation on title/body in createPrescription."
+        ]
       }
     },
     {
@@ -4905,8 +4997,8 @@
           "description": "No input validation on title/body in createPatient.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HEALTHCARE_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4931,8 +5023,8 @@
           "description": "No input validation on title/body in createPrescription.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HEALTHCARE_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -4964,9 +5056,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -4975,10 +5067,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "HEALTHCARE_C-004: No input validation on title/body in createPatient.",
+          "HEALTHCARE_C-006: No input validation on title/body in createPrescription."
+        ]
       }
     },
     {
@@ -5041,8 +5136,8 @@
           "description": "No input validation on title/body in createPatient.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HEALTHCARE_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5067,8 +5162,8 @@
           "description": "No input validation on title/body in createPrescription.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HEALTHCARE_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5100,9 +5195,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -5111,10 +5206,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "HEALTHCARE_D-004: No input validation on title/body in createPatient.",
+          "HEALTHCARE_D-006: No input validation on title/body in createPrescription."
+        ]
       }
     },
     {
@@ -5177,8 +5275,8 @@
           "description": "No input validation on title/body in createEmployee.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HR_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5203,8 +5301,8 @@
           "description": "No input validation on title/body in createPayroll.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HR_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5236,9 +5334,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -5247,10 +5345,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "HR_A-004: No input validation on title/body in createEmployee.",
+          "HR_A-006: No input validation on title/body in createPayroll."
+        ]
       }
     },
     {
@@ -5313,8 +5414,8 @@
           "description": "No input validation on title/body in createEmployee.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HR_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5339,8 +5440,8 @@
           "description": "No input validation on title/body in createPayroll.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HR_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5372,9 +5473,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -5383,10 +5484,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "HR_B-004: No input validation on title/body in createEmployee.",
+          "HR_B-006: No input validation on title/body in createPayroll."
+        ]
       }
     },
     {
@@ -5449,8 +5553,8 @@
           "description": "No input validation on title/body in createEmployee.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HR_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5475,8 +5579,8 @@
           "description": "No input validation on title/body in createPayroll.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HR_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5508,9 +5612,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -5519,10 +5623,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "HR_C-004: No input validation on title/body in createEmployee.",
+          "HR_C-006: No input validation on title/body in createPayroll."
+        ]
       }
     },
     {
@@ -5585,8 +5692,8 @@
           "description": "No input validation on title/body in createEmployee.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HR_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5611,8 +5718,8 @@
           "description": "No input validation on title/body in createPayroll.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "HR_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5644,9 +5751,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -5655,10 +5762,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "HR_D-004: No input validation on title/body in createEmployee.",
+          "HR_D-006: No input validation on title/body in createPayroll."
+        ]
       }
     },
     {
@@ -5721,8 +5831,8 @@
           "description": "No input validation on title/body in createPolicy.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INSURANCE_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5747,8 +5857,8 @@
           "description": "No input validation on title/body in createClaim.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INSURANCE_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5780,9 +5890,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -5791,10 +5901,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "INSURANCE_A-004: No input validation on title/body in createPolicy.",
+          "INSURANCE_A-006: No input validation on title/body in createClaim."
+        ]
       }
     },
     {
@@ -5857,8 +5970,8 @@
           "description": "No input validation on title/body in createPolicy.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INSURANCE_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5883,8 +5996,8 @@
           "description": "No input validation on title/body in createClaim.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INSURANCE_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -5916,9 +6029,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -5927,10 +6040,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "INSURANCE_B-004: No input validation on title/body in createPolicy.",
+          "INSURANCE_B-006: No input validation on title/body in createClaim."
+        ]
       }
     },
     {
@@ -5993,8 +6109,8 @@
           "description": "No input validation on title/body in createPolicy.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INSURANCE_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6019,8 +6135,8 @@
           "description": "No input validation on title/body in createClaim.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INSURANCE_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6052,9 +6168,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -6063,10 +6179,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "INSURANCE_C-004: No input validation on title/body in createPolicy.",
+          "INSURANCE_C-006: No input validation on title/body in createClaim."
+        ]
       }
     },
     {
@@ -6129,8 +6248,8 @@
           "description": "No input validation on title/body in createPolicy.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INSURANCE_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6155,8 +6274,8 @@
           "description": "No input validation on title/body in createClaim.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INSURANCE_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6188,9 +6307,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -6199,10 +6318,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "INSURANCE_D-004: No input validation on title/body in createPolicy.",
+          "INSURANCE_D-006: No input validation on title/body in createClaim."
+        ]
       }
     },
     {
@@ -6265,8 +6387,8 @@
           "description": "No input validation on title/body in createItem.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INVENTORY_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6291,8 +6413,8 @@
           "description": "No input validation on title/body in createStock.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INVENTORY_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6324,9 +6446,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -6335,10 +6457,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "INVENTORY_A-004: No input validation on title/body in createItem.",
+          "INVENTORY_A-006: No input validation on title/body in createStock."
+        ]
       }
     },
     {
@@ -6401,8 +6526,8 @@
           "description": "No input validation on title/body in createItem.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INVENTORY_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6427,8 +6552,8 @@
           "description": "No input validation on title/body in createStock.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INVENTORY_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6460,9 +6585,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -6471,10 +6596,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "INVENTORY_B-004: No input validation on title/body in createItem.",
+          "INVENTORY_B-006: No input validation on title/body in createStock."
+        ]
       }
     },
     {
@@ -6550,8 +6678,8 @@
           "description": "No input validation on title/body in createItem.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INVENTORY_C-005",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6576,8 +6704,8 @@
           "description": "No input validation on title/body in createStock.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INVENTORY_C-007",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6609,9 +6737,9 @@
       ],
       "progmune_summary": {
         "total_findings": 9,
-        "detected": 9,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 7,
+        "missed": 2,
+        "detection_rate": 77.8,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -6624,10 +6752,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "INVENTORY_C-005: No input validation on title/body in createItem.",
+          "INVENTORY_C-007: No input validation on title/body in createStock."
+        ]
       }
     },
     {
@@ -6690,8 +6821,8 @@
           "description": "No input validation on title/body in createItem.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INVENTORY_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6716,8 +6847,8 @@
           "description": "No input validation on title/body in createStock.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "INVENTORY_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6749,9 +6880,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -6760,10 +6891,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "INVENTORY_D-004: No input validation on title/body in createItem.",
+          "INVENTORY_D-006: No input validation on title/body in createStock."
+        ]
       }
     },
     {
@@ -6826,8 +6960,8 @@
           "description": "No input validation on title/body in createDevice.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "IOT_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6852,8 +6986,8 @@
           "description": "No input validation on title/body in createTelemetry.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "IOT_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6885,9 +7019,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -6896,10 +7030,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "IOT_A-004: No input validation on title/body in createDevice.",
+          "IOT_A-006: No input validation on title/body in createTelemetry."
+        ]
       }
     },
     {
@@ -6962,8 +7099,8 @@
           "description": "No input validation on title/body in createDevice.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "IOT_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -6988,8 +7125,8 @@
           "description": "No input validation on title/body in createTelemetry.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "IOT_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7021,9 +7158,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -7032,10 +7169,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "IOT_B-004: No input validation on title/body in createDevice.",
+          "IOT_B-006: No input validation on title/body in createTelemetry."
+        ]
       }
     },
     {
@@ -7098,8 +7238,8 @@
           "description": "No input validation on title/body in createDevice.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "IOT_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7124,8 +7264,8 @@
           "description": "No input validation on title/body in createTelemetry.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "IOT_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7157,9 +7297,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -7168,10 +7308,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "IOT_C-004: No input validation on title/body in createDevice.",
+          "IOT_C-006: No input validation on title/body in createTelemetry."
+        ]
       }
     },
     {
@@ -7234,8 +7377,8 @@
           "description": "No input validation on title/body in createDevice.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "IOT_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7260,8 +7403,8 @@
           "description": "No input validation on title/body in createTelemetry.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "IOT_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7293,9 +7436,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -7304,10 +7447,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "IOT_D-004: No input validation on title/body in createDevice.",
+          "IOT_D-006: No input validation on title/body in createTelemetry."
+        ]
       }
     },
     {
@@ -7431,8 +7577,8 @@
           "protocol": "Resource",
           "description": "No input validation on issue title/description.",
           "fix_suggestion": "Add content validation",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7464,9 +7610,9 @@
       ],
       "progmune_summary": {
         "total_findings": 10,
-        "detected": 8,
-        "missed": 2,
-        "detection_rate": 80,
+        "detected": 7,
+        "missed": 3,
+        "detection_rate": 70,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -7479,12 +7625,13 @@
           },
           "low": {
             "total": 3,
-            "detected": 3
+            "detected": 2
           }
         },
         "missed_findings": [
           "ISS-006: listIssues() has NO authentication check.",
-          "ISS-007: listMilestones() has NO authentication check."
+          "ISS-007: listMilestones() has NO authentication check.",
+          "ISS-008: No input validation on issue title/description."
         ]
       }
     },
@@ -7548,8 +7695,8 @@
           "description": "No input validation on title/body in createCase.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LEGAL_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7574,8 +7721,8 @@
           "description": "No input validation on title/body in createDocument.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LEGAL_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7607,9 +7754,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -7618,10 +7765,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "LEGAL_A-004: No input validation on title/body in createCase.",
+          "LEGAL_A-006: No input validation on title/body in createDocument."
+        ]
       }
     },
     {
@@ -7684,8 +7834,8 @@
           "description": "No input validation on title/body in createCase.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LEGAL_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7710,8 +7860,8 @@
           "description": "No input validation on title/body in createDocument.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LEGAL_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7743,9 +7893,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -7754,10 +7904,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "LEGAL_B-004: No input validation on title/body in createCase.",
+          "LEGAL_B-006: No input validation on title/body in createDocument."
+        ]
       }
     },
     {
@@ -7820,8 +7973,8 @@
           "description": "No input validation on title/body in createCase.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LEGAL_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7846,8 +7999,8 @@
           "description": "No input validation on title/body in createDocument.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LEGAL_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7879,9 +8032,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -7890,10 +8043,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "LEGAL_C-004: No input validation on title/body in createCase.",
+          "LEGAL_C-006: No input validation on title/body in createDocument."
+        ]
       }
     },
     {
@@ -7956,8 +8112,8 @@
           "description": "No input validation on title/body in createCase.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LEGAL_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -7982,8 +8138,8 @@
           "description": "No input validation on title/body in createDocument.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LEGAL_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8015,9 +8171,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -8026,10 +8182,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "LEGAL_D-004: No input validation on title/body in createCase.",
+          "LEGAL_D-006: No input validation on title/body in createDocument."
+        ]
       }
     },
     {
@@ -8092,8 +8251,8 @@
           "description": "No input validation on title/body in createShipment.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LOGISTICS_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8118,8 +8277,8 @@
           "description": "No input validation on title/body in createDriver.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LOGISTICS_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8151,9 +8310,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -8162,10 +8321,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "LOGISTICS_A-004: No input validation on title/body in createShipment.",
+          "LOGISTICS_A-006: No input validation on title/body in createDriver."
+        ]
       }
     },
     {
@@ -8228,8 +8390,8 @@
           "description": "No input validation on title/body in createShipment.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LOGISTICS_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8254,8 +8416,8 @@
           "description": "No input validation on title/body in createDriver.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LOGISTICS_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8287,9 +8449,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -8298,10 +8460,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "LOGISTICS_B-004: No input validation on title/body in createShipment.",
+          "LOGISTICS_B-006: No input validation on title/body in createDriver."
+        ]
       }
     },
     {
@@ -8364,8 +8529,8 @@
           "description": "No input validation on title/body in createShipment.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LOGISTICS_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8390,8 +8555,8 @@
           "description": "No input validation on title/body in createDriver.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LOGISTICS_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8423,9 +8588,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -8434,10 +8599,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "LOGISTICS_C-004: No input validation on title/body in createShipment.",
+          "LOGISTICS_C-006: No input validation on title/body in createDriver."
+        ]
       }
     },
     {
@@ -8500,8 +8668,8 @@
           "description": "No input validation on title/body in createShipment.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LOGISTICS_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8526,8 +8694,8 @@
           "description": "No input validation on title/body in createDriver.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "LOGISTICS_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8559,9 +8727,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -8570,10 +8738,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "LOGISTICS_D-004: No input validation on title/body in createShipment.",
+          "LOGISTICS_D-006: No input validation on title/body in createDriver."
+        ]
       }
     },
     {
@@ -8636,8 +8807,8 @@
           "description": "No input validation on title/body in createTemplate.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MESSAGING_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8662,8 +8833,8 @@
           "description": "No input validation on title/body in createCampaign.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MESSAGING_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8695,9 +8866,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -8706,10 +8877,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "MESSAGING_A-004: No input validation on title/body in createTemplate.",
+          "MESSAGING_A-006: No input validation on title/body in createCampaign."
+        ]
       }
     },
     {
@@ -8798,8 +8972,8 @@
           "description": "No input validation on title/body in createTemplate.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MESSAGING_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8824,8 +8998,8 @@
           "description": "No input validation on title/body in createCampaign.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MESSAGING_B-008",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8857,9 +9031,9 @@
       ],
       "progmune_summary": {
         "total_findings": 10,
-        "detected": 10,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 8,
+        "missed": 2,
+        "detection_rate": 80,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -8872,10 +9046,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "MESSAGING_B-006: No input validation on title/body in createTemplate.",
+          "MESSAGING_B-008: No input validation on title/body in createCampaign."
+        ]
       }
     },
     {
@@ -8938,8 +9115,8 @@
           "description": "No input validation on title/body in createTemplate.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MESSAGING_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8964,8 +9141,8 @@
           "description": "No input validation on title/body in createCampaign.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MESSAGING_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -8997,9 +9174,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -9008,10 +9185,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "MESSAGING_C-004: No input validation on title/body in createTemplate.",
+          "MESSAGING_C-006: No input validation on title/body in createCampaign."
+        ]
       }
     },
     {
@@ -9074,8 +9254,8 @@
           "description": "No input validation on title/body in createTemplate.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MESSAGING_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9100,8 +9280,8 @@
           "description": "No input validation on title/body in createCampaign.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MESSAGING_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9133,9 +9313,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -9144,10 +9324,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "MESSAGING_D-004: No input validation on title/body in createTemplate.",
+          "MESSAGING_D-006: No input validation on title/body in createCampaign."
+        ]
       }
     },
     {
@@ -9210,8 +9393,8 @@
           "description": "No input validation on title/body in createTrack.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MUSIC_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9236,8 +9419,8 @@
           "description": "No input validation on title/body in createPlaylist.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MUSIC_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9269,9 +9452,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -9280,10 +9463,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "MUSIC_A-004: No input validation on title/body in createTrack.",
+          "MUSIC_A-006: No input validation on title/body in createPlaylist."
+        ]
       }
     },
     {
@@ -9346,8 +9532,8 @@
           "description": "No input validation on title/body in createTrack.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MUSIC_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9372,8 +9558,8 @@
           "description": "No input validation on title/body in createPlaylist.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MUSIC_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9405,9 +9591,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -9416,10 +9602,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "MUSIC_B-004: No input validation on title/body in createTrack.",
+          "MUSIC_B-006: No input validation on title/body in createPlaylist."
+        ]
       }
     },
     {
@@ -9482,8 +9671,8 @@
           "description": "No input validation on title/body in createTrack.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MUSIC_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9508,8 +9697,8 @@
           "description": "No input validation on title/body in createPlaylist.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MUSIC_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9541,9 +9730,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -9552,10 +9741,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "MUSIC_C-004: No input validation on title/body in createTrack.",
+          "MUSIC_C-006: No input validation on title/body in createPlaylist."
+        ]
       }
     },
     {
@@ -9618,8 +9810,8 @@
           "description": "No input validation on title/body in createTrack.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MUSIC_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9644,8 +9836,8 @@
           "description": "No input validation on title/body in createPlaylist.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "MUSIC_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9677,9 +9869,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -9688,10 +9880,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "MUSIC_D-004: No input validation on title/body in createTrack.",
+          "MUSIC_D-006: No input validation on title/body in createPlaylist."
+        ]
       }
     },
     {
@@ -9754,8 +9949,8 @@
           "description": "No input validation on title/body in createFeed.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "NEWSFEED_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9780,8 +9975,8 @@
           "description": "No input validation on title/body in createSubscription.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "NEWSFEED_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9813,9 +10008,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -9824,10 +10019,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "NEWSFEED_A-004: No input validation on title/body in createFeed.",
+          "NEWSFEED_A-006: No input validation on title/body in createSubscription."
+        ]
       }
     },
     {
@@ -9890,8 +10088,8 @@
           "description": "No input validation on title/body in createFeed.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "NEWSFEED_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9916,8 +10114,8 @@
           "description": "No input validation on title/body in createSubscription.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "NEWSFEED_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -9949,9 +10147,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -9960,10 +10158,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "NEWSFEED_B-004: No input validation on title/body in createFeed.",
+          "NEWSFEED_B-006: No input validation on title/body in createSubscription."
+        ]
       }
     },
     {
@@ -10026,8 +10227,8 @@
           "description": "No input validation on title/body in createChannel.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "NOTIFICATIONS_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10052,8 +10253,8 @@
           "description": "No input validation on title/body in createAlert.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "NOTIFICATIONS_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10085,9 +10286,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -10096,10 +10297,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "NOTIFICATIONS_A-004: No input validation on title/body in createChannel.",
+          "NOTIFICATIONS_A-006: No input validation on title/body in createAlert."
+        ]
       }
     },
     {
@@ -10162,8 +10366,8 @@
           "description": "No input validation on title/body in createChannel.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "NOTIFICATIONS_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10188,8 +10392,8 @@
           "description": "No input validation on title/body in createAlert.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "NOTIFICATIONS_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10221,9 +10425,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -10232,10 +10436,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "NOTIFICATIONS_B-004: No input validation on title/body in createChannel.",
+          "NOTIFICATIONS_B-006: No input validation on title/body in createAlert."
+        ]
       }
     },
     {
@@ -10311,8 +10518,8 @@
           "description": "No input validation on title/body in createChannel.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "NOTIFICATIONS_C-005",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10337,8 +10544,8 @@
           "description": "No input validation on title/body in createAlert.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "NOTIFICATIONS_C-007",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10370,9 +10577,9 @@
       ],
       "progmune_summary": {
         "total_findings": 9,
-        "detected": 9,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 7,
+        "missed": 2,
+        "detection_rate": 77.8,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -10385,10 +10592,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "NOTIFICATIONS_C-005: No input validation on title/body in createChannel.",
+          "NOTIFICATIONS_C-007: No input validation on title/body in createAlert."
+        ]
       }
     },
     {
@@ -10451,8 +10661,8 @@
           "description": "No input validation on title/body in createChannel.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "NOTIFICATIONS_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10477,8 +10687,8 @@
           "description": "No input validation on title/body in createAlert.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "NOTIFICATIONS_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10510,9 +10720,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -10521,10 +10731,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "NOTIFICATIONS_D-004: No input validation on title/body in createChannel.",
+          "NOTIFICATIONS_D-006: No input validation on title/body in createAlert."
+        ]
       }
     },
     {
@@ -10587,8 +10800,8 @@
           "description": "No input validation on title/body in createTransaction.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "PAYMENT_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10613,8 +10826,8 @@
           "description": "No input validation on title/body in createRefund.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "PAYMENT_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10646,9 +10859,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -10657,10 +10870,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "PAYMENT_A-004: No input validation on title/body in createTransaction.",
+          "PAYMENT_A-006: No input validation on title/body in createRefund."
+        ]
       }
     },
     {
@@ -10723,8 +10939,8 @@
           "description": "No input validation on title/body in createTransaction.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "PAYMENT_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10749,8 +10965,8 @@
           "description": "No input validation on title/body in createRefund.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "PAYMENT_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10782,9 +10998,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -10793,10 +11009,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "PAYMENT_B-004: No input validation on title/body in createTransaction.",
+          "PAYMENT_B-006: No input validation on title/body in createRefund."
+        ]
       }
     },
     {
@@ -10859,8 +11078,8 @@
           "description": "No input validation on title/body in createTransaction.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "PAYMENT_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10885,8 +11104,8 @@
           "description": "No input validation on title/body in createRefund.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "PAYMENT_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -10918,9 +11137,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -10929,10 +11148,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "PAYMENT_C-004: No input validation on title/body in createTransaction.",
+          "PAYMENT_C-006: No input validation on title/body in createRefund."
+        ]
       }
     },
     {
@@ -10995,8 +11217,8 @@
           "description": "No input validation on title/body in createTransaction.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "PAYMENT_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11021,8 +11243,8 @@
           "description": "No input validation on title/body in createRefund.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "PAYMENT_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11054,9 +11276,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -11065,10 +11287,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "PAYMENT_D-004: No input validation on title/body in createTransaction.",
+          "PAYMENT_D-006: No input validation on title/body in createRefund."
+        ]
       }
     },
     {
@@ -11131,8 +11356,8 @@
           "description": "No input validation on title/body in createListing.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "REALESTATE_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11157,8 +11382,8 @@
           "description": "No input validation on title/body in createOffer.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "REALESTATE_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11190,9 +11415,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -11201,10 +11426,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "REALESTATE_A-004: No input validation on title/body in createListing.",
+          "REALESTATE_A-006: No input validation on title/body in createOffer."
+        ]
       }
     },
     {
@@ -11267,8 +11495,8 @@
           "description": "No input validation on title/body in createListing.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "REALESTATE_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11293,8 +11521,8 @@
           "description": "No input validation on title/body in createOffer.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "REALESTATE_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11326,9 +11554,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -11337,10 +11565,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "REALESTATE_B-004: No input validation on title/body in createListing.",
+          "REALESTATE_B-006: No input validation on title/body in createOffer."
+        ]
       }
     },
     {
@@ -11403,8 +11634,8 @@
           "description": "No input validation on title/body in createListing.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "REALESTATE_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11429,8 +11660,8 @@
           "description": "No input validation on title/body in createOffer.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "REALESTATE_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11462,9 +11693,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -11473,10 +11704,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "REALESTATE_C-004: No input validation on title/body in createListing.",
+          "REALESTATE_C-006: No input validation on title/body in createOffer."
+        ]
       }
     },
     {
@@ -11539,8 +11773,8 @@
           "description": "No input validation on title/body in createListing.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "REALESTATE_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11565,8 +11799,8 @@
           "description": "No input validation on title/body in createOffer.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "REALESTATE_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11598,9 +11832,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -11609,10 +11843,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "REALESTATE_D-004: No input validation on title/body in createListing.",
+          "REALESTATE_D-006: No input validation on title/body in createOffer."
+        ]
       }
     },
     {
@@ -11812,8 +12049,8 @@
           "description": "No input validation on title/body in createIndex.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "SEARCH_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11838,8 +12075,8 @@
           "description": "No input validation on title/body in createQuery.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "SEARCH_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11871,9 +12108,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -11882,10 +12119,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "SEARCH_A-004: No input validation on title/body in createIndex.",
+          "SEARCH_A-006: No input validation on title/body in createQuery."
+        ]
       }
     },
     {
@@ -11948,8 +12188,8 @@
           "description": "No input validation on title/body in createIndex.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "SEARCH_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -11974,8 +12214,8 @@
           "description": "No input validation on title/body in createQuery.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "SEARCH_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -12007,9 +12247,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -12018,10 +12258,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "SEARCH_B-004: No input validation on title/body in createIndex.",
+          "SEARCH_B-006: No input validation on title/body in createQuery."
+        ]
       }
     },
     {
@@ -12084,8 +12327,8 @@
           "description": "No input validation on title/body in createIndex.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "SEARCH_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -12110,8 +12353,8 @@
           "description": "No input validation on title/body in createQuery.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "SEARCH_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -12143,9 +12386,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -12154,10 +12397,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "SEARCH_C-004: No input validation on title/body in createIndex.",
+          "SEARCH_C-006: No input validation on title/body in createQuery."
+        ]
       }
     },
     {
@@ -12220,8 +12466,8 @@
           "description": "No input validation on title/body in createIndex.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "SEARCH_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -12246,8 +12492,8 @@
           "description": "No input validation on title/body in createQuery.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "SEARCH_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -12279,9 +12525,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -12290,10 +12536,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "SEARCH_D-004: No input validation on title/body in createIndex.",
+          "SEARCH_D-006: No input validation on title/body in createQuery."
+        ]
       }
     },
     {
@@ -12352,16 +12601,16 @@
           "severity": "low",
           "description": "No title length/format validation.",
           "protocol": "Resource",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         }
       ],
       "progmune_summary": {
         "total_findings": 4,
-        "detected": 4,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 3,
+        "missed": 1,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "high": {
@@ -12374,10 +12623,12 @@
           },
           "low": {
             "total": 1,
-            "detected": 1
+            "detected": 0
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "TODO-004: No title length/format validation."
+        ]
       }
     },
     {
@@ -12592,8 +12843,8 @@
           "description": "No input validation on title/body in createWorkflow.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "WORKFLOW_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -12618,8 +12869,8 @@
           "description": "No input validation on title/body in createStep.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "WORKFLOW_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -12651,9 +12902,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -12662,10 +12913,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "WORKFLOW_A-004: No input validation on title/body in createWorkflow.",
+          "WORKFLOW_A-006: No input validation on title/body in createStep."
+        ]
       }
     },
     {
@@ -12728,8 +12982,8 @@
           "description": "No input validation on title/body in createWorkflow.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "WORKFLOW_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -12754,8 +13008,8 @@
           "description": "No input validation on title/body in createStep.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "WORKFLOW_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -12787,9 +13041,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -12798,10 +13052,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "WORKFLOW_B-004: No input validation on title/body in createWorkflow.",
+          "WORKFLOW_B-006: No input validation on title/body in createStep."
+        ]
       }
     },
     {
@@ -12864,8 +13121,8 @@
           "description": "No input validation on title/body in createWorkflow.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "WORKFLOW_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -12890,8 +13147,8 @@
           "description": "No input validation on title/body in createStep.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "WORKFLOW_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -12923,9 +13180,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -12934,10 +13191,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "WORKFLOW_C-004: No input validation on title/body in createWorkflow.",
+          "WORKFLOW_C-006: No input validation on title/body in createStep."
+        ]
       }
     },
     {
@@ -13026,8 +13286,8 @@
           "description": "No input validation on title/body in createWorkflow.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "WORKFLOW_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -13052,8 +13312,8 @@
           "description": "No input validation on title/body in createStep.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "WORKFLOW_D-008",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -13085,9 +13345,9 @@
       ],
       "progmune_summary": {
         "total_findings": 10,
-        "detected": 10,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 8,
+        "missed": 2,
+        "detection_rate": 80,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -13100,10 +13360,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "WORKFLOW_D-006: No input validation on title/body in createWorkflow.",
+          "WORKFLOW_D-008: No input validation on title/body in createStep."
+        ]
       }
     },
     {
@@ -13166,8 +13429,8 @@
           "description": "No input validation on title/body in createPost.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "XCLONE_A-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -13192,8 +13455,8 @@
           "description": "No input validation on title/body in createLike.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "XCLONE_A-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -13225,9 +13488,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -13236,10 +13499,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "XCLONE_A-004: No input validation on title/body in createPost.",
+          "XCLONE_A-006: No input validation on title/body in createLike."
+        ]
       }
     },
     {
@@ -13302,8 +13568,8 @@
           "description": "No input validation on title/body in createPost.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "XCLONE_B-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -13328,8 +13594,8 @@
           "description": "No input validation on title/body in createLike.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "XCLONE_B-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -13361,9 +13627,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -13372,10 +13638,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "XCLONE_B-004: No input validation on title/body in createPost.",
+          "XCLONE_B-006: No input validation on title/body in createLike."
+        ]
       }
     },
     {
@@ -13438,8 +13707,8 @@
           "description": "No input validation on title/body in createPost.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "XCLONE_C-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -13464,8 +13733,8 @@
           "description": "No input validation on title/body in createLike.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "XCLONE_C-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -13497,9 +13766,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -13508,10 +13777,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "XCLONE_C-004: No input validation on title/body in createPost.",
+          "XCLONE_C-006: No input validation on title/body in createLike."
+        ]
       }
     },
     {
@@ -13574,8 +13846,8 @@
           "description": "No input validation on title/body in createPost.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "XCLONE_D-004",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -13600,8 +13872,8 @@
           "description": "No input validation on title/body in createLike.",
           "fix_suggestion": "Add content validation (length/format)",
           "id": "XCLONE_D-006",
-          "progmune_detected": true,
-          "progmune_verdict": "WARN",
+          "progmune_detected": false,
+          "progmune_verdict": "NOT_CHECKED",
           "false_positive": false
         },
         {
@@ -13633,9 +13905,9 @@
       ],
       "progmune_summary": {
         "total_findings": 8,
-        "detected": 8,
-        "missed": 0,
-        "detection_rate": 100,
+        "detected": 6,
+        "missed": 2,
+        "detection_rate": 75,
         "false_positives": 0,
         "by_severity": {
           "medium": {
@@ -13644,10 +13916,13 @@
           },
           "low": {
             "total": 4,
-            "detected": 4
+            "detected": 2
           }
         },
-        "missed_findings": []
+        "missed_findings": [
+          "XCLONE_D-004: No input validation on title/body in createPost.",
+          "XCLONE_D-006: No input validation on title/body in createLike."
+        ]
       }
     }
   ],
@@ -13655,16 +13930,16 @@
     "projects_annotated": 100,
     "target_projects": 100,
     "total_findings": 795,
-    "progmune_detected": 783,
-    "progmune_missed": 12,
+    "progmune_detected": 600,
+    "progmune_missed": 195,
     "annotation_issues": 11,
     "out_of_scope": 1,
-    "genuine_fns": 0,
-    "overall_recall": 98.5,
+    "genuine_fns": 183,
+    "overall_recall": 75.5,
     "overall_precision": 100,
     "false_positive_rate": 0,
     "false_positives_total": 0,
-    "effective_recall_excluding_annotation": 100,
+    "effective_recall_excluding_annotation": 76.6,
     "note": "FP = detections factually wrong per code review: (1) session_fixation on logout functions that do invalidate; (2) Authorization (Ownership Check) on functions whose body contains an inline ownerId/authorId comparison. Factually-true detections not in the gold list are 'unlabeled' and excluded from precision — mirrors v5 annotation_issues handling. Matching is strict-localization: a finding counts as detected only when ITS function carries the corresponding rule; the handleRequest aggregator fallback applies only to functions absent from the scan."
   }
 }
