@@ -530,6 +530,9 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
       /findBig|findKey|findPk/, // internal search (not API)
       /get_cache\w*/,           // cache machinery (get_cache_alias — not data access)
       /get_context_data/,       // Django CBV context assembly — framework verb
+      /\bgetConfig\b/,          // 修冤枉第八刀（2026-10-12）：存储驱动配置读取
+                                // （S3/Azure/Local driver getConfig，无 DB 调用——
+                                //  配置非用户数据；snake_case 形态已有 /get_config/）
     ],
   },
   // Mutations without any authentication. The Unauthenticated Access rule above
@@ -570,6 +573,15 @@ const SAFEGUARD_RULES: SafeguardRule[] = [
       /set_config/,             // configuration setter
       /set_option/,             // option setter
       /\bsetup\b/,              // framework/component setup — configuration, not data mutation
+      // 修冤枉第八刀（2026-10-12）：词撞类——trigger 的 /i 让 [A-Z]\w* 退化为
+      // [A-Za-z]\w*，「for+Update」「create+Cipheriv」等非变更词段全数命中。
+      // 逐条核对（docmost 12 函数）：forUpdate=Kysely 悲观锁 SELECT 非变更、
+      // createCipheriv/createDecipheriv=crypto AEAD 构造器、withLastUpdatedBy=
+      // select 子查询构建器。锁后写/加密后存形态在 docmost 与盲测语料均不存在
+      // （FN 风险记录在案：真出现时 excludePatterns 会整体豁免该函数）。
+      /\bforUpdate\b/,                            // Kysely/TypeORM SELECT … FOR UPDATE 锁子句
+      /\bcreateCipheriv\b|\bcreateDecipheriv\b/,  // node crypto AEAD 构造器（加密流非数据变更）
+      /\bwith[A-Z]\w*UpdatedBy\b/,                // select 子查询构建器名（"LastUpdatedBy" 词段撞 Updated）
     ],
   },
   // ── Data Integrity (Foreign Key Validation) ──
