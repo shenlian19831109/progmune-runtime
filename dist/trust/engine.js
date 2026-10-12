@@ -1504,6 +1504,14 @@ async function collectProtocolViolations(ctx, callGraph) {
                 // ≤3 跳、歧义 fail-safe。豁免仅作用于 authorization 类规则
                 // 且函数自身不直接带标记（R5/R6）——标记而非静默丢弃。
                 const guardPropagated = (0, protocol_detector_1.computeGuardPropagatedSet)(functions);
+                // 修冤枉第七刀（2026-10-11）：队列作业调用方传播——「函数只被
+                // 作业/定时/事件处理器调用 ⇒ 无请求面」。B 判据（裸名并集，见
+                // computeJobSurfacePropagatedSet）：并集非空且全部已豁免才豁免，
+                // 默认 1 轮。豁免仅作用于 authorization 类且函数自身不直接带
+                // 标记（R5/R6）——与第五刀同：标记而非静默丢弃。
+                const jobSurfacePropagated = process.env.PROGMUNE_JOB_SURFACE_TOGGLE === "off"
+                    ? new Set()
+                    : (0, protocol_detector_1.computeJobSurfacePropagatedSet)(functions);
                 for (const f of functions) {
                     const fCalls = f.calls || [];
                     let svs;
@@ -1517,7 +1525,9 @@ async function collectProtocolViolations(ctx, callGraph) {
                         continue;
                     const params = (f.params || []).map((p) => ({ n: p.name, t: p.type || "" }));
                     const directlyMarked = fCalls.includes("__progmune_auth_machinery__");
+                    const directlyJobMarked = fCalls.includes("__progmune_no_request_surface__");
                     const guardExempt = !directlyMarked && guardPropagated.has(f.name);
+                    const jobExempt = !directlyJobMarked && jobSurfacePropagated.has(f.name);
                     for (const v of svs) {
                         const alert = {
                             rule: v.rule,
@@ -1527,13 +1537,22 @@ async function collectProtocolViolations(ctx, callGraph) {
                             nRules: svs.length,
                             params,
                         };
-                        if (guardExempt && v.category === "authorization") {
-                            alert.suppressedByGuardPropagation = true;
-                            safeguardAlertsSuppressed.push(alert);
+                        if (v.category === "authorization") {
+                            let suppressed = false;
+                            if (guardExempt) {
+                                alert.suppressedByGuardPropagation = true;
+                                suppressed = true;
+                            }
+                            if (jobExempt) {
+                                alert.suppressedByJobSurfacePropagation = true;
+                                suppressed = true;
+                            }
+                            if (suppressed) {
+                                safeguardAlertsSuppressed.push(alert);
+                                continue;
+                            }
                         }
-                        else {
-                            safeguardAlertsRaw.push(alert);
-                        }
+                        safeguardAlertsRaw.push(alert);
                     }
                 }
                 safeguardAlerts = {

@@ -15,6 +15,7 @@ exports.classifyParamType = classifyParamType;
 exports.detectSafeguardViolations = detectSafeguardViolations;
 exports.buildCallerMap = buildCallerMap;
 exports.computeGuardPropagatedSet = computeGuardPropagatedSet;
+exports.computeJobSurfacePropagatedSet = computeJobSurfacePropagatedSet;
 exports.detectSafeguardViolationsV7 = detectSafeguardViolationsV7;
 exports.detectProtocolViolations = detectProtocolViolations;
 exports.validateProtocolState = validateProtocolState;
@@ -1752,6 +1753,67 @@ function computeGuardPropagatedSet(funcs, opts) {
             guarded.add(n);
     }
     return guarded;
+}
+/**
+ * 修冤枉第七刀（2026-10-11）：队列作业调用方传播 ——「函数只被作业调用
+ * ⇒ 无请求面」。与 computeGuardPropagatedSet（第五刀）镜像，但判据不同：
+ *
+ * 第五刀对被调名做逐边分层消歧（后缀唯一→同文件→同目录→类根），歧义
+ * fail-safe 挂未解析边 ⇒ 任何歧义阻断豁免。而作业链（Processor→XxxService）
+ * 跨目录、类根不同名，分层消歧恒失败——docmost 实测第七刀若沿用该框架
+ * 只剩同文件层 4 条（预测压掉 4/600）。
+ *
+ * 本判据（B 判据）：调用方**裸名并集**——凡调用名裸化后等于 F 裸名的函数
+ * 都是「可能调用方」；并集非空且全部已豁免 ⇒ F 豁免。正确性：裸化只增
+ * 候选（限定形态调用名也被收进并集）⇒ 真实调用方必在并集中 ⇒ 并集全作业
+ * 蕴含真实调用方全作业（R75 正向证据）。歧义下比逐边消歧更保守：同名族
+ * 任一成员被非作业调用，整个裸名族都不豁免。
+ * 快照轮次语义与第五刀一致；默认 1 轮（只豁免直接作业下游；传递闭包
+ * docmost 实测 +16 条告警命中但豁免集从 120 膨胀到 173，留作数据驱动再开）。
+ */
+function computeJobSurfacePropagatedSet(funcs, opts) {
+    const marker = opts?.marker ?? "__progmune_no_request_surface__";
+    const maxHops = opts?.maxHops ?? 1;
+    const bySuffix = new Map();
+    for (const f of funcs) {
+        const bare = f.name.split(".").pop() || f.name;
+        if (!bySuffix.has(bare))
+            bySuffix.set(bare, []);
+        bySuffix.get(bare).push(f.name);
+    }
+    const callersByBare = new Map();
+    for (const f of funcs) {
+        for (const c of f.calls || []) {
+            const bareC = c.split(".").pop() || c; // 裸化：限定形态调用名也进并集（只增候选，保守方向）
+            if (!bySuffix.has(bareC))
+                continue; // 非项目函数名 → 无豁免语义
+            if (!callersByBare.has(bareC))
+                callersByBare.set(bareC, new Set());
+            callersByBare.get(bareC).add(f.name);
+        }
+    }
+    const exempt = new Set();
+    for (const f of funcs)
+        if ((f.calls || []).includes(marker))
+            exempt.add(f.name);
+    for (let round = 0; round < maxHops; round++) {
+        const toAdd = [];
+        for (const f of funcs) {
+            if (exempt.has(f.name))
+                continue;
+            const bare = f.name.split(".").pop() || f.name;
+            const callers = callersByBare.get(bare);
+            if (!callers || callers.size === 0)
+                continue; // 无调用方 → 不豁免
+            if ([...callers].every((c) => exempt.has(c)))
+                toAdd.push(f.name);
+        }
+        if (toAdd.length === 0)
+            break;
+        for (const n of toAdd)
+            exempt.add(n);
+    }
+    return exempt;
 }
 /**
  * v7: Build safeguard context — own → same-file → caller chain.
