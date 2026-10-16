@@ -1,5 +1,49 @@
 # Changelog
 
+## [3.7.68] — 2026-10-16
+
+### 调用方混合并集豁免（修冤枉第九刀）
+
+**根因**：第五刀（全部调用方已守卫）与第七刀（全部调用方是作业）
+各留下边界：① 守卫传播 ≤3 跳，第 4 跳的服务层函数（如
+ExportService.getWorkspaceBaseUrl）在守卫集外；② 第七刀 B 判据是
+**裸名族级**保守——同名族任一成员被 HTTP 面调用则全族不豁免，
+族内「只被作业调用」的成员（如 VerificationNotificationService.
+getPageContext，同为 getPageContext 裸名的 Page 族成员被 controller
+调用）被连坐照报。两者语义上都没有未鉴权请求面：每条到达 F 的
+路径要么已过守卫、要么源起作业处理器。
+
+- **判据（computeMixedSurfacePropagatedSet）**：函数 F 的每个直接
+  调用方都 ∈ {已守卫传播集} ∪ {作业面传播集} ⇒ 豁免。保守规则：
+  R1 调用方集合非空（HTTP 入口无项目调用方，永不豁免）；R2 每条
+  调用边必须可解析（与第五刀共享 computeResolvedCallerMap 分层消歧，
+  歧义 fail-safe）；R3 任一调用方在并集外 → 照报；R4 快照轮次语义，
+  默认 1 轮（传递闭包留数据驱动）；R5 返回集合只含并集新增成员
+- **引擎接线**：豁免仅 authorization 类、函数自身不直接带标记
+  （R5/R6）；被压告警进 `safeguardAlerts.suppressed` 带
+  `suppressedByMixedSurfacePropagation` 标记（标记而非丢弃，R9）；
+  `PROGMUNE_MIXED_SURFACE_TOGGLE=off` 逃生门
+- **同条件 A/B（docmost，各 fresh IR）**：主告警流 685→669
+  （−16 = Access 13 + Mutation 2 + Ownership 1，消失清单与离线重放
+  预测逐条一致、新增 0）；**control（toggle off）685/140 与 3.7.67
+  基线逐条一致**；主路径 violations 11=11 / score 84=84 /
+  NEEDS_REVIEW 不变；suppressed 140→156（156=117 守卫 +23 作业
+  +16 混合，669+156=825 证据守恒）
+- **FN 风险逐条复核**：16 条全核调用方来源——3 条守卫类
+  （@UseGuards(JwtAuthGuard) 导出路由 → export 工具函数，守卫传播
+  第 4 跳）；13 条作业类（@Processor 队列 → 通知/历史服务方法 →
+  下游 getter/写入，B 判据族级连坐的成员）。TP 0
+- **C4/C5 主力类探针结论（knife9-mixed-surface-probe）**：
+  repo-update 类 137 / getter 类 213 中，无调用方（HTTP 入口）62/92、
+  歧义边 50/70、并集外调用方 23/42——「公开设计端点/可达但非
+  鉴权敏感」是语义问题，调用方面传播已到边界（守卫深度敏感性：
+  maxDepth 3→6 仅 +6 条）
+- **回归锁定**：单测 11 例（protocol-detector-mixed-surface.test.ts，
+  含与第七刀族级保守的差异用例）+ 引擎产品路径 2 + 检测器族
+  199/199 + 引擎 239/239；三闸门（taintpath 160 / webshape 72 /
+  fr-007 pre5-post0 + fr-016 pre7-post0）；**TS 盲测 119 项目对
+  3.7.67 提交基线 LOST 0 / ADDED 0**
+
 ## [3.7.67] — 2026-10-12
 
 ### 词撞类豁免（修冤枉第八刀：mutation/access trigger 词段碰撞）
