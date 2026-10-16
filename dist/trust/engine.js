@@ -1512,6 +1512,14 @@ async function collectProtocolViolations(ctx, callGraph) {
                 const jobSurfacePropagated = process.env.PROGMUNE_JOB_SURFACE_TOGGLE === "off"
                     ? new Set()
                     : (0, protocol_detector_1.computeJobSurfacePropagatedSet)(functions);
+                // 修冤枉第九刀（2026-10-16）：调用方混合并集豁免——「每个直接
+                // 调用方都 ∈ {已守卫传播集} ∪ {作业面传播集}」⇒ 无未鉴权请求面。
+                // 保守判据见 computeMixedSurfacePropagatedSet（R1-R5）：调用方
+                // 非空、边全解析、默认 1 轮。豁免仅作用于 authorization 类且
+                // 函数自身不直接带标记（R5/R6）——与第五/七刀同：标记而非丢弃。
+                const mixedSurfacePropagated = process.env.PROGMUNE_MIXED_SURFACE_TOGGLE === "off"
+                    ? new Set()
+                    : (0, protocol_detector_1.computeMixedSurfacePropagatedSet)(functions, guardPropagated, jobSurfacePropagated);
                 for (const f of functions) {
                     const fCalls = f.calls || [];
                     let svs;
@@ -1528,6 +1536,7 @@ async function collectProtocolViolations(ctx, callGraph) {
                     const directlyJobMarked = fCalls.includes("__progmune_no_request_surface__");
                     const guardExempt = !directlyMarked && guardPropagated.has(f.name);
                     const jobExempt = !directlyJobMarked && jobSurfacePropagated.has(f.name);
+                    const mixedExempt = !directlyMarked && !directlyJobMarked && mixedSurfacePropagated.has(f.name);
                     for (const v of svs) {
                         const alert = {
                             rule: v.rule,
@@ -1545,6 +1554,10 @@ async function collectProtocolViolations(ctx, callGraph) {
                             }
                             if (jobExempt) {
                                 alert.suppressedByJobSurfacePropagation = true;
+                                suppressed = true;
+                            }
+                            if (mixedExempt) {
+                                alert.suppressedByMixedSurfacePropagation = true;
                                 suppressed = true;
                             }
                             if (suppressed) {
