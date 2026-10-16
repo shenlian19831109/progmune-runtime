@@ -84,7 +84,7 @@ import {
 import type { SSGValidationResult } from "./ssg-bridge";
 import { buildCallSequences, collectProjectFunctionNames } from "../call-sequence";
 import type { CallSequence } from "../call-sequence";
-import { detectSafeguardViolations, computeGuardPropagatedSet, computeJobSurfacePropagatedSet } from "../protocol-detector";
+import { detectSafeguardViolations, computeGuardPropagatedSet, computeJobSurfacePropagatedSet, computeMixedSurfacePropagatedSet } from "../protocol-detector";
 import type { SafeguardViolation } from "../protocol-detector";
 import { rankAlerts, groupAlerts } from "./alert-ranker";
 import type { RankableAlert, Ranked } from "./alert-ranker";
@@ -1747,6 +1747,15 @@ async function collectProtocolViolations(
           process.env.PROGMUNE_JOB_SURFACE_TOGGLE === "off"
             ? new Set<string>()
             : computeJobSurfacePropagatedSet(functions);
+        // 修冤枉第九刀（2026-10-16）：调用方混合并集豁免——「每个直接
+        // 调用方都 ∈ {已守卫传播集} ∪ {作业面传播集}」⇒ 无未鉴权请求面。
+        // 保守判据见 computeMixedSurfacePropagatedSet（R1-R5）：调用方
+        // 非空、边全解析、默认 1 轮。豁免仅作用于 authorization 类且
+        // 函数自身不直接带标记（R5/R6）——与第五/七刀同：标记而非丢弃。
+        const mixedSurfacePropagated =
+          process.env.PROGMUNE_MIXED_SURFACE_TOGGLE === "off"
+            ? new Set<string>()
+            : computeMixedSurfacePropagatedSet(functions, guardPropagated, jobSurfacePropagated);
         for (const f of functions) {
           const fCalls = f.calls || [];
           let svs: SafeguardViolation[];
@@ -1768,6 +1777,7 @@ async function collectProtocolViolations(
           const directlyJobMarked = fCalls.includes("__progmune_no_request_surface__");
           const guardExempt = !directlyMarked && guardPropagated.has(f.name);
           const jobExempt = !directlyJobMarked && jobSurfacePropagated.has(f.name);
+          const mixedExempt = !directlyMarked && !directlyJobMarked && mixedSurfacePropagated.has(f.name);
           for (const v of svs) {
             const alert: RankableAlert = {
               rule: v.rule,
@@ -1785,6 +1795,10 @@ async function collectProtocolViolations(
               }
               if (jobExempt) {
                 alert.suppressedByJobSurfacePropagation = true;
+                suppressed = true;
+              }
+              if (mixedExempt) {
+                alert.suppressedByMixedSurfacePropagation = true;
                 suppressed = true;
               }
               if (suppressed) {
