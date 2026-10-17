@@ -1520,6 +1520,21 @@ async function collectProtocolViolations(ctx, callGraph) {
                 const mixedSurfacePropagated = process.env.PROGMUNE_MIXED_SURFACE_TOGGLE === "off"
                     ? new Set()
                     : (0, protocol_detector_1.computeMixedSurfacePropagatedSet)(functions, guardPropagated, jobSurfacePropagated);
+                // 修冤枉第十刀（2026-10-16）：公开表面传播豁免——「每个直接
+                // 调用方都 ∈ {公开面} ∪ {已守卫} ∪ {作业面}」⇒ 无未鉴权请求面
+                // （公开=开发者显式声明，见 computePublicSurfacePropagatedSet
+                // R1-R5）。直接公开标记函数的告警由规则侧 safeguard 接受标记
+                // 消除（与第六刀同架构）；本传播只覆盖下游。并集含守卫∪作业
+                // ⇒ 是第九刀超集——消费顺序 guard→job→mixed→public，已豁免
+                // 的告警不重复挂 public 标记。
+                const publicMarked = new Set();
+                for (const f of functions) {
+                    if ((f.calls || []).includes("__progmune_public_surface__"))
+                        publicMarked.add(f.name);
+                }
+                const publicSurfacePropagated = process.env.PROGMUNE_PUBLIC_SURFACE_TOGGLE === "off"
+                    ? new Set()
+                    : (0, protocol_detector_1.computePublicSurfacePropagatedSet)(functions, publicMarked, guardPropagated, jobSurfacePropagated);
                 for (const f of functions) {
                     const fCalls = f.calls || [];
                     let svs;
@@ -1534,9 +1549,11 @@ async function collectProtocolViolations(ctx, callGraph) {
                     const params = (f.params || []).map((p) => ({ n: p.name, t: p.type || "" }));
                     const directlyMarked = fCalls.includes("__progmune_auth_machinery__");
                     const directlyJobMarked = fCalls.includes("__progmune_no_request_surface__");
+                    const directlyPublicMarked = fCalls.includes("__progmune_public_surface__");
                     const guardExempt = !directlyMarked && guardPropagated.has(f.name);
                     const jobExempt = !directlyJobMarked && jobSurfacePropagated.has(f.name);
                     const mixedExempt = !directlyMarked && !directlyJobMarked && mixedSurfacePropagated.has(f.name);
+                    const publicExempt = !directlyPublicMarked && publicSurfacePropagated.has(f.name);
                     for (const v of svs) {
                         const alert = {
                             rule: v.rule,
@@ -1558,6 +1575,10 @@ async function collectProtocolViolations(ctx, callGraph) {
                             }
                             if (mixedExempt) {
                                 alert.suppressedByMixedSurfacePropagation = true;
+                                suppressed = true;
+                            }
+                            if (!suppressed && publicExempt) {
+                                alert.suppressedByPublicSurfacePropagation = true;
                                 suppressed = true;
                             }
                             if (suppressed) {
