@@ -517,6 +517,46 @@ function noRequestSurfaceFromDecorators(decorators: any[]): string[] {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// 修冤枉第十刀（2026-10-16）：公开设计端点 → 公开面标记
+//
+// 数据：docmost 15 个 @Public() 方法自身 17 条授权族告警 + 下游
+// 纯公开可达 10 条（knife10-public-surface-probe.ts 量化）——公开是
+// 开发者显式声明（正向证据，R75），授权族「缺鉴权」提问不适用。
+//
+// 语义与 E2（auth_machinery）相反：E2 是「有鉴权」，本标记是
+// 「鉴权问题不适用」（与第六刀 no_request_surface 同族，但面向
+// 请求面——公开端点是请求面，只是免鉴权）。
+//
+// 注入名只收三个 NestJS 惯例装饰器：Public / SkipAuth / AllowAnonymous。
+// 与 AUTH_SKIP_DECORATOR（E2 的 skip 方向）不对称是**故意的**：
+//   skip 方向多收（IsPublic/NoAuth/ApiExcludeEndpoint）是防「把公开
+//   端点判成有鉴权」的假阴性；注入方向少收是防「把受限端点判成
+//   公开」的假阴性——两个方向的错判都是假阴性，都必须保守。
+// @ApiExcludeEndpoint 是 Swagger 文档语义，绝不注入。
+// ═══════════════════════════════════════════════════════════════
+const PUBLIC_SURFACE_MARKER = "__progmune_public_surface__";
+/** 显式公开装饰器 —— 出现即注入公开面标记（NestJS 惯例） */
+const PUBLIC_SURFACE_DECORATOR = /^(?:Public|SkipAuth|AllowAnonymous)$/i;
+
+/**
+ * 由类/方法装饰器判定是否注入公开面标记（与 E2/第六刀同款文本匹配）。
+ * @returns [] 或 [PUBLIC_SURFACE_MARKER]
+ */
+function publicSurfaceFromDecorators(decorators: any[]): string[] {
+  let publicSurface = false;
+  for (const d of decorators) {
+    const text = (d?.getText?.() ?? "").trim();
+    const name = /^@([A-Za-z_$][\w$]*)/.exec(text)?.[1];
+    if (!name) continue;
+    if (PUBLIC_SURFACE_DECORATOR.test(name)) {
+      publicSurface = true;
+      break;
+    }
+  }
+  return publicSurface ? [PUBLIC_SURFACE_MARKER] : [];
+}
+
+// ═══════════════════════════════════════════════════════════════
 // E3（2026-09-22）：TS 侧「入参已按 schema 校验」语义标记
 //
 // 判据（先抄准再写 expect，R22）：
@@ -3344,6 +3384,14 @@ function _extractSingleProject(
         // 修冤枉第六刀：队列/定时/事件处理器 → 无请求面标记（与 E2 并列，
         // 语义相反——E2 是「有鉴权」，本标记是「鉴权问题不适用」）
         for (const mk of noRequestSurfaceFromDecorators([
+          ...(cls.getDecorators?.() ?? []),
+          ...(m.getDecorators?.() ?? []),
+        ])) {
+          if (!mCalls.includes(mk)) mCalls.push(mk);
+        }
+        // 修冤枉第十刀：@Public()/@SkipAuth()/@AllowAnonymous → 公开面标记
+        // （与 E2/第六刀并列；类级公开装饰器作用于全部方法）
+        for (const mk of publicSurfaceFromDecorators([
           ...(cls.getDecorators?.() ?? []),
           ...(m.getDecorators?.() ?? []),
         ])) {

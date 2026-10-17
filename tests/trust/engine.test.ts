@@ -758,3 +758,87 @@ export class PageService {
     expect(supp.some((x: any) => x.function === "PageService.getPageData")).toBe(false);
   }, 150_000);
 });
+
+// ═══════════════════════════════════════════════════════════════
+// 修冤枉第十刀（2026-10-16）：公开表面传播豁免（产品路径锁定）
+//
+// 判据：函数 F 的每个直接调用方都 ∈ {公开面} ∪ {已守卫} ∪ {作业面}
+// ⇒ F 无未鉴权请求面 ⇒ 授权族告警进 suppressed 清单（不进主计数），
+// 带 suppressedByPublicSurfacePropagation 标记可复核；公开标记自身的
+// 告警由规则侧 safeguard 接受消除（第六刀同架构，不进 suppressed）。
+// 语义：公开=开发者显式声明（@Public 装饰器），传播豁免只分桶不丢弃（R9）。
+// ═══════════════════════════════════════════════════════════════
+
+describe("evaluateTrust：公开表面传播豁免（修冤枉第十刀）", () => {
+  const TS_SOURCE = (publicController: boolean) => `
+declare const Public: any;
+declare const Controller: any;
+declare const UseGuards: any;
+declare class JwtAuthGuard {}
+${publicController ? "@Public()" : ""}
+@Controller("share")
+export class ShareController {
+  getShare() { return this.shareService.getShareTree(); }
+}
+@UseGuards(JwtAuthGuard)
+@Controller("pages")
+export class PageController {
+  getPage() { return this.shareService.getShareTree(); }
+}
+export class ShareService {
+  getShareTree() { return "x"; }
+}
+`;
+
+  async function runWith(source: string) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-engine-public-"));
+    try {
+      fs.writeFileSync(path.join(dir, "app.ts"), source);
+      fs.writeFileSync(
+        path.join(dir, "tsconfig.json"),
+        JSON.stringify({ compilerOptions: { target: "ES2020", module: "commonjs", strict: false, skipLibCheck: true, noEmit: true }, include: ["**/*.ts"] })
+      );
+      return await evaluateTrust({
+        projectPath: dir,
+        projectName: "public-surface-propagation-test",
+        commit: "test",
+        language: "typescript",
+      });
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it("公开 controller + 已守卫 controller 共同调用的 service 告警进 suppressed，不进主计数", async () => {
+    const r = await runWith(TS_SOURCE(true));
+    const sa = r.overall.safeguardAlerts;
+    expect(sa).toBeDefined();
+    const supp = sa!.suppressed || [];
+    const hit = supp.find(
+      (x: any) => x.function === "ShareService.getShareTree" &&
+        x.rule === "Authorization (Unauthenticated Access)"
+    );
+    expect(hit).toBeDefined();
+    expect(hit!.suppressedByPublicSurfacePropagation).toBe(true);
+    // 不进主计数：topRanked/groups/total 都不含该函数
+    expect(sa!.topRanked.some((x: any) => x.alert.function === "ShareService.getShareTree")).toBe(false);
+    expect(sa!.groups.every((g: any) => g.alerts.every((x: any) => x.alert.function !== "ShareService.getShareTree"))).toBe(true);
+    expect(sa!.total).toBe(sa!.topRanked.length);
+    // 公开标记自身的告警由规则侧接受消除：不进 suppressed 也不进主计数
+    expect(supp.some((x: any) => x.function === "ShareController.getShare")).toBe(false);
+    expect(sa!.topRanked.some((x: any) => x.alert.function === "ShareController.getShare")).toBe(false);
+  }, 150_000);
+
+  it("对照组（调用方含无公开标记的未守卫 controller）同函数照常进主告警流", async () => {
+    const r = await runWith(TS_SOURCE(false));
+    const sa = r.overall.safeguardAlerts;
+    expect(sa).toBeDefined();
+    const hit = sa!.topRanked.find(
+      (x: any) => x.alert.function === "ShareService.getShareTree" &&
+        x.alert.rule === "Authorization (Unauthenticated Access)"
+    );
+    expect(hit).toBeDefined();
+    const supp = sa!.suppressed || [];
+    expect(supp.some((x: any) => x.function === "ShareService.getShareTree")).toBe(false);
+  }, 150_000);
+});
