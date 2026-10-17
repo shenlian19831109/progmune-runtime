@@ -1,5 +1,47 @@
 # Changelog
 
+## [3.7.69] — 2026-10-17
+
+### 公开表面传播豁免（修冤枉第十刀）
+
+**根因**：@Public()/@SkipAuth()/@AllowAnonymous 是开发者**显式声明**
+免鉴权（正向证据，R75），但提取器只在 E2 的 skip 方向认识它们
+（「不注入鉴权标记」）——授权族规则照旧提问「缺鉴权」，公开端点
+自身（docmost 15 个 @Public 方法 17 条告警）与纯公开下游（10 条）
+全数误报。与第六刀（无请求面）同族，差在面向请求面——公开端点
+是请求面，只是免鉴权。
+
+- **提取器**：类级/方法级 @Public/@SkipAuth/@AllowAnonymous ⇒ 注入
+  `__progmune_public_surface__`（与 E2/第六刀并列；类级作用于全方法）。
+  ⚠ 注入名只收三个 NestJS 惯例装饰器，与 E2 的 AUTH_SKIP_DECORATOR
+  **不对称是故意的**：skip 方向多收（IsPublic/NoAuth/ApiExcludeEndpoint）
+  是防「公开判成有鉴权」，注入方向少收是防「受限判成公开」——两个
+  方向的错判都是假阴性；@ApiExcludeEndpoint 是 Swagger 文档语义，
+  绝不注入
+- **规则侧（Part A，第六刀同架构）**：授权族四条（Access/Mutation/
+  Ownership/Resource Ownership）safeguard 接受标记——公开端点自身的
+  告警直接消除（标记本身就是证据，与 no_request_surface 并列）
+- **传播（Part B）**：computePublicSurfacePropagatedSet——F 的每个
+  直接调用方 ∈ {公开面} ∪ {已守卫} ∪ {作业面} ⇒ 豁免；R1 调用方非空
+  / R2 边全解析 / R3 并集外照报 / R4 默认 1 轮 / R5 返回只含新增成员。
+  引擎侧 suppressed 带 `suppressedByPublicSurfacePropagation` 标记（R9），
+  `PROGMUNE_PUBLIC_SURFACE_TOGGLE=off` 逃生门；并集含守卫∪作业 ⇒ 是
+  第九刀超集，消费顺序 guard→job→mixed→public 保证不重复挂标记
+- **三向 A/B（docmost，各 fresh IR）**：①control（传播关）vs 3.7.68
+  基线 = **精确 −17 条 Part A**（全落 12 个 @Public 方法，新增 0，
+  suppressed 156=156 不变）；②pre vs control = **精确 −10 条 Part B**
+  （全带 public 标记，suppressed 156→166）；③主路径 violations
+  11=11 / score 84=84 三臂一致。告警流累计 992→…→685→669→**642**
+- **FN 风险逐条复核**：10 条传播候选全核调用方——搜索/分享/公开空间
+  服务只被 @UseGuards(JwtAuthGuard) 类级守卫路由或 @Public 路由调用
+  （search.controller.ts 类级守卫 + 方法级 @Public 并存形态），TP 0；
+  公开端点自身由装饰器显式声明
+- **回归锁定**：提取器 5 例 + 规则侧 5 例 + 传播 10 例 + 引擎产品
+  路径 2；全量 541/541（首跑 1 失败为 worker 超时环境噪音，复跑全绿）；
+  三闸门（taintpath 160 / webshape 72 / fr-007 pre5-post0 + fr-016
+  pre7-post0）；TS 盲测 119 项目 LOST 0/ADDED 0（generated 语料无
+  @Public 形状，零漂移由构造保证 R23 家族）
+
 ## [3.7.68] — 2026-10-16
 
 ### 调用方混合并集豁免（修冤枉第九刀）
