@@ -1090,6 +1090,25 @@
       "result_reason": "可点亮——身份锚点归属（授权校验的锚点应来自服务端配置而非请求输入）",
       "result_note": "扁平单文件语料；1 个真值文件在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。",
       "verdict_date": "2026-10-06"
+    },
+    {
+      "id": "fr-018",
+      "repo": "Flux159/mcp-server-kubernetes",
+      "lang": "typescript",
+      "ghsa": "GHSA-cr22-wjx7-2w6m",
+      "cve": "CVE-2026-46519",
+      "type": "mcp_tool_auth_filter_list_only",
+      "summary": "MCP 工具访问控制绕过：ALLOW_ONLY_READONLY_TOOLS/ALLOW_ONLY_NON_DESTRUCTIVE_TOOLS/ALLOWED_TOOLS 只在 tools/list handler 强制（presentation-layer filtering），tools/call handler 不做任何过滤（execution layer 无强制）——任何知道工具名的客户端可直接调用 kubectl_delete/exec_in_pod/kubectl_generic。MCP_AUTH_TOKEN 只控端点访问、无每工具授权。",
+      "fix_commit": "16579d431157350f03682aabc30d7f6ae708724b",
+      "parent_commit": "74cd11ce859de0722a28392144f4f6680d3f32a7",
+      "severity": "high",
+      "patched_version": "3.6.0",
+      "ground_truth_files": [
+        "src/index.ts"
+      ],
+      "ground_truth_note": "修复 = 提取模块级共享判据 isToolAllowed(name)（ALLOWED_TOOLS 显式白名单 → ALLOW_ONLY_READONLY → NON_DESTRUCTIVE 三分支），tools/list 与 tools/call 同源过滤；call handler 内加 if (!isToolAllowed(name)) throw McpError。漏洞形态 = **执行层授权缺席型**（F1(b) 家族）：列表层过滤逻辑存在（正向证据），call 层同文件缺席——与 fr-013 关闭时留的「MCP 缺席型判据方向」同族。",
+      "sha_verified": "2026-10-18（api.github.com 实测：tag v3.6.0 = 16579d43 merge commit，parent 74cd11ce；diff = src/index.ts +26/-15 + 新测试）",
+      "result": "MISS（2026-10-18 基线）：pre 扫描 0 violations / 0 safeguard 告警 / APPROVED(90)——引擎对真值位置完全失明。根因 = MCP 执行层授权缺席判据未实现：call handler 是 setRequestHandler(CallToolRequestSchema, withTelemetry(async...)) 嵌套回调，不在 IR 条目里；「列表层有过滤、执行层无」的跨 handler 对比判据超出当前名字级+函数级标记通道。能力实现候选：提取器识别 CallToolRequestSchema handler 函数体 + 文件级列表层过滤正向证据 + 函数体缺席判据（fr-002/003 的 AST 全量函数体缺席判据同款方法学，但挂点需 MCP handler 合成条目或文件级通道）。"
     }
   ]
 }
