@@ -1535,6 +1535,21 @@ async function collectProtocolViolations(ctx, callGraph) {
                 const publicSurfacePropagated = process.env.PROGMUNE_PUBLIC_SURFACE_TOGGLE === "off"
                     ? new Set()
                     : (0, protocol_detector_1.computePublicSurfacePropagatedSet)(functions, publicMarked, guardPropagated, jobSurfacePropagated);
+                // 修冤枉第十一刀（2026-10-17）：裸名族兜底传播——逐边消歧失败
+                // 的函数用 B 判据族级保守形态兜底：裸名族调用方并集全 ⊆ base
+                // （公开∪守卫∪作业∪既有传播）⇒ 全族豁免。正确性：裸化只增候选
+                // ⇒ 真实调用方必在并集中（不需要边解析，最坏归因也在并集内）。
+                // 比逐边消歧更保守：族内任一成员被并集外调用则全族不豁免。
+                // 默认 1 轮；豁免仅 authorization 类且不作用于直接标记函数。
+                const bareFamilyPropagated = process.env.PROGMUNE_BARE_FAMILY_TOGGLE === "off"
+                    ? new Set()
+                    : (0, protocol_detector_1.computeBareFamilyPropagatedSet)(functions, new Set([
+                        ...publicMarked,
+                        ...guardPropagated,
+                        ...jobSurfacePropagated,
+                        ...mixedSurfacePropagated,
+                        ...publicSurfacePropagated,
+                    ]));
                 for (const f of functions) {
                     const fCalls = f.calls || [];
                     let svs;
@@ -1554,6 +1569,7 @@ async function collectProtocolViolations(ctx, callGraph) {
                     const jobExempt = !directlyJobMarked && jobSurfacePropagated.has(f.name);
                     const mixedExempt = !directlyMarked && !directlyJobMarked && mixedSurfacePropagated.has(f.name);
                     const publicExempt = !directlyPublicMarked && publicSurfacePropagated.has(f.name);
+                    const familyExempt = !directlyMarked && !directlyJobMarked && !directlyPublicMarked && bareFamilyPropagated.has(f.name);
                     for (const v of svs) {
                         const alert = {
                             rule: v.rule,
@@ -1579,6 +1595,10 @@ async function collectProtocolViolations(ctx, callGraph) {
                             }
                             if (!suppressed && publicExempt) {
                                 alert.suppressedByPublicSurfacePropagation = true;
+                                suppressed = true;
+                            }
+                            if (!suppressed && familyExempt) {
+                                alert.suppressedByBareFamilyPropagation = true;
                                 suppressed = true;
                             }
                             if (suppressed) {

@@ -17,6 +17,7 @@ exports.buildCallerMap = buildCallerMap;
 exports.computeResolvedCallerMap = computeResolvedCallerMap;
 exports.computeGuardPropagatedSet = computeGuardPropagatedSet;
 exports.computeJobSurfacePropagatedSet = computeJobSurfacePropagatedSet;
+exports.computeBareFamilyPropagatedSet = computeBareFamilyPropagatedSet;
 exports.computeMixedSurfacePropagatedSet = computeMixedSurfacePropagatedSet;
 exports.computePublicSurfacePropagatedSet = computePublicSurfacePropagatedSet;
 exports.detectSafeguardViolationsV7 = detectSafeguardViolationsV7;
@@ -1798,6 +1799,27 @@ function computeGuardPropagatedSet(funcs, opts) {
 function computeJobSurfacePropagatedSet(funcs, opts) {
     const marker = opts?.marker ?? "__progmune_no_request_surface__";
     const maxHops = opts?.maxHops ?? 1;
+    // 种子：直接带标记的函数（含种子的返回语义由消费方 R6 过滤）
+    const seeds = new Set();
+    for (const f of funcs)
+        if ((f.calls || []).includes(marker))
+            seeds.add(f.name);
+    return computeBareFamilyPropagatedSet(funcs, seeds, { maxRounds: maxHops, includeBase: true });
+}
+/**
+ * 裸名族兜底传播内核（B 判据）：裸名族调用方并集全 ⊆ base ⇒ 族内
+ * 每个成员豁免。正确性（R75 正向证据）：裸化只增候选 ⇒ 真实调用方
+ * 必在并集中 ⇒ 并集全豁免蕴含真实调用方全豁免——**不需要边解析**，
+ * 即使最坏归因（每个族成员都被每个调用方调用）也落在并集内。
+ * 比逐边消歧更保守：族内任一成员被并集外调用则全族不豁免。
+ *
+ * 第七刀（computeJobSurfacePropagatedSet）与第十一刀共用本内核；
+ * 默认返回只含 base 新增成员（includeBase=false），第七刀保留
+ * 「含种子」的历史语义（消费方 R6 过滤）故传 includeBase=true。
+ * 快照轮次语义；无调用方的函数不豁免。
+ */
+function computeBareFamilyPropagatedSet(funcs, base, opts) {
+    const maxRounds = opts?.maxRounds ?? 1;
     const bySuffix = new Map();
     for (const f of funcs) {
         const bare = f.name.split(".").pop() || f.name;
@@ -1816,11 +1838,9 @@ function computeJobSurfacePropagatedSet(funcs, opts) {
             callersByBare.get(bareC).add(f.name);
         }
     }
-    const exempt = new Set();
-    for (const f of funcs)
-        if ((f.calls || []).includes(marker))
-            exempt.add(f.name);
-    for (let round = 0; round < maxHops; round++) {
+    const exempt = new Set(base);
+    const added = new Set();
+    for (let round = 0; round < maxRounds; round++) {
         const toAdd = [];
         for (const f of funcs) {
             if (exempt.has(f.name))
@@ -1834,10 +1854,12 @@ function computeJobSurfacePropagatedSet(funcs, opts) {
         }
         if (toAdd.length === 0)
             break;
-        for (const n of toAdd)
+        for (const n of toAdd) {
             exempt.add(n);
+            added.add(n);
+        }
     }
-    return exempt;
+    return opts?.includeBase ? exempt : added;
 }
 /**
  * 修冤枉第九刀（2026-10-16）：调用方混合并集豁免——
