@@ -1109,6 +1109,26 @@
       "ground_truth_note": "修复 = 提取模块级共享判据 isToolAllowed(name)（ALLOWED_TOOLS 显式白名单 → ALLOW_ONLY_READONLY → NON_DESTRUCTIVE 三分支），tools/list 与 tools/call 同源过滤；call handler 内加 if (!isToolAllowed(name)) throw McpError。漏洞形态 = **执行层授权缺席型**（F1(b) 家族）：列表层过滤逻辑存在（正向证据），call 层同文件缺席——与 fr-013 关闭时留的「MCP 缺席型判据方向」同族。",
       "sha_verified": "2026-10-18（api.github.com 实测：tag v3.6.0 = 16579d43 merge commit，parent 74cd11ce；diff = src/index.ts +26/-15 + 新测试）",
       "result": "MISS（2026-10-18 基线）：pre 扫描 0 violations / 0 safeguard 告警 / APPROVED(90)——引擎对真值位置完全失明。根因 = MCP 执行层授权缺席判据未实现：call handler 是 setRequestHandler(CallToolRequestSchema, withTelemetry(async...)) 嵌套回调，不在 IR 条目里；「列表层有过滤、执行层无」的跨 handler 对比判据超出当前名字级+函数级标记通道。能力实现候选：提取器识别 CallToolRequestSchema handler 函数体 + 文件级列表层过滤正向证据 + 函数体缺席判据（fr-002/003 的 AST 全量函数体缺席判据同款方法学，但挂点需 MCP handler 合成条目或文件级通道）。"
+    },
+    {
+      "id": "fr-019",
+      "repo": "MervinPraison/PraisonAI",
+      "lang": "python",
+      "ghsa": "GHSA-9CR9-25Q5-8PRJ",
+      "cve": "CVE-2026-47394",
+      "type": "mcp_tool_arg_taint_missing_containment",
+      "summary": "MCP 工具任意文件读（CVE-2026-44336 修复不完整）：praisonai.workflow.show 接受 MCP tools/call 的 file_path 实参直接 open() 读取——无 containment 检查，未认证调用可读 /etc/passwd、~/.ssh/id_rsa、~/.aws/credentials。workflow.validate 与 deploy.validate 同形态；dispatcher（server.py _handle_tools_call）接受未校验 **kwargs 不强制 input_schema（根因层）。修复：_resolve_cwd_yaml_path()（cwd 锚定 + candidate 解析 + 校验）应用于 workflow_show/validate。",
+      "fix_commit": "179cab02dbec0c1e9b601507a65908e079876004",
+      "parent_commit": "402d7ed9fc5926babaa70c97a6ee5353e3d0dd62",
+      "severity": "high",
+      "patched_version": "4.6.40",
+      "ground_truth_files": [
+        "src/praisonai/praisonai/mcp_server/adapters/cli_tools.py",
+        "src/praisonai/praisonai/mcp_server/server.py"
+      ],
+      "ground_truth_note": "advisory 点名 workflow.show（cli_tools.py:63-73）/workflow.validate（42-61）/deploy.validate（415-432）+ dispatcher（server.py:281-298 **kwargs 无 schema 强制）。fix commit 179cab02 = PR #1684 batch-10 hardening（19 文件综合批次，含 SSRF/RBAC 无关修复——真值文件清单只取 advisory 点名两文件，如实记录）；parent 402d7ed9 = v4.6.39 tag（干净单亲，api.github.com 实测）。",
+      "sha_verified": "2026-10-18（api.github.com 实测：v4.6.40 tag = a72e156c（纯版本 bump）→ 真修复 = 179cab02（PR #1684，parent 402d7ed9 = v4.6.39）——教训复现：release tag 本身不是修复 commit）",
+      "result": "MISS（2026-10-18 基线）：pre mini 语料（2 真值文件）扫描 0 violations / APPROVED(85) / safeguard 137 条但无路径穿越类命中——workflow_show 真值位置失明。根因 = **Python 侧 MCP 工具实参污点根缺口**（fr-012 同族：污点源词汇表缺口）——@register_tool 装饰器函数的 file_path 形参不是已知污点根，open() sink 无 containment 校验不可见。能力实现候选：extract_ir.py 识别 @register_tool 工具函数的路径类形参为污点根（TS 侧 C 系列 UNTRUSTED_ROOTS MCP 实参根已建 3.7.33，Python 镜像）+ containment 校验识别（_resolve_cwd_yaml_path 类 = G-A/G-B 守卫家族）。"
     }
   ]
 }
