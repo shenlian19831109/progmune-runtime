@@ -84,7 +84,7 @@ import {
 import type { SSGValidationResult } from "./ssg-bridge";
 import { buildCallSequences, collectProjectFunctionNames } from "../call-sequence";
 import type { CallSequence } from "../call-sequence";
-import { detectSafeguardViolations, computeGuardPropagatedSet, computeJobSurfacePropagatedSet, computeMixedSurfacePropagatedSet, computePublicSurfacePropagatedSet } from "../protocol-detector";
+import { detectSafeguardViolations, computeGuardPropagatedSet, computeJobSurfacePropagatedSet, computeMixedSurfacePropagatedSet, computePublicSurfacePropagatedSet, computeBareFamilyPropagatedSet } from "../protocol-detector";
 import type { SafeguardViolation } from "../protocol-detector";
 import { rankAlerts, groupAlerts } from "./alert-ranker";
 import type { RankableAlert, Ranked } from "./alert-ranker";
@@ -1771,6 +1771,25 @@ async function collectProtocolViolations(
           process.env.PROGMUNE_PUBLIC_SURFACE_TOGGLE === "off"
             ? new Set<string>()
             : computePublicSurfacePropagatedSet(functions, publicMarked, guardPropagated, jobSurfacePropagated);
+        // 修冤枉第十一刀（2026-10-17）：裸名族兜底传播——逐边消歧失败
+        // 的函数用 B 判据族级保守形态兜底：裸名族调用方并集全 ⊆ base
+        // （公开∪守卫∪作业∪既有传播）⇒ 全族豁免。正确性：裸化只增候选
+        // ⇒ 真实调用方必在并集中（不需要边解析，最坏归因也在并集内）。
+        // 比逐边消歧更保守：族内任一成员被并集外调用则全族不豁免。
+        // 默认 1 轮；豁免仅 authorization 类且不作用于直接标记函数。
+        const bareFamilyPropagated =
+          process.env.PROGMUNE_BARE_FAMILY_TOGGLE === "off"
+            ? new Set<string>()
+            : computeBareFamilyPropagatedSet(
+                functions,
+                new Set([
+                  ...publicMarked,
+                  ...guardPropagated,
+                  ...jobSurfacePropagated,
+                  ...mixedSurfacePropagated,
+                  ...publicSurfacePropagated,
+                ])
+              );
         for (const f of functions) {
           const fCalls = f.calls || [];
           let svs: SafeguardViolation[];
@@ -1795,6 +1814,7 @@ async function collectProtocolViolations(
           const jobExempt = !directlyJobMarked && jobSurfacePropagated.has(f.name);
           const mixedExempt = !directlyMarked && !directlyJobMarked && mixedSurfacePropagated.has(f.name);
           const publicExempt = !directlyPublicMarked && publicSurfacePropagated.has(f.name);
+          const familyExempt = !directlyMarked && !directlyJobMarked && !directlyPublicMarked && bareFamilyPropagated.has(f.name);
           for (const v of svs) {
             const alert: RankableAlert = {
               rule: v.rule,
@@ -1820,6 +1840,10 @@ async function collectProtocolViolations(
               }
               if (!suppressed && publicExempt) {
                 alert.suppressedByPublicSurfacePropagation = true;
+                suppressed = true;
+              }
+              if (!suppressed && familyExempt) {
+                alert.suppressedByBareFamilyPropagation = true;
                 suppressed = true;
               }
               if (suppressed) {

@@ -842,3 +842,95 @@ export class ShareService {
     expect(supp.some((x: any) => x.function === "ShareService.getShareTree")).toBe(false);
   }, 150_000);
 });
+
+// ═══════════════════════════════════════════════════════════════
+// 修冤枉第十一刀（2026-10-17）：裸名族兜底传播豁免（产品路径锁定）
+//
+// 判据：逐边消歧失败（同名候选同目录同类根）时，用 B 判据族级兜底——
+// 裸名族调用方并集全 ⊆ base（公开∪守卫∪作业∪既有传播）⇒ 全族豁免，
+// 带 suppressedByBareFamilyPropagation 标记可复核；族并集含并集外
+// 调用方的对照组照常上报。语义：裸化只增候选 ⇒ 并集全豁免蕴含
+// 真实调用方全豁免（不需要边解析）。
+// ═══════════════════════════════════════════════════════════════
+
+describe("evaluateTrust：裸名族兜底传播豁免（修冤枉第十一刀）", () => {
+  const TS_SOURCE = (familyClean: boolean) => `
+declare const Controller: any;
+declare const UseGuards: any;
+declare class JwtAuthGuard {}
+@UseGuards(JwtAuthGuard)
+@Controller("pages")
+export class PageController {
+  getPage() { return this.spaceService.getData(); }
+}
+@UseGuards(JwtAuthGuard)
+@Controller("spaces")
+export class SpaceController {
+  getSpace() { return this.spaceService.getData(); }
+}
+${familyClean ? "" : `@Controller("public")
+export class PublicController {
+  show() { return this.spaceService.getData(); }
+}`}
+export class SpaceService {
+  getData() { return "x"; }
+}
+export class SpaceRepo {
+  getData() { return "y"; }
+}
+`;
+
+  async function runWith(source: string) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pm-engine-family-"));
+    try {
+      fs.writeFileSync(path.join(dir, "app.ts"), source);
+      fs.writeFileSync(
+        path.join(dir, "tsconfig.json"),
+        JSON.stringify({ compilerOptions: { target: "ES2020", module: "commonjs", strict: false, skipLibCheck: true, noEmit: true }, include: ["**/*.ts"] })
+      );
+      return await evaluateTrust({
+        projectPath: dir,
+        projectName: "bare-family-propagation-test",
+        commit: "test",
+        language: "typescript",
+      });
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it("同名族（同文件两候选，逐边消歧失败）+ 调用方并集全已守卫 ⇒ 全族进 suppressed", async () => {
+    const r = await runWith(TS_SOURCE(true));
+    const sa = r.overall.safeguardAlerts;
+    expect(sa).toBeDefined();
+    const supp = sa!.suppressed || [];
+    for (const fn of ["SpaceService.getData", "SpaceRepo.getData"]) {
+      const hit = supp.find(
+        (x: any) => x.function === fn &&
+          x.rule === "Authorization (Unauthenticated Access)"
+      );
+      expect(hit).toBeDefined();
+      expect(hit!.suppressedByBareFamilyPropagation).toBe(true);
+      // 不进主计数：topRanked/groups 都不含该函数
+      expect(sa!.topRanked.some((x: any) => x.alert.function === fn)).toBe(false);
+      expect(sa!.groups.every((g: any) => g.alerts.every((x: any) => x.alert.function !== fn))).toBe(true);
+    }
+    expect(sa!.total).toBe(sa!.topRanked.length);
+  }, 150_000);
+
+  it("对照组（族调用方并集含无守卫 HTTP controller）同族照常进主告警流", async () => {
+    const r = await runWith(TS_SOURCE(false));
+    const sa = r.overall.safeguardAlerts;
+    expect(sa).toBeDefined();
+    for (const fn of ["SpaceService.getData", "SpaceRepo.getData"]) {
+      const hit = sa!.topRanked.find(
+        (x: any) => x.alert.function === fn &&
+          x.alert.rule === "Authorization (Unauthenticated Access)"
+      );
+      expect(hit).toBeDefined();
+    }
+    const supp = sa!.suppressed || [];
+    expect(supp.some((x: any) => x.function === "SpaceService.getData")).toBe(false);
+    expect(supp.some((x: any) => x.function === "SpaceRepo.getData")).toBe(false);
+  }, 150_000);
+});
