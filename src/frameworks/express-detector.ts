@@ -231,22 +231,89 @@ export function classifyMiddleware(code: string, name: string): ExpressMiddlewar
 }
 
 /**
+ * 解析 app.use(...) 的实参列表（2026-10-18，fr-014 残留根因修复）：
+ * 顶层逗号切分 + 括号/花括号/字符串/注释感知。
+ *
+ * 根因：旧实现用 `[^)]+` 捕获实参——匿名中间件函数体的鉴权证据
+ * （app.use(`${prefix}*`, (req,res,next) => { extractBearerToken(...)
+ * ... })）被截断在第一个 `)` 处（(req,res,next) 的右括号），
+ * classifyMiddleware 永远看不到函数体 ⇒ hasAnyAuth 恒 false。
+ *
+ * 边界（如实记录）：模板串按无嵌套 ${} 处理（路径字面量形态；
+ * ${} 内含反引号/顶层括号的极端形态会错切）；正则字面量不特殊
+ * 处理（检测器不做语法树，与其他文本级判定同口径）。
+ */
+function parseUseArgs(code: string, openParenIndex: number): Array<{ text: string; start: number }> {
+  const args: Array<{ text: string; start: number }> = [];
+  let i = openParenIndex + 1;
+  let paren = 1; // app.use( 的实参层
+  let brace = 0;
+  let argStart = i;
+  let quote: string | null = null;
+  let lineComment = false;
+  let blockComment = false;
+  while (i < code.length) {
+    const ch = code[i];
+    if (lineComment) {
+      if (ch === "\n") lineComment = false;
+      i++;
+      continue;
+    }
+    if (blockComment) {
+      if (ch === "*" && code[i + 1] === "/") { blockComment = false; i += 2; continue; }
+      i++;
+      continue;
+    }
+    if (quote) {
+      if (ch === "\\") { i += 2; continue; }
+      if (ch === quote) quote = null;
+      i++;
+      continue;
+    }
+    if (ch === "'" || ch === '"' || ch === "`") { quote = ch; i++; continue; }
+    if (ch === "/" && code[i + 1] === "/") { lineComment = true; i += 2; continue; }
+    if (ch === "/" && code[i + 1] === "*") { blockComment = true; i += 2; continue; }
+    if (ch === "(") { paren++; i++; continue; }
+    if (ch === ")") {
+      paren--;
+      if (paren === 0) {
+        const text = code.slice(argStart, i).trim();
+        if (text) args.push({ text, start: argStart });
+        return args;
+      }
+      i++;
+      continue;
+    }
+    if (ch === "{") { brace++; i++; continue; }
+    if (ch === "}") { brace = Math.max(0, brace - 1); i++; continue; }
+    if (ch === "," && paren === 1 && brace === 0) {
+      const text = code.slice(argStart, i).trim();
+      if (text) args.push({ text, start: argStart });
+      argStart = i + 1;
+    }
+    i++;
+  }
+  return args;
+}
+
+/**
  * Extract global middleware registrations (app.use(fn)).
  */
 export function extractGlobalMiddleware(code: string, appName: string): ExpressMiddlewareChain[] {
   const middleware: ExpressMiddlewareChain[] = [];
-  const useRegex = new RegExp(`${appName}\\.use\\s*\\(([^)]+)\\)`, "gi");
+  const useRegex = new RegExp(`${appName}\\.use\\s*\\(`, "gi");
 
   let match: RegExpExecArray | null;
   while ((match = useRegex.exec(code)) !== null) {
-    const args = match[1].split(",").map(a => a.trim());
-    for (const arg of args) {
-      if (arg.startsWith("'") || arg.startsWith('"')) continue; // skip path strings
-      if (/^(express|router|Router)\./.test(arg)) continue; // skip sub-routers (handled separately)
+    const openParen = match.index + match[0].length - 1;
+    for (const arg of parseUseArgs(code, openParen)) {
+      const t = arg.text;
+      if (/^['"`]/.test(t)) continue; // skip path strings
+      if (/^(express|router|Router)\./.test(t)) continue; // skip sub-routers (handled separately)
 
       middleware.push({
-        name: arg,
-        type: classifyMiddleware(code, arg),
+        name: t,
+        type: classifyMiddleware(code, t),
         registeredAt: code.slice(0, match.index).split("\n").length,
       });
     }
@@ -334,6 +401,13 @@ export function analyzeExpressApp(code: string): ExpressAppAnalysis {
       if (["use", "all"].includes(route.method)) continue; // skip middleware registrations
       if (!isMutation(route)) continue; // 读操作不查（公开读常见）
       if (routeHasAuth(route)) continue;
+      // 模板串路径（如 `${adminApiPrefix}/env-vars`）不可静态归属——
+      // 全局守卫挂载路径同样是变量拼接（app.use(`${prefix}*`, auth)），
+      // 检测器无法证明「该路由不在守卫覆盖内」，逐路由告警是不可归属的
+      // 噪声（fr-014 mockoon 修复形态实测 12 条全 FP）。保守边界：动态
+      // 路径跳过逐路由检查；整 app 无认证的 critical 检查不受影响
+      // （动态路径照常进入 hasNakedMutation 计数）。
+      if (route.path.includes("${")) continue;
       if (isPublicRoute(route.path)) continue;
       if (route.method === "post" && isRegisterRoot(route.path, registerRoots)) continue;
       issues.push({

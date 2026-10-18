@@ -2,7 +2,7 @@
   "name": "fix-regression-corpus",
   "version": 2,
   "created": "2026-09-11",
-  "updated": "2026-10-06",
+  "updated": "2026-10-18",
   "method": "真实安全修复回归：对每个修复，扫描「修复前 parent commit」——引擎在该位置/该类型上能否报出违规；再扫修复后确认不误报。来源=GitHub 安全公告数据库（GHSA/CVE），SHA 均经 api.github.com 实测核验。",
   "methodology_rules": [
     {
@@ -1016,7 +1016,7 @@
       ],
       "ground_truth_note": "修复 = admin-api.ts 新增 bearer token 鉴权（extractBearerToken + timingSafeEqual）+ CORS 来源白名单（adminApiCorsOrigins 取代硬编码 '*'）+ 事务脱敏（redactTransaction）。漏洞形态 = **中间件/鉴权整体缺席**（pre-fix admin-api.ts 无任何 auth 检查）+ 配置层 CORS 通配。注意：该管理 API 是库形态（commons-server 内部 server.use 挂载），不是 app.get('/path', handler) 的顶层路由注册形态——这是框架适配器可见性的已知软肋。",
       "sha_verified": "2026-09-18（api.github.com 核验；PR #2254 merge=c420b5a5 34 文件）",
-      "result": "DETECTED-with-boundary（2026-10-05）：修复前 admin-api.ts 报 EXPRESS_NO_AUTH_MIDDLEWARE critical（两处检测器可见性缺口修复：①extractRoutes 支持模板字符串路径——库形态模块路径全是 ${prefix}/... 变量拼前缀，字符串字面量 regex 整文件 0 路由；②「app: Express 形参」的 setup 模块纳入整 app 无认证判定——此前落在 creator 门与 hasAnyAuth 门之间）。修复后残留 1 条归因到「匿名中间件函数体内的 bearer 校验（hasValidAdminApiToken/timingSafeEqual）超出中间件名级分类」——AUTH_MIDDLEWARE_PATTERNS 已补 timingSafeEqual/extractBearerToken 词（对具名形态 app.use(extractBearerToken) 有效），匿名函数体需要全局覆盖分析（未做）。express-realworld 回归 20 路由零新增误报。",
+      "result": "DETECTED（2026-10-05 点亮 with-boundary，2026-10-18 残留归零升级干净）：修复前 admin-api.ts 报 EXPRESS_NO_AUTH_MIDDLEWARE critical（两处检测器可见性缺口修复：①extractRoutes 支持模板字符串路径②app: Express 形参 setup 模块纳入整 app 无认证判定）。修复后残留根因=匿名中间件函数体鉴权证据不可见——旧 extractGlobalMiddleware 用 [^)]+ 捕获实参，app.use(`${prefix}*`, (req,res,next) => { extractBearerToken... }) 截断在第一个 `)` 处。2026-10-18 修复（3.7.71）：①顶层实参解析（括号/花括号/字符串/注释感知）⇒ 函数体证据进 classifyMiddleware②模板串路径路由跳过逐路由检查（动态路径不可静态归属，实测 12 条全 FP）。三态：pre 1 critical（admin-api.ts）+ 3 加固建议类（server.ts，两版本一致）；fix 0 critical + 同 3 建议类。express-realworld 20 路由 0 协议级 FP 保持。",
       "result_detail": "mini 语料（5 个真值文件）提取 99 个函数，trust 引擎 0 违规。根因类别 = 缺失检查类 + 配置类（CORS 通配无域名恰语义），且管理路由以库内 server.use 挂载、不具 app.get 形态",
       "result_reason": "corpus_unverified",
       "result_note": "mini 语料；5 个真值文件均在切片内（2026-09-19 严格路径校验），调用链完整性未校验。MISS 结论暂定。"
