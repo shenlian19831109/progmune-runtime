@@ -273,3 +273,93 @@ module.exports = router;
         (0, vitest_1.expect)(issues.some((i) => i.rule === "EXPRESS_ROUTE_MISSING_AUTH" && i.route === "PUT /admin")).toBe(false);
     });
 });
+// ═══════════════════════════════════════════════════════════════
+// fr-014 残留修复（2026-10-18）：匿名中间件函数体鉴权证据 + 模板
+// 串路径归属边界（mockoon admin-api 修复形态）
+//
+// 根因：extractGlobalMiddleware 旧实现 [^)]+ 把 app.use(`${prefix}*`,
+// (req,res,next) => { ...extractBearerToken... }) 截断在第一个 `)`，
+// 函数体证据永远不可见 ⇒ hasAnyAuth 恒 false ⇒ 修复后仍报 critical。
+// 修复：顶层实参解析（括号/花括号/字符串感知）+ 模板串路径跳过
+// 逐路由检查（动态路径不可静态归属，12 条实测全 FP）。
+// ═══════════════════════════════════════════════════════════════
+(0, vitest_1.describe)("express-detector：匿名中间件函数体鉴权证据（fr-014 残留）", () => {
+    const ADMIN_API_FIX_SHAPE = `
+const express = require('express');
+const { timingSafeEqual } = require('node:crypto');
+const setupAdminApi = (app: Express) => {
+  const adminApiPrefix = '/mockoon-admin';
+  const hasValidAdminApiToken = (token: string) => timingSafeEqual(Buffer.from('x'), Buffer.from(token));
+
+  app.use(\`\${adminApiPrefix}*\`, (req, res, next) => {
+    const bearerToken = extractBearerToken(req.get('authorization'));
+    if (!bearerToken || !hasValidAdminApiToken(bearerToken)) {
+      res.status(401).send({ message: 'Unauthorized' });
+      return;
+    }
+    next();
+  });
+
+  app.post(\`\${adminApiPrefix}/env-vars\`, setEnvVarHandler);
+  app.put(\`\${adminApiPrefix}/env-vars\`, setEnvVarHandler);
+};
+
+export { setupAdminApi };
+`;
+    const ADMIN_API_PRE_SHAPE = ADMIN_API_FIX_SHAPE.replace(`  app.use(\`\${adminApiPrefix}*\`, (req, res, next) => {
+    const bearerToken = extractBearerToken(req.get('authorization'));
+    if (!bearerToken || !hasValidAdminApiToken(bearerToken)) {
+      res.status(401).send({ message: 'Unauthorized' });
+      return;
+    }
+    next();
+  });
+
+`, "");
+    (0, vitest_1.it)("匿名中间件函数体内的 bearer 证据 ⇒ 分类为 auth（修复形态）", () => {
+        const mw = (0, express_detector_1.extractGlobalMiddleware)(ADMIN_API_FIX_SHAPE, "app");
+        const auth = mw.find((m) => m.type === "auth");
+        (0, vitest_1.expect)(auth).toBeDefined();
+        (0, vitest_1.expect)(auth.name).toContain("extractBearerToken");
+    });
+    (0, vitest_1.it)("修复形态（全局匿名 auth + 模板串 mutation 路由）⇒ 0 issues", () => {
+        const { issues } = (0, express_detector_1.analyzeExpressApp)(ADMIN_API_FIX_SHAPE);
+        (0, vitest_1.expect)(issues).toEqual([]);
+    });
+    (0, vitest_1.it)("修复前形态（无任何鉴权证据 + 模板串 mutation 路由）⇒ critical 照报", () => {
+        const { issues } = (0, express_detector_1.analyzeExpressApp)(ADMIN_API_PRE_SHAPE);
+        (0, vitest_1.expect)(issues.some((i) => i.rule === "EXPRESS_NO_AUTH_MIDDLEWARE")).toBe(true);
+    });
+    (0, vitest_1.it)("嵌套调用实参不被切碎（app.use(cors({origin:'x,y'})) 分类 cors）", () => {
+        const code = `
+const app = require('express')();
+app.use(cors({ origin: 'a,b', methods: ['GET','POST'] }));
+app.post('/x', handler);
+`;
+        const mw = (0, express_detector_1.extractGlobalMiddleware)(code, "app");
+        (0, vitest_1.expect)(mw.some((m) => m.type === "cors")).toBe(true);
+        // 逗号在字符串/嵌套括号内不产生碎实参
+        (0, vitest_1.expect)(mw.length).toBe(1);
+    });
+    (0, vitest_1.it)("字面量路径 mutation 路由在 hasAnyAuth 下仍逐路由报（回归锁定）", () => {
+        const code = `
+const app = require('express')();
+app.use(passport.initialize());
+app.post('/admin/secret', handler);
+`;
+        const { issues } = (0, express_detector_1.analyzeExpressApp)(code);
+        (0, vitest_1.expect)(issues.some((i) => i.rule === "EXPRESS_ROUTE_MISSING_AUTH" && i.route === "POST /admin/secret")).toBe(true);
+    });
+    (0, vitest_1.it)("注释内的括号/花括号不破坏实参解析", () => {
+        const code = `
+const app = require('express')();
+app.use(
+  // (注释里的括号) 与 /* 块注释 { } */
+  (req, res, next) => { /* } */ if (req.url) { next(); } }
+);
+app.post('/x', handler);
+`;
+        const mw = (0, express_detector_1.extractGlobalMiddleware)(code, "app");
+        (0, vitest_1.expect)(mw.length).toBe(1);
+    });
+});
