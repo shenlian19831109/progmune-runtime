@@ -1,5 +1,44 @@
 # Changelog
 
+## [3.7.70] — 2026-10-18
+
+### 裸名族兜底传播豁免（修冤枉第十一刀）
+
+**根因**：computeResolvedCallerMap 分层消歧（后缀唯一→同文件→同目录
+→类根）失败时挂未解析边 fail-safe ⇒ 豁免被阻断。第九刀探针实测
+C4/C5 残部里「歧义边」占 50/70 条——但歧义≠证据缺失：同名族调用方
+**并集**全落在豁免集合内时，最坏归因（每个族成员都被每个调用方
+调用）也在并集内，不需要边解析。
+
+- **内核（computeBareFamilyPropagatedSet）**：第七刀 B 判据泛化——
+  裸名族调用方并集全 ⊆ base ⇒ 全族豁免；裸化只增候选（R75 正向
+  证据）⇒ 并集全豁免蕴含真实调用方全豁免；比逐边消歧更保守
+  （族内任一成员被并集外调用则全族不豁免）；快照轮次默认 1；
+  computeJobSurfacePropagatedSet 重构委托本内核（includeBase 保留
+  第七刀「含种子」历史语义，11 例既有测试锁零漂移）
+- **引擎接线**：base = 公开∪守卫∪作业∪混合∪公开传播；suppressed 带
+  `suppressedByBareFamilyPropagation` 标记（R9），
+  `PROGMUNE_BARE_FAMILY_TOGGLE=off` 逃生门；消费顺序
+  guard→job→mixed→public→family（未豁免才挂标记）
+- **A/B（docmost，各 fresh IR）**：control（toggle off）与 3.7.69
+  基线**逐条一致**（642/166，diff 0）；pre **642→585（−57）**，
+  suppressed 166→223（+57 全带 family 标记），主路径 11=11/84=84。
+  −57 = 探针预测的 50 条歧义边类 + **7 条「已豁免成员下游一跳」类**
+  （如 getGreetingName ← PageUpdateEmail、getPageContext ←
+  notifyMentionedUsers——族调用方是第五~十刀豁免成员的函数，内核
+  base 含传播集故自然覆盖；逐条核族调用方 100% 在并集内，TP 0）
+- **FN 风险逐条复核**：57 条全核调用方来源——守卫 controller
+  （updateSpace/removeSpaceIcon/markAllAsRead 类）、@OnEvent 监听器
+  作业链（isTypesense→getSearchDriver 类）、公开路由、既有豁免成员
+  下游；族并集外调用方 148 条照报（不豁免）
+- **回归锁定**：内核 9 例 + 引擎产品路径 2；全量 552/552；三闸门
+  （taintpath 160 / webshape 72 / fr-007 pre5-post0 + fr-016
+  pre7-post0）；TS 盲测 119 项目 LOST 0/ADDED 0（引擎侧豁免不进
+  batch-scan，构造保证 + 实测）
+- **过程教训**：探针只统计「有未解析边」的告警，低估 7 条——
+  传播内核作用于全量函数，「已豁免成员下游」也是合法覆盖。探针
+  过滤器必须与实现判据逐字对齐（R59 家族）
+
 ## [3.7.69] — 2026-10-17
 
 ### 公开表面传播豁免（修冤枉第十刀）
