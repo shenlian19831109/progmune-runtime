@@ -1,5 +1,37 @@
 # Changelog
 
+## [3.7.71] — 2026-10-18
+
+### Express 匿名中间件函数体鉴权证据（fr-014 残留归零）
+
+**根因**：旧 `extractGlobalMiddleware` 用 `[^)]+` 捕获 `app.use(...)`
+实参——匿名中间件函数体的鉴权证据（`app.use(\`${prefix}*\`,
+(req,res,next) => { extractBearerToken(...) ... })`）被截断在第一个
+`）` 处（`(req,res,next)` 的右括号），`classifyMiddleware` 永远看不
+到函数体 ⇒ `hasAnyAuth` 恒 false ⇒ mockoon 管理 API 修复版本
+（CVE-2026-59148 / GHSA-rqx4-3f6q-3x2v）仍残留 1 条
+EXPRESS_NO_AUTH_MIDDLEWARE critical。
+
+- **顶层实参解析（parseUseArgs）**：括号/花括号/字符串/注释感知的
+  顶层逗号切分——匿名中间件函数体完整进入 classifyMiddleware，
+  函数体内的 extractBearerToken/timingSafeEqual 等强证据词命中
+  auth 分类。边界如实记录：模板串按无嵌套 ${} 处理；正则字面量
+  不特殊处理（与检测器其他文本级判定同口径）
+- **模板串路径归属边界**：动态路径路由（`${prefix}/x`）跳过逐路由
+  EXPRESS_ROUTE_MISSING_AUTH 检查——全局守卫挂载路径同样是变量
+  拼接，检测器无法证明「该路由不在守卫覆盖内」，逐路由告警是不
+  可归属的噪声（mockoon 修复形态实测 12 条全 FP）。保守边界：整
+  app 无认证的 critical 不受影响（动态路径照常进 hasNakedMutation
+  计数，修复前形态照报 critical）
+- **fr-014 三态复测（mini 语料，真值文件 raw 直链）**：修复前
+  admin-api.ts 报 critical + server.ts 3 条加固建议类（两版本一致）；
+  修复后 0 critical + 同 3 条建议类——**注册表升级为干净 DETECTED**
+  （fr-corpus 有效 11/17 的 with-boundary 项收窄）
+- **回归锁定**：express 检测器 33/33（+6 例：函数体证据/三态/嵌套
+  实参不切碎/字面量路由照报/注释括号）；框架全族 188/188；引擎 +
+  检测器族 245/245；express-realworld 20 路由 0 协议级 FP 保持
+  （仅已知 NO_HELMET 加固建议边界）
+
 ## [3.7.70] — 2026-10-18
 
 ### 裸名族兜底传播豁免（修冤枉第十一刀）
