@@ -2,13 +2,12 @@
 
 ## [3.7.72] — 2026-10-26
 
-### Python MCP 工具实参污点根 + containment 守卫净化（fr-019 点亮，修看不见第十四刀）
+### Python MCP 工具实参污点根 + containment 守卫净化（fr-019 点亮）
 
 **根因**：MCP 工具的实参由未认证调用方完全控制，与 HTTP request 同属
 不可信传输面——但 Python 路径穿越判据只认 `request` 对象为污点根。
 PraisonAI CVE-2026-47394（workflow.show 的 file_path 实参直接 open()
-任意文件读）因此 MISS（fr-012 同族的污点源词汇表缺口，MCP 语料族
-第 3 条点亮）。
+任意文件读）因此 MISS（fr-012 同族的污点源词汇表缺口）。
 
 - **is_mcp_tool_function**：`@register_tool("name")` / `@mcp.tool()` /
   `@tool` 装饰函数的形参 = 路径穿越污点根（TS 侧 C 系列
@@ -30,7 +29,9 @@ PraisonAI CVE-2026-47394（workflow.show 的 file_path 实参直接 open()
 - **fr-019 三态（mini 语料）**：pre 标记 3 = 真值函数
   （workflow_validate / workflow_show / deploy_validate），引擎级 3 条
   PATH_TRAVERSAL medium / APPROVED(83)；post 0 / APPROVED(85)
-  ——**注册表升级为干净 DETECTED**，修复回归战绩 6/19
+  ——**注册表升级为干净 DETECTED**，fr-corpus 有效 12/19
+  （10 干净 + 2 with-boundary；5 判定不可点亮 + fr-015 corpus_invalid；
+  唯一开放 MISS = fr-018）
 - **门禁**：Python 盲测 90 项目零漂移（findings 与逐函数 calls 全比对）
   / PyGoat 路径穿越 1/1 保持 / 定向 8/8（含 pre 反例与守卫传播用例）
   / fr-corpus 闸门新增 fr-019 语言感知分派（check-fr-corpus.ts
