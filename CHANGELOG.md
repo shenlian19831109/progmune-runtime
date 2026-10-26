@@ -1,5 +1,41 @@
 # Changelog
 
+## [3.7.72] — 2026-10-26
+
+### Python MCP 工具实参污点根 + containment 守卫净化（fr-019 点亮，修看不见第十四刀）
+
+**根因**：MCP 工具的实参由未认证调用方完全控制，与 HTTP request 同属
+不可信传输面——但 Python 路径穿越判据只认 `request` 对象为污点根。
+PraisonAI CVE-2026-47394（workflow.show 的 file_path 实参直接 open()
+任意文件读）因此 MISS（fr-012 同族的污点源词汇表缺口，MCP 语料族
+第 3 条点亮）。
+
+- **is_mcp_tool_function**：`@register_tool("name")` / `@mcp.tool()` /
+  `@tool` 装饰函数的形参 = 路径穿越污点根（TS 侧 C 系列
+  UNTRUSTED_ROOTS「按传输面声明根」的 Python 镜像）。只认三个惯例
+  装饰器名，不扩及其他——误认框架装饰器会把内部受信参数当不可信源
+- **compute_guard_function_names**：文件内函数体含 containment 证据
+  （relative_to / is_relative_to / startswith("..") / in ("..", ".") /
+  == ".."）的函数是守卫（tier-0），并向调用方有界传播 3 轮（TS
+  pathGuardFunctionNames 镜像；传播用 AST 收直调名——正则 `\bname\(`
+  会把嵌套 `def` 误当调用）
+- **is_tainted 守卫调用结果净化**：污点流经守卫调用的结果视为已净化
+  （调用点级而非文件级——fr-019 pre 的 rules 工具调用
+  _resolve_rule_path 被正确抑制，同文件不调用守卫的 workflow 工具
+  照报，这正是判别力来源）；净化判定放在 request 根判定之前
+  （守卫实参本身可能含 request 根）
+- **read_text 接收者统一走 is_tainted**：覆盖 MCP 形参直连
+  `file_path.read_text()` 与守卫净化结果两形态（旧实现只认被赋值给
+  Path(...) 调用的 Name）
+- **fr-019 三态（mini 语料）**：pre 标记 3 = 真值函数
+  （workflow_validate / workflow_show / deploy_validate），引擎级 3 条
+  PATH_TRAVERSAL medium / APPROVED(83)；post 0 / APPROVED(85)
+  ——**注册表升级为干净 DETECTED**，修复回归战绩 6/19
+- **门禁**：Python 盲测 90 项目零漂移（findings 与逐函数 calls 全比对）
+  / PyGoat 路径穿越 1/1 保持 / 定向 8/8（含 pre 反例与守卫传播用例）
+  / fr-corpus 闸门新增 fr-019 语言感知分派（check-fr-corpus.ts
+  EXPECTED pre 3 / post 0）
+
 ## [3.7.71] — 2026-10-18
 
 ### Express 匿名中间件函数体鉴权证据（fr-014 残留归零）
