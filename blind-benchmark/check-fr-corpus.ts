@@ -20,6 +20,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { extractIR } from "../src/extract-ir";
+import { extractProjectIR } from "../src/extract-project-ir";
 
 const MARKER = "__progmune_path_traversal__";
 const CORPUS = path.resolve(__dirname, "fix-regression-corpus.json");
@@ -35,10 +36,21 @@ const EXPECTED: Record<string, { pre: number; post: number }> = {
   // getFileNamePath(...) 这一跳，iterateAsyncApiComponents / iterateComponents
   // 由漏报转为检出。两条都是真阳性（恶意组件名带 ../ 逃出输出目录）。
   "fr-016": { pre: 7, post: 0 },
+  // 2026-10-25（3.7.72）：Python 侧 MCP 工具实参污点根 + containment 守卫
+  // 净化（is_mcp_tool_function / compute_guard_function_names）——
+  // fr-019 由 MISS 转 DETECTED。pre 3 = 真值函数（workflow_validate /
+  // workflow_show / deploy_validate）；rules 工具调用 _resolve_rule_path
+  // 守卫被正确抑制（调用点级净化，pre 反例）；post 0。
+  "fr-019": { pre: 3, post: 0 },
 };
 
-function markedFns(dir: string): string[] {
-  const fns = extractIR(dir) as Array<{ name: string; file?: string; calls?: string[] }>;
+function markedFns(dir: string, lang: string): string[] {
+  // TS 语料走 TS 提取器；Python 语料（fr-019）走多语言注册表。
+  const fns = (lang === "python" ? extractProjectIR(dir) : extractIR(dir)) as Array<{
+    name: string;
+    file?: string;
+    calls?: string[];
+  }>;
   return fns
     .filter((f) => (f.calls || []).some((c) => c.includes(MARKER)))
     .map((f) => f.name)
@@ -95,7 +107,7 @@ function main(): number {
         bad++;
         continue;
       }
-      const fns = markedFns(dir);
+      const fns = markedFns(dir, e.lang);
       got[side] = fns.length;
       console.log(`   ${side.padEnd(4)} 标记 ${fns.length} 条：${fns.join(", ") || "（无）"}`);
     }

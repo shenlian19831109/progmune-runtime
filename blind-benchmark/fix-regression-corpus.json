@@ -1128,7 +1128,9 @@
       ],
       "ground_truth_note": "advisory 点名 workflow.show（cli_tools.py:63-73）/workflow.validate（42-61）/deploy.validate（415-432）+ dispatcher（server.py:281-298 **kwargs 无 schema 强制）。fix commit 179cab02 = PR #1684 batch-10 hardening（19 文件综合批次，含 SSRF/RBAC 无关修复——真值文件清单只取 advisory 点名两文件，如实记录）；parent 402d7ed9 = v4.6.39 tag（干净单亲，api.github.com 实测）。",
       "sha_verified": "2026-10-18（api.github.com 实测：v4.6.40 tag = a72e156c（纯版本 bump）→ 真修复 = 179cab02（PR #1684，parent 402d7ed9 = v4.6.39）——教训复现：release tag 本身不是修复 commit）",
-      "result": "MISS（2026-10-18 基线）：pre mini 语料（2 真值文件）扫描 0 violations / APPROVED(85) / safeguard 137 条但无路径穿越类命中——workflow_show 真值位置失明。根因 = **Python 侧 MCP 工具实参污点根缺口**（fr-012 同族：污点源词汇表缺口）——@register_tool 装饰器函数的 file_path 形参不是已知污点根，open() sink 无 containment 校验不可见。能力实现候选：extract_ir.py 识别 @register_tool 工具函数的路径类形参为污点根（TS 侧 C 系列 UNTRUSTED_ROOTS MCP 实参根已建 3.7.33，Python 镜像）+ containment 校验识别（_resolve_cwd_yaml_path 类 = G-A/G-B 守卫家族）。"
+      "result": "DETECTED（2026-10-26，3.7.72）：pre 标记 3（workflow_validate/workflow_show/deploy_validate，引擎级 3 条 PATH_TRAVERSAL medium / APPROVED 83）/ post 0（APPROVED 85）——MISS 归零。实现=extract_ir.py ①is_mcp_tool_function（@register_tool/@mcp.tool/@tool 装饰器，形参=路径穿越污点根，TS C 系列 UNTRUSTED_ROOTS 的 Python 镜像）②compute_guard_function_names（体内含 relative_to/startswith(\"..\") 等 containment 证据=守卫，有界传播 3 轮）③is_tainted 守卫调用结果净化（调用点级：pre 的 rules 工具调用 _resolve_rule_path 被正确抑制、不调用守卫的 workflow 工具照报）。read_text 接收者统一走 is_tainted（覆盖 MCP 形参直连/守卫净化两形态）。",
+      "result_reason": "detected_after_mcp_tool_taint_roots_and_containment_guards",
+      "result_note": "门禁实测：Python 盲测 90 项目零漂移（findings 与逐函数 calls 全比对）/ PyGoat 路径穿越 1/1 保持 / 定向 8/8；预期计数已进 check-fr-corpus.ts EXPECTED（fr-019 pre 3/post 0）。"
     }
   ]
 }

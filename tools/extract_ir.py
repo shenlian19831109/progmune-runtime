@@ -131,24 +131,47 @@ def _func_param_names(node):
     return {a.arg for a in node.args.args + node.args.posonlyargs + node.args.kwonlyargs}
 
 
-def is_tainted(node, assigns, depth=0, request_params=None):
+def is_tainted(node, assigns, depth=0, request_params=None, extra_roots=None, guard_fns=None):
     """Single-hop taint: request-rooted, variable assigned from a tainted
-    value, or dynamic formatting containing tainted parts."""
+    value, or dynamic formatting containing tainted parts.
+
+    extra_roots（fr-019）：额外污点根名集合 —— MCP 工具函数（@register_tool /
+    @mcp.tool 装饰）的形参。MCP tools/call 的实参完全由未认证调用方控制，
+    与 HTTP request 同属不可信传输面（TS 侧 C 系列 UNTRUSTED_ROOTS 的
+    Python 镜像）。仅在路径穿越判据中传入，SSRF 等既有判据不受影响。
+
+    guard_fns（fr-019）：containment 守卫函数名集合 —— 污点流经守卫函数
+    调用的结果视为已净化（G-C/G2 家族 Python 镜像：按被调用方的实际证据
+    定案，而非按名字猜语义）。守卫函数体内含 containment 证据
+    （relative_to / startswith("..") 等），见 compute_guard_function_names。"""
     if node is None or depth > 2:
         return False
+    if isinstance(node, ast.Call) and guard_fns:
+        callee = node.func
+        if isinstance(callee, ast.Name) and callee.id in guard_fns:
+            # 守卫调用结果视为已净化：不向其内部传播污点。必须放在
+            # is_request_rooted 之前 —— 守卫调用的实参本身可能含
+            # request 根，先判根会把净化形态误判成污点。
+            return False
+    if isinstance(node, ast.Name) and extra_roots and node.id in extra_roots:
+        return True
     if is_request_rooted(node, request_params):
         return True
     if isinstance(node, ast.Name):
-        return is_tainted(assigns.get(node.id), assigns, depth + 1, request_params)
+        return is_tainted(assigns.get(node.id), assigns, depth + 1,
+                          request_params, extra_roots, guard_fns)
     if isinstance(node, ast.JoinedStr):
-        return any(is_tainted(v.value, assigns, depth + 1, request_params)
+        return any(is_tainted(v.value, assigns, depth + 1, request_params,
+                              extra_roots, guard_fns)
                    for v in node.values if isinstance(v, ast.FormattedValue))
     if isinstance(node, ast.BinOp):
-        return (is_tainted(node.left, assigns, depth, request_params)
-                or is_tainted(node.right, assigns, depth, request_params))
+        return (is_tainted(node.left, assigns, depth, request_params, extra_roots, guard_fns)
+                or is_tainted(node.right, assigns, depth, request_params, extra_roots, guard_fns))
     if isinstance(node, ast.Call):
-        return (any(is_tainted(a, assigns, depth, request_params) for a in node.args)
-                or any(is_tainted(k.value, assigns, depth, request_params) for k in node.keywords))
+        return (any(is_tainted(a, assigns, depth, request_params, extra_roots, guard_fns)
+                    for a in node.args)
+                or any(is_tainted(k.value, assigns, depth, request_params, extra_roots, guard_fns)
+                       for k in node.keywords))
     return False
 
 
@@ -936,35 +959,133 @@ def has_xss(node, unsafe_vars=None):
     return False
 
 
-def has_path_traversal(node):
+# ── MCP 工具实参污点根 + containment 守卫（fr-019，2026-10-25）──
+
+MCP_TOOL_DECORATOR_NAMES = ("register_tool", "tool")
+
+
+def is_mcp_tool_function(node):
+    """@register_tool("name") / @mcp.tool() / @tool —— MCP 工具注册装饰器。
+
+    MCP tools/call 的实参由未认证调用方完全控制（fr-019：workflow.show 的
+    file_path 实参直接 open() 任意文件读），与 HTTP request 同属不可信
+    传输面 —— TS 侧 C 系列 UNTRUSTED_ROOTS「按传输面声明根」的 Python 镜像。
+    只认惯例装饰器名（register_tool / tool / *.tool()），不扩及其他装饰器
+    —— 误认一个框架装饰器就会把内部受信参数当不可信源（两方向都是假阴性）。"""
+    for dec in getattr(node, "decorator_list", []):
+        if isinstance(dec, ast.Name) and dec.id in MCP_TOOL_DECORATOR_NAMES:
+            return True
+        if isinstance(dec, ast.Call):
+            fn = dec.func
+            if isinstance(fn, ast.Name) and fn.id in MCP_TOOL_DECORATOR_NAMES:
+                return True
+            if isinstance(fn, ast.Attribute) and fn.attr == "tool":
+                # @mcp.tool() / @server.tool() —— FastMCP 实例惯例名。
+                # 任意接收者的 .tool() 装饰器都极大概率是 MCP 工具注册。
+                return True
+    return False
+
+
+# containment 守卫证据（TS PATH_GUARD_RULES G-A/G-B 家族的 Python 镜像）。
+# 种子全部来自 fr-019 真实语料（post 的 _resolve_cwd_yaml_path 与 pre 侧
+# 既有守卫 _resolve_rule_path）：
+#   P-A  relative_to / is_relative_to —— canonical 包含性判定（pathlib）
+#   P-B  startswith("..") / in ("..", ".") / == ".." —— 上跳拒绝
+PY_PATH_GUARD_EVIDENCE = (
+    re.compile(r'\.\s*(?:is_relative_to|relative_to)\s*\('),
+    re.compile(r'\.\s*startswith\s*\(\s*["\']\.\.'),
+    re.compile(r'\bin\s*\(\s*["\']\.\.["\']'),
+    re.compile(r'(?:==|!=)\s*["\']\.\.["\']'),
+)
+
+
+def _body_direct_call_names(node):
+    """函数体直调裸名集合 —— 不下钻嵌套函数体（嵌套 def 不是调用）。
+
+    必须用 AST 而不是正则 \\bname\\(：后者会把 `def workflow_show(...)`
+    这类嵌套函数定义误当成调用（cli_tools.py 的工具函数全嵌套在
+    register_cli_tools 里，正则版会把这层传播污染掉）。"""
+    names = set()
+    stack = list(getattr(node, "body", []))
+    while stack:
+        stmt = stack.pop()
+        if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)):
+            continue
+        if isinstance(stmt, ast.Call):
+            fn = stmt.func
+            if isinstance(fn, ast.Name):
+                names.add(fn.id)
+        stack.extend(ast.iter_child_nodes(stmt))
+    return names
+
+
+def compute_guard_function_names(tree):
+    """文件内 containment 守卫函数名集合（tier-0 证据 + 有界传播 3 轮）。
+
+    TS pathGuardFunctionNames 镜像：tier-0 = 函数体自身含 containment
+    证据；再向调用方传播（调用了守卫函数的函数自身也算守卫，3 轮有界）。"""
+    bodies = []
+    direct = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        try:
+            text = ast.unparse(node.body)
+        except Exception:
+            text = ""
+        bodies.append((node.name, node))
+        if text and any(r.search(text) for r in PY_PATH_GUARD_EVIDENCE):
+            direct.add(node.name)
+    guarded = set(direct)
+    for _ in range(3):
+        added = False
+        for name, node in bodies:
+            if name in guarded:
+                continue
+            if _body_direct_call_names(node) & guarded:
+                guarded.add(name)
+                added = True
+        if not added:
+            break
+    return guarded
+
+
+def has_path_traversal(node, extra_roots=None, guard_fns=None):
     """Path-traversal check: a file sink whose path argument is tainted by
     request-derived user input (directly or via single-hop assignment —
-    os.path.join chains resolve through assignment tracking)."""
+    os.path.join chains resolve through assignment tracking).
+
+    extra_roots（fr-019）：MCP 工具函数形参污点根（is_mcp_tool_function）。
+    guard_fns（fr-019）：containment 守卫函数名（compute_guard_function_names）
+    —— 污点流经守卫调用的结果已净化，不再标记（post 不误报的关键）。"""
     assigns = collect_assignments(node)
     request_params = _func_param_names(node)
     for child in ast.walk(node):
         if not isinstance(child, ast.Call) or not is_file_sink_call(child):
             continue
-        if any(is_tainted(a, assigns, request_params=request_params) for a in child.args):
+        if any(is_tainted(a, assigns, request_params=request_params,
+                          extra_roots=extra_roots, guard_fns=guard_fns)
+               for a in child.args):
             return True
-        if any(is_tainted(k.value, assigns, request_params=request_params) for k in child.keywords):
+        if any(is_tainted(k.value, assigns, request_params=request_params,
+                          extra_roots=extra_roots, guard_fns=guard_fns)
+               for k in child.keywords):
             return True
-        # Path(...).read_text(): the tainted path lives in the receiver —
-        # either the direct call or a variable assigned from a Path(...) call.
-        if isinstance(child.func, ast.Attribute) and child.func.attr in ("read_text", "read_bytes"):
-            recv = child.func.value
-            if isinstance(recv, ast.Call) and any(is_tainted(a, assigns) for a in recv.args):
+        # Path(...).read_text() / yaml_path.read_text(): the tainted path
+        # lives in the receiver。2026-10-25（fr-019）统一为对接收者整体跑
+        # is_tainted —— 覆盖三形态：直接 Path(tainted) 调用、被赋值的
+        # Name（MCP 形参直连 / 守卫净化结果）、守卫调用直连。旧实现只认
+        # 被赋值给 Path(...) 调用的 Name，MCP 形参直连 `file_path.read_text()`
+        # 会漏报；守卫净化不生效会误报。
+        if isinstance(child.func, ast.Attribute) \
+                and child.func.attr in ("read_text", "read_bytes"):
+            if is_tainted(child.func.value, assigns, request_params=request_params,
+                          extra_roots=extra_roots, guard_fns=guard_fns):
                 return True
-            if isinstance(recv, ast.Name):
-                v = assigns.get(recv.id)
-                if isinstance(v, ast.Call) and isinstance(v.func, ast.Name) \
-                        and v.func.id == "Path" \
-                        and any(is_tainted(a, assigns) for a in v.args):
-                    return True
     return False
 
 
-def extract_calls(node, unsafe_vars=None, imports=None, module_constants=None, global_constants=None):
+def extract_calls(node, unsafe_vars=None, imports=None, module_constants=None, global_constants=None, guard_fns=None):
     """Extract function call names from a function body (first-level only).
 
     Attribute calls emit the full qualified chain (e.g. user.change_password,
@@ -999,7 +1120,11 @@ def extract_calls(node, unsafe_vars=None, imports=None, module_constants=None, g
         calls.append(SQL_MARKER)
     if has_ssrf(node) and SSRF_MARKER not in calls:
         calls.append(SSRF_MARKER)
-    if has_path_traversal(node) and PATH_MARKER not in calls:
+    # fr-019：MCP 工具函数的形参是路径穿越污点根（不可信传输面）；
+    # guard_fns 让流经 containment 守卫调用的污点被净化。
+    mcp_roots = _func_param_names(node) if is_mcp_tool_function(node) else None
+    if has_path_traversal(node, extra_roots=mcp_roots, guard_fns=guard_fns) \
+            and PATH_MARKER not in calls:
         calls.append(PATH_MARKER)
     if unsafe_vars and has_xss(node, unsafe_vars) and XSS_MARKER not in calls:
         calls.append(XSS_MARKER)
@@ -1146,6 +1271,8 @@ def extract_functions_from_file(filepath: str, root_dir: str, unsafe_vars=None, 
     rel_path = os.path.relpath(filepath, root_dir)
     imports = build_import_map(tree)
     module_constants = build_module_constants(tree)
+    # fr-019：文件级 containment 守卫函数名集合（tier-0 证据 + 有界传播）
+    guard_fns = compute_guard_function_names(tree)
 
     # Classes declaring DRF permission/authentication class attributes
     # (permission_classes = (...)) — their methods are framework-guarded.
@@ -1190,7 +1317,7 @@ def extract_functions_from_file(filepath: str, root_dir: str, unsafe_vars=None, 
                 params.append({"name": arg.arg, "type": ptype})
 
             return_type = get_annotation(node.returns) if node.returns else "any"
-            calls = extract_calls(node, unsafe_vars, imports, module_constants, global_constants)
+            calls = extract_calls(node, unsafe_vars, imports, module_constants, global_constants, guard_fns)
             # Class-level framework guards: DRF permission classes, auth machinery
             if parent_class:
                 if parent_class in drf_permission_classes \
